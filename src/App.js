@@ -1,25 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
+import React , { useState, useEffect } from 'react';
+import Layout from './Components/Layout/Layout'
+// var ws = new WebSocket('ws://77.237.74.40:4546/tms/websocket/getAllBusLocations')
+function App() {  
+  useEffect(() => {
+    // ws.onopen = () => {
+    //   // on connecting, do nothing but log it to the console
+    //   console.log('connected')
+    //   }
+    //   ws.onmessage = evt => {
+    //     // listen to data sent from the websocket server
+    //     const message = JSON.parse(evt.data)
+    //     // this.setState({dataFromServer: message})
+    //     console.log(message)
+    //     }
+  });
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+   <Layout />
   );
 }
 
