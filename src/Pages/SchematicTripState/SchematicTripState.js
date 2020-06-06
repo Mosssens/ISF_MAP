@@ -243,6 +243,19 @@ const SchematicTripState = () => {
       <div className="card">
         <div className="header">مسیر برگشت :</div>
         <div className="line backwards" ref={forwardLineRef}>
+        {buses.reverse().map((bus, index) => {
+            return (
+              <div className="bus" style={{ left: bus.marginLeft }}>
+                <div className="pos pin">
+                  <div
+                    className="pin-marker"
+                    // style={{ background: getRandomColor() }}
+                  ></div>
+                  <div className="bus-name">{bus.buscode}</div>
+                </div>
+              </div>
+            );
+          })} 
           {busStops.reverse().map((busStop, index) => {
             return (
               <div

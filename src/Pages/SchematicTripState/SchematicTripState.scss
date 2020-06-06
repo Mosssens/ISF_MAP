@@ -103,7 +103,7 @@
       // }
       .bus {
         position: absolute;
-        bottom: 85px;
+        bottom: 60px;
         cursor: pointer;
         .pos {
           position: absolute;
@@ -113,7 +113,7 @@
           margin: -20px 0 0 -20px;
         }
 
-        $size: 64px;
+        $size: 58px;
         $size-hover: ($size * 1.5);
         $bdw: 5px;
         $shadow-offset: 5px;
@@ -127,8 +127,8 @@
           transform-origin: center 100px;
           .bus-name {
             position: absolute;
-            bottom: 25px;
-            right: 22px;
+            bottom: 24px;
+            right: 20px;
             color: white;
             font-family: Arial, Helvetica, sans-serif;
           }
