@@ -101,6 +101,163 @@
       // .bus-stop:first-of-type {
       //   left: 0px !important;
       // }
+      .bus {
+        position: absolute;
+        bottom: 85px;
+        cursor: pointer;
+        .pos {
+          position: absolute;
+
+          left: 50%;
+          top: 50%;
+          margin: -20px 0 0 -20px;
+        }
+
+        $size: 64px;
+        $size-hover: ($size * 1.5);
+        $bdw: 5px;
+        $shadow-offset: 5px;
+        .pin {
+          position: absolute;
+          float: left;
+          animation: stretchWobble 1.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+            fadeIn 1.3s cubic-bezier(0.68, 0, 0, 1.02), fallDown 1.3s ease-out,
+            2.6s stretchWobbleEnd ease-in-out 1.3s;
+          transition: transform 0.2s;
+          transform-origin: center 100px;
+          .bus-name {
+            position: absolute;
+            bottom: 25px;
+            right: 22px;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+          }
+        }
+        .pin-marker {
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19),
+            0 6px 6px rgba(0, 0, 0, 0.23), 0 6px 6px rgba(0, 0, 0, 0.23),
+            0 6px 6px rgba(0, 0, 0, 0.23);
+          position: relative; //
+          width: $size;
+          height: $size;
+          border-radius: 50% 50% 50% 0;
+          // background: #309ea1;
+          background: #232323;
+          border: 4px solid white;
+          transition: 0.2s ease-in-out;
+          transform: rotate(-45deg);
+
+          // shadow
+          &:before {
+            @shadow-w: 34%;
+            position: absolute;
+            content: "";
+            width: 40%;
+            height: 8%;
+            background: fade(black, 30%);
+            bottom: -8%;
+            left: -20%;
+            margin-left: -1px;
+            transform-origin: center center;
+            border-radius: 50%;
+            transform: rotate(-135deg);
+          }
+
+          // white circle
+          &:after {
+            content: "";
+            width: "calc(100% - 10px)";
+            height: "calc(100% - 10px)";
+            margin: $bdw $bdw 0;
+            background: #fff;
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: 0 2px 1px fade(black, 20%);
+          }
+        }
+
+        .pin:hover {
+          z-index: 100;
+          .pin-marker {
+          }
+        }
+
+        .pulse {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 50%;
+          height: 14px;
+          width: 14px;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          margin: 11px 0px 0px -12px;
+          transform: rotateX(55deg);
+          z-index: -2;
+
+          &:after {
+            content: "";
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            position: absolute;
+            margin: -13px 0 0 -13px;
+            animation: pulsate 1s ease-out;
+            animation-iteration-count: infinite;
+            opacity: 0;
+            box-shadow: 0 0 1px 2px #89849b;
+            animation-delay: 1.1s;
+          }
+        }
+        @keyframes pulsate {
+          0% {
+            transform: scale(0.1, 0.1);
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1.2, 1.2);
+            opacity: 0;
+          }
+        }
+        @keyframes stretchWobble {
+          0% {
+            transform: scaleY(1);
+          }
+          30% {
+            transform: scaleY(2);
+          }
+          50% {
+            transform: scaleY(0.6);
+          }
+          70% {
+            transform: scaleY(1.3);
+          }
+          95% {
+            transform: scaleY(0.9);
+          }
+          100% {
+            transform: scaleY(0.95);
+          }
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes fallDown {
+          0% {
+            margin-top: -400px;
+          }
+          40% {
+            margin-top: 0px;
+          }
+        }
+      }
       .bus-stop {
         position: absolute;
         display: flex;
