@@ -1,0 +1,171 @@
+.SchematicTripState {
+  // padding: 1em 1em;
+  .card {
+    margin: 40px 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    background-color: white;
+    height: 15em;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-bottom: 3.5em;
+    .header {
+      height: 2em;
+      display: flex;
+      justify-content: start;
+      padding-right: 8px;
+      font-size: 1.15em;
+      font-weight: bold;
+    }
+    .line {
+      display: flex;
+      width: 100%;
+      height: 15px;
+      margin-bottom: 3em;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      &.forward {
+        $forwardsColor: #3ee06f;
+        background: linear-gradient(
+          -75deg,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          #fff,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor
+        );
+        background-size: 300% 300%;
+        animation: gradientForward 4s ease infinite;
+      }
+      &.backwards {
+        $backwardsColor: #eb0d0d;
+        background: linear-gradient(
+          -75deg,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          #fff,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor
+        );
+        background-size: 300% 300%;
+        animation: gradientBackwards 4s ease infinite;
+      }
+      // .bus-stop:last-of-type {
+      //   right: 0px !important;
+      //   left: unset !important;
+      // }
+      // .bus-stop:first-of-type {
+      //   left: 0px !important;
+      // }
+      .bus-stop {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        top: 5px;
+        .bus-stop-counter {
+          height: 25px;
+          width: 25px;
+          background-color: #232323;
+          color: white;
+          font-weight: bold;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 0.85em;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.23);
+          z-index: 2;
+        }
+        .bus-stop-name {
+          width: 122px;
+          background: white;
+          position: absolute;
+          left: -59px;
+          padding-right: 20px;
+          top: 56px;
+          border-radius: 4px;
+          font-size: 0.85em;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.23), 0 3px 6px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.16);
+          -webkit-transform: rotate(90deg);
+          -moz-transform: rotate(90deg);
+          -o-transform: rotate(90deg);
+          -ms-transform: rotate(90deg);
+          transform: rotate(90deg);
+        }
+      }
+      .arrows {
+        position: absolute;
+        right: -3px;
+        bottom: -36px;
+        font-size: 2em;
+        color: black;
+      }
+    }
+  }
+}
+
+@keyframes gradientForward {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes gradientBackwards {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
