@@ -23,6 +23,11 @@ const AllBusLocations = () => {
 
         }
     }, [ws.onmessage, ws.onopen]);
+    useEffect(() => {
+        return () => {
+          ws.close()
+        };
+      }, []);
     const onBusDetailClick = (bus) => {
         setMapZoom(14)
         setMapCenter([bus.latitude, bus.longitude])

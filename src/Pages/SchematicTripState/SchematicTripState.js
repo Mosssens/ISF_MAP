@@ -210,7 +210,7 @@ const SchematicTripState = () => {
         <div className="line forward" ref={forwardLineRef}>
           {buses.map((bus, index) => {
             return (
-              <div className="bus" style={{ left: bus.marginLeft }}>
+              <div key={index} className="bus" style={{ left: bus.marginLeft }}>
                 <div className="pos pin">
                   <div
                     className="pin-marker"
@@ -245,7 +245,7 @@ const SchematicTripState = () => {
         <div className="line backwards" ref={forwardLineRef}>
         {buses.reverse().map((bus, index) => {
             return (
-              <div className="bus" style={{ left: bus.marginLeft }}>
+              <div key={index} className="bus" style={{ left: bus.marginLeft }}>
                 <div className="pos pin">
                   <div
                     className="pin-marker"
