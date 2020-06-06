@@ -33,7 +33,7 @@ function App() {
           <Route path="/SchematicTripState" component={SchematicTripState} />
           <Route path="/AllBusLocations" component={AllBusLocations} />
           <Route path="/" >
-            <div>asdasda</div>
+            <div></div>
           </Route>
         </Switch>
       </Layout>

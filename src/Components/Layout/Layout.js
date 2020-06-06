@@ -32,20 +32,24 @@ const Layout = (props) => {
                         </Link>
                     </Ripples>
                     <Ripples onClick={onItemClicked} >
-                        <li className={(lastUrlPath === "2") ? "active" : ""}>
+                    <Link to="/not-implemented">
+                        <li className={(lastUrlPath === "implemented") ? "active" : ""}>
                             <div className="icon"><FaPagelines /></div>
                             <div className="title">وضعیت آنلاین اتوبوس های خط</div>
                         </li>
+                        </Link>
                     </Ripples>
                     <Ripples onClick={onItemClicked} >
-                        <li className={(lastUrlPath === "3") ? "active" : ""}>
+                    <Link to="/not-implemented">
+                        <li className={(lastUrlPath === "implemented") ? "active" : ""}>
                             <div className="icon"><FaServicestack /></div>
                             <div className="title"> رهگیری اتوبوس</div>
                         </li>
+                        </Link>
                     </Ripples>
                     <Ripples onClick={onItemClicked} >
-                        <Link to="/about">
-                            <li className={(lastUrlPath === "about") ? "active" : ""}>
+                        <Link to="/not-implemented">
+                            <li className={(lastUrlPath === "implemented") ? "active" : ""}>
                                 <div className="icon"><FaAddressCard /></div>
                                 <div className="title"> رهگیری اتوبوس های یک خط</div>
                             </li>
