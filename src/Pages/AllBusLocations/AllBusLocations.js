@@ -4,7 +4,7 @@ import './AllBusLocations.scss'
 import Ripples from 'react-ripples'
 
 const AllBusLocations = () => {
-    const ws = new WebSocket('ws://77.237.74.40:4546/tms/websocket/getAllBusLocations')
+    const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
     const [markers, setMarkers] = useState([])
     const [mapCenter, setMapCenter] = useState([35.7077191, 51.209391])
     const [mapZoom, setMapZoom] = useState(10)
@@ -20,7 +20,7 @@ const AllBusLocations = () => {
             // this.setState({dataFromServer: message})
             console.log(message)
             setMarkers(message.payload)
-
+            console.log(markers.length)
         }
     }, [ws.onmessage, ws.onopen]);
     useEffect(() => {
