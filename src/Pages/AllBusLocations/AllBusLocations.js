@@ -33,7 +33,7 @@ const AllBusLocations = () => {
 
     useEffect(() => {
         if (!ws) return;
-
+        var isFirstMessageReceived = false;
         ws.onmessage = e => {
             if (isPaused) return;
             const message = JSON.parse(e.data);
@@ -51,14 +51,15 @@ const AllBusLocations = () => {
 
             setBusOptions(busTempOptions)
             console.log('pinnd', pinnedMarkers)
-
+            if (isFirstMessageReceived === false) {
             setSelectedBusOptions(busTempOptions)
             var tempArr = []
             busTempOptions.map(item => {
                 tempArr.push(item.value)
             })
             setSelectedBusOptionsString(tempArr)
-
+            isFirstMessageReceived = true
+        }
 
         };
     }, [isPaused, ws]);
