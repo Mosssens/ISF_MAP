@@ -2,47 +2,247 @@ import React, { useState, useEffect } from 'react'
 import Map from '../../Components/Map/Map'
 import './AllBusLocations.scss'
 import Ripples from 'react-ripples'
+import Select from 'react-select'
+import { IoMdPin } from "react-icons/io";
 
 const AllBusLocations = () => {
-    const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
+    // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
     const [markers, setMarkers] = useState([])
-    const [mapCenter, setMapCenter] = useState([35.7077191, 51.209391])
-    const [mapZoom, setMapZoom] = useState(10)
+    const [mapCenter, setMapCenter] = useState([32.634349845364056, 51.55693869732796])
+    const [mapZoom, setMapZoom] = useState(11)
+    const [busOptions, setBusOptions] = useState([])
+    const [selectedBusOptions, setSelectedBusOptions] = useState([])
+    const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([])
+    const [pinnedMarkers, setPinnedMarkers] = useState([])
+
+    const [isPaused, setPause] = useState(false);
+    const [ws, setWs] = useState(null);
 
     useEffect(() => {
-        ws.onopen = () => {
-            // on connecting, do nothing but log it to the console
-            console.log('connected')
-        }
-        ws.onmessage = evt => {
-            // listen to data sent from the websocket server
-            const message = JSON.parse(evt.data)
-            // this.setState({dataFromServer: message})
-            console.log(message)
-            setMarkers(message.payload)
-            console.log(markers.length)
-        }
-    }, [ws.onmessage, ws.onopen]);
-    useEffect(() => {
-        return () => {
-          ws.close()
+        const wsClient = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations');
+        wsClient.onopen = () => {
+            console.log('ws opened');
+            setWs(wsClient);
         };
-      }, []);
+        wsClient.onclose = () => console.log('ws closed');
+
+        return () => {
+            wsClient.close();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!ws) return;
+
+        ws.onmessage = e => {
+            if (isPaused) return;
+            const message = JSON.parse(e.data);
+            console.log('e', message);
+            // listen to data sent from the websocket server
+            // this.setState({dataFromServer: message})
+            setMarkers(message.payload)
+            console.log(message.payload)
+            const busTempOptions = message.payload.map((item, index) => {
+                return {
+                    value: item.busCode,
+                    label: item.busCode
+                }
+            })
+
+            setBusOptions(busTempOptions)
+            console.log('pinnd', pinnedMarkers)
+
+            setSelectedBusOptions(busTempOptions)
+            var tempArr = []
+            busTempOptions.map(item => {
+                tempArr.push(item.value)
+            })
+            setSelectedBusOptionsString(tempArr)
+
+
+        };
+    }, [isPaused, ws]);
+
+    // useEffect(() => {
+    //     ws.onopen = () => {
+    //         // on connecting, do nothing but log it to the console
+    //         console.log('connected')
+    //     }
+    //     var isFirstMessageReceived = false;
+    //     ws.onmessage = evt => {
+    //         // listen to data sent from the websocket server
+    //         const message = JSON.parse(evt.data)
+    //         // this.setState({dataFromServer: message})
+    //         setMarkers(message.payload)
+    //         console.log(message.payload)
+    //         const busTempOptions = message.payload.map((item, index) => {
+    //             return {
+    //                 value: item.busCode,
+    //                 label: item.busCode
+    //             }
+    //         })
+
+    //         setBusOptions(busTempOptions)
+    //         console.log('pinnd',pinnedMarkers)
+    //         if (isFirstMessageReceived === false) {
+
+    //             setSelectedBusOptions(busTempOptions)
+    //             var tempArr = []
+    //             busTempOptions.map(item => {
+    //                 tempArr.push(item.value)
+    //             })
+    //             setSelectedBusOptionsString(tempArr)
+    //             isFirstMessageReceived = true
+    //         }
+    //     }
+    // }, [ws.onmessage, ws.onopen]);
+    // useEffect(() => {
+
+    //     return () => {
+    //         ws.close()
+    //     };
+    // }, []);
+
     const onBusDetailClick = (bus) => {
         setMapZoom(14)
         setMapCenter([bus.latitude, bus.longitude])
     }
+    const onPinButtonClick = (id) => {
+        if (pinnedMarkers.includes(id)) {
+            setPinnedMarkers(pinnedMarkers.filter(item => item !== id))
+        } else {
+            setPinnedMarkers([...pinnedMarkers, id])
+        }
+    }
+    const  getMarkers = ()=>{
+        const filteredMarkers =markers.filter(item => selectedBusOptionsString.includes(item.busCode));
+        const markersWithIsPinned = markers.map(marker=>{
+           return {
+            ...marker,
+            isPinned:pinnedMarkers.includes(marker.busCode)
+            }
+        })
+        console.log('markersWithIsPinned',markersWithIsPinned)
+        return markersWithIsPinned
+    }
     return (
         <section className="all-bus-locations-container">
             <div className="map-contianer">
-                <Map onMarkerClick={(id) => console.log(id)} markers={markers} center={mapCenter} zoom={mapZoom} />
+                <Map onMarkerClick={(id) => console.log(id)} markers={getMarkers()} center={mapCenter} zoom={mapZoom} />
             </div>
             <div className="action-menu" >
+                <Select value={selectedBusOptions} onChange={(selectedBuses) => {
+                    setSelectedBusOptions(selectedBuses);
+                    var tempArr = []
+                    if (selectedBuses !== null) {
+                        selectedBuses.map(item => {
+                            tempArr.push(item.value)
+                        })
+                    }
+                    console.log(tempArr)
+                    setSelectedBusOptionsString(tempArr)
+                }}
+                    className="bus-select-input" closeMenuOnSelect={false} isMulti={true} options={busOptions} isRtl={true} />
                 <div className="bus-detail-container">
                     {markers.map(bus => {
                         return (
-                            <Ripples key={bus.busCode} onClick={() => { onBusDetailClick(bus) }}>
-                                <div className="card">
+                            (selectedBusOptionsString.includes(bus.busCode)) ?
+                                <Ripples key={bus.busCode} onClick={() => { onBusDetailClick(bus); }}>
+                                    <table>
+                                        <tr>
+                                            <td >
+                                                <td >
+                                                    کد اتوبوس :
+                                            </td>
+                                                <td >
+                                                    {bus.busCode}
+                                                </td>
+                                            </td>
+                                            <td>
+                                                <td>
+                                                    سرعت لحظه ای :
+                                            </td>
+                                                <td>
+                                                    {`${bus.groundSpeed}km`}
+                                                    <div className={`pin-btn ${(pinnedMarkers.includes(bus.busCode)) ? 'active' : ''}`} onClick={() => onPinButtonClick(bus.busCode)}><IoMdPin /></div>
+                                                </td>
+                                            </td>
+                                        </tr>
+                                        <tr >
+                                            <td >
+                                                <td >
+                                                    شاغل/غیر شاغل:
+                                            </td>
+                                                <td >
+                                                    {(bus.busy) ? "شاغل" : "غیر شاغل"}
+                                                </td>
+                                            </td>
+                                            <td>
+                                                <td >
+                                                    فعال/غیر فعال :
+                                            </td>
+                                                <td >
+                                                    {(bus.busy) ? "فعال" : "غیر فعال"}
+
+                                                </td>
+                                            </td>
+                                        </tr>
+                                        <tr >
+                                            <td >
+                                                <td>
+                                                    نوع سوخت:
+                                            </td>
+                                                <td>
+                                                    {bus.fuelType}
+                                                </td>
+                                            </td>
+                                            <td>
+                                                <td>
+                                                    وضعیت اتوبوس :
+                                            </td>
+                                                <td >
+                                                    {bus.busStatus}
+                                                </td>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <td >
+                                                    کد خط :
+                                            </td>
+                                                <td >
+                                                    {bus.tripCode}
+                                                </td>
+                                            </td>
+                                            <td>
+                                                <td >
+                                                    تعداد تراکنش ها :
+                                            </td>
+                                                <td>
+                                                    {bus.dcTransactionCount}
+                                                </td>
+                                            </td>
+                                        </tr>
+                                        <tr >
+                                            <td >
+                                                <td>
+                                                    تراکنش های در جلو :
+                                            </td>
+                                                <td >
+                                                    {bus.frontDoorTransactionCount}
+                                                </td>
+                                            </td>
+                                            <td className="col">
+                                                <td >
+                                                    تراکنش های در عقب :
+                                            </td>
+                                                <td>
+                                                    {bus.backDoorTransactionCount}
+                                                </td>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    {/* <div className="card">
                                     <div className="row">
                                         <div className="col">
                                             <div className="col">
@@ -144,8 +344,10 @@ const AllBusLocations = () => {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Ripples>
+                                </div> */}
+                                </Ripples>
+                                :
+                                ''
                         )
                     })}
 

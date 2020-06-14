@@ -8,14 +8,16 @@
     background-color: white;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
     z-index: 1000;
-  
+    max-height: 100vh;
+    overflow-y: scroll;
+    .bus-select-input {
+      margin: 5px 5px;
+    }
     .bus-detail-container {
-          padding-top: .5em;
-    padding-bottom: .5em;
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
       display: flex;
       flex-direction: column;
-      overflow-y: scroll;
-      max-height: 100vh;
       font-family: 'Yekan';
       .react-ripples {
         cursor: pointer;
@@ -23,12 +25,67 @@
         width: 100%;
         padding: 0;
         margin: 0;
+        .pin-btn{
+          position: absolute;
+          display: flex;
+          width: 30px;
+          height: 31px;
+          font-size: 22px;
+          color: #232323;
+          top: 10px;
+          align-items: center;
+          justify-content: center;
+          left: 8px;
+          background-color: white;
+          font-size: 2.15em;
+          &.active{
+            background-color: greenyellow;
+          }
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          font-size: 0.85em;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.23);
+          margin: 10px 8px;
+        }
+        
+        table:hover{
+        }
+        table td,
+        table th {
+          // border: 1px solid #ddd;
+          // padding: 8px;
+        }
+        table tr:first-of-type {
+          background-color: #333333;
+          color: white;
+        }
+        table tr:nth-child(even) {
+          background-color: #e7e7e7;
+        }
+
+        table tr:hover {
+          background-color: #232323;
+          color: white;
+          
+        }
+
+        table th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: seagreen;
+          color: white;
+        }
         .card {
           width: 100%;
           border-radius: 6px;
           margin: 8px;
           box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
             0 3px 6px rgba(0, 0, 0, 0.23);
+
           .row {
             display: flex;
             flex-direction: column;

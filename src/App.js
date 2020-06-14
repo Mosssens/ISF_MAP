@@ -5,6 +5,7 @@ import AllBusLocations from './Pages/AllBusLocations/AllBusLocations'
 // var ws = new WebSocket('ws://77.237.74.40:4546/tms/websocket/getAllBusLocations')
 import {
   BrowserRouter as Router,
+  HashRouter,
   Switch,
   Route,
   Link
@@ -27,7 +28,7 @@ function App() {
   return (
 
 
-    <Router>
+    <HashRouter basename="/tms/newreports/">
       <Layout>
         <Switch>
           <Route path="/SchematicTripState" component={SchematicTripState} />
@@ -37,7 +38,7 @@ function App() {
           </Route>
         </Switch>
       </Layout>
-    </Router>
+    </HashRouter>
   );
 }
 
