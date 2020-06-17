@@ -38,9 +38,9 @@ export default function Map(props) {
 
   const renderMarkers = () => {
     return markers.map(
-      (marker) => {
+      (marker,index) => {
         const markerId = marker.busCode;
-        return <Marker icon={(marker.isPinned)?greenIcon:defaultIcon} onclick={() => props.onMarkerClick(markerId)} key={`${marker.busCode}`} position={[marker.latitude, marker.longitude]} >
+        return <Marker icon={(marker.isPinned)?greenIcon:defaultIcon} onclick={() => props.onMarkerClick(markerId,index)} key={`${marker.busCode}`} position={[marker.latitude, marker.longitude]} >
           <Tooltip permanent direction="bottom" offset={L.point(63, 1)}>{markerId}</Tooltip>
         </Marker>
       })

@@ -3,13 +3,61 @@
   .map-contianer {
     flex-grow: 1;
   }
+
+  
   .action-menu {
     flex-basis: 30%;
     background-color: white;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
     z-index: 1000;
     max-height: 100vh;
+    scroll-behavior: smooth;
+
     overflow-y: scroll;
+    .overview-container {
+      display: flex;
+      font-size: 1.05em;
+      font-weight: bold;
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.85em;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        margin: 10px 8px;
+      }
+
+      table:hover {
+      }
+      table td,
+      table th {
+        // border: 1px solid #ddd;
+        padding: 4px;
+      }
+      table {
+        tr:first-of-type {
+          background-color: #2684ff;
+          color: white;
+        }
+      }
+
+      table tr:nth-child(even) {
+        background-color: #e7e7e7;
+      }
+
+      table tr:hover {
+        background-color: #232323;
+        color: white;
+      }
+
+      table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: seagreen;
+        color: white;
+      }
+    }
     .bus-select-input {
       margin: 5px 5px;
     }
@@ -19,13 +67,14 @@
       display: flex;
       flex-direction: column;
       font-family: 'Yekan';
+
       .react-ripples {
         cursor: pointer;
         min-height: 170px;
         width: 100%;
         padding: 0;
         margin: 0;
-        .pin-btn{
+        .pin-btn {
           position: absolute;
           display: flex;
           width: 30px;
@@ -38,7 +87,7 @@
           left: 8px;
           background-color: white;
           font-size: 2.15em;
-          &.active{
+          &.active {
             background-color: greenyellow;
           }
         }
@@ -50,17 +99,28 @@
             0 3px 6px rgba(0, 0, 0, 0.23);
           margin: 10px 8px;
         }
-        
-        table:hover{
+
+        table:hover {
         }
         table td,
         table th {
           // border: 1px solid #ddd;
           // padding: 8px;
         }
-        table tr:first-of-type {
-          background-color: #333333;
-          color: white;
+
+        table {
+          &.selected tr:first-of-type {
+            background-color: #2684ff ;
+            color: white;
+            -webkit-animation: argh-my-eyes 1s 5;
+            -moz-animation:    argh-my-eyes 1s 5;
+            animation:         argh-my-eyes 1s 5;
+        
+          }
+          tr:first-of-type {
+            background-color: #333333;
+            color: white;
+          }
         }
         table tr:nth-child(even) {
           background-color: #e7e7e7;
@@ -69,7 +129,6 @@
         table tr:hover {
           background-color: #232323;
           color: white;
-          
         }
 
         table th {
@@ -110,5 +169,30 @@
         }
       }
     }
+  }
+}
+
+@-webkit-keyframes argh-my-eyes {
+  0% {
+    background-color: #2684ff;
+  }
+  100% {
+    background-color: #232323;
+  }
+}
+@-moz-keyframes argh-my-eyes {
+  0% {
+    background-color: #2684ff;
+  }
+  100% {
+    background-color: #232323;
+  }
+}
+@keyframes argh-my-eyes {
+  0% {
+    background-color: #2684ff;
+  }
+  100% {
+    background-color: #232323;
   }
 }

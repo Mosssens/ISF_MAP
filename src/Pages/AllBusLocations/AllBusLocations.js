@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Map from '../../Components/Map/Map'
 import './AllBusLocations.scss'
 import Ripples from 'react-ripples'
@@ -14,10 +14,14 @@ const AllBusLocations = () => {
     const [selectedBusOptions, setSelectedBusOptions] = useState([])
     const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([])
     const [pinnedMarkers, setPinnedMarkers] = useState([])
-
+    const [selectedMarker, setSelectedMarker] = useState([])
     const [isPaused, setPause] = useState(false);
     const [ws, setWs] = useState(null);
 
+    const actionMenuRef = useRef()
+    const searchBoxRef = useRef()
+    const overviewBoxRef = useRef()
+    const actionMenuHeaderRef = useRef()
     useEffect(() => {
         const wsClient = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations');
         wsClient.onopen = () => {
@@ -126,13 +130,19 @@ const AllBusLocations = () => {
         console.log('markersWithIsPinned', markersWithIsPinned)
         return markersWithIsPinned
     }
+    const onMarkerClick = (id,index) => {
+        setSelectedMarker(id)
+        console.log('sss', actionMenuHeaderRef.current.offsetHeight)
+        actionMenuRef.current.scrollTo(0, actionMenuHeaderRef.current.offsetHeight * index -100,{behavior: 'smooth'})
+    }
     return (
         <section className="all-bus-locations-container">
             <div className="map-contianer">
-                <Map onMarkerClick={(id) => console.log(id)} markers={getMarkers()} center={mapCenter} zoom={mapZoom} />
+                <Map onMarkerClick={(id,index) => onMarkerClick(id,index)} markers={getMarkers()} center={mapCenter} zoom={mapZoom} />
             </div>
-            <div className="action-menu" >
-                <Select value={selectedBusOptions} onChange={(selectedBuses) => {
+            <div ref={actionMenuRef} className="action-menu" >
+                <div ref={actionMenuHeaderRef}>
+                <Select ref={searchBoxRef} value={selectedBusOptions} onChange={(selectedBuses) => {
                     setSelectedBusOptions(selectedBuses);
                     var tempArr = []
                     if (selectedBuses !== null) {
@@ -144,117 +154,176 @@ const AllBusLocations = () => {
                     setSelectedBusOptionsString(tempArr)
                 }}
                     className="bus-select-input" closeMenuOnSelect={false} isMulti={true} options={busOptions} isRtl={true} />
+             
+                {(markers.length > 0) ?
+                    <div ref={overviewBoxRef} className="overview-container">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td >
+                                        تعداد کل اتوبوس ها:
+                                        </td>
+                                    <td >
+                                        {markers.length + 1}
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td >
+                                        <td >
+                                            اتوبوس های فعال:
+                                        </td>
+                                        <td >
+                                            {markers.filter(item => item.active === true).length + 1}
+                                        </td>
+                                    </td>
+                                    <td>
+                                        <td >
+                                            اتوبوس های غیر فعال:
+                                        </td>
+                                        <td >
+                                            {markers.filter(item => item.active === false).length + 1}
+                                        </td>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td >
+                                        <td>
+                                            اتوبوس های شاغل :
+                                        </td>
+                                        <td>
+                                            {markers.filter(item => item.busy === true).length + 1}
+                                        </td>
+                                    </td>
+                                    <td>
+                                        <td>
+                                            اتوبوس های غیر شاغل :
+                                        </td>
+                                        <td >
+                                            {markers.filter(item => item.busy === false).length + 1}
+                                        </td>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    :
+                    ''}
+</div>
                 <div className="bus-detail-container">
+
                     {markers.map(bus => {
                         return (
                             (selectedBusOptionsString.includes(bus.busCode)) ?
                                 <Ripples key={bus.busCode} onClick={() => { onBusDetailClick(bus); }}>
-                                    <table>
-                                        <tr>
-                                            <td >
+                                    <table className={(selectedMarker === (bus.busCode) ? "selected" : "")}>
+                                        <tbody>
+                                            <tr>
                                                 <td >
-                                                    کد اتوبوس :
+                                                    <td >
+                                                        کد اتوبوس :
                                             </td>
-                                                <td >
-                                                    {bus.busCode}
+                                                    <td >
+                                                        {bus.busCode}
+                                                    </td>
                                                 </td>
-                                            </td>
-                                            <td>
                                                 <td>
-                                                    سرعت لحظه ای :
+                                                    <td>
+                                                        سرعت لحظه ای :
                                             </td>
+                                                    <td>
+                                                        {`${bus.groundSpeed}km`}
+                                                        <div className={`pin-btn ${(pinnedMarkers.includes(bus.busCode)) ? 'active' : ''}`} onClick={() => onPinButtonClick(bus.busCode)}><IoMdPin /></div>
+                                                    </td>
+                                                </td>
+                                            </tr>
+                                            <tr >
+                                                <td >
+                                                    <td >
+                                                        شاغل/غیر شاغل:
+                                            </td>
+                                                    <td >
+                                                        {(bus.busy) ? "شاغل" : "غیر شاغل"}
+                                                    </td>
+                                                </td>
                                                 <td>
-                                                    {`${bus.groundSpeed}km`}
-                                                    <div className={`pin-btn ${(pinnedMarkers.includes(bus.busCode)) ? 'active' : ''}`} onClick={() => onPinButtonClick(bus.busCode)}><IoMdPin /></div>
-                                                </td>
+                                                    <td >
+                                                        فعال/غیر فعال :
                                             </td>
-                                        </tr>
-                                        <tr >
-                                            <td >
-                                                <td >
-                                                    شاغل/غیر شاغل:
-                                            </td>
-                                                <td >
-                                                    {(bus.busy) ? "شاغل" : "غیر شاغل"}
-                                                </td>
-                                            </td>
-                                            <td>
-                                                <td >
-                                                    فعال/غیر فعال :
-                                            </td>
-                                                <td >
-                                                    {(bus.busy) ? "فعال" : "غیر فعال"}
+                                                    <td >
+                                                        {(bus.busy) ? "فعال" : "غیر فعال"}
 
+                                                    </td>
                                                 </td>
-                                            </td>
-                                        </tr>
-                                        <tr >
-                                            <td >
-                                                <td>
-                                                    نوع سوخت:
-                                            </td>
-                                                <td>
-                                                    {bus.fuelType}
-                                                </td>
-                                            </td>
-                                            <td>
-                                                <td>
-                                                    وضعیت اتوبوس :
-                                            </td>
+                                            </tr>
+                                            <tr >
                                                 <td >
-                                                    {bus.busStatus}
+                                                    <td>
+                                                        نوع سوخت:
+                                            </td>
+                                                    <td>
+                                                        {bus.fuelType}
+                                                    </td>
                                                 </td>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <td >
-                                                    کد خط :
-                                            </td>
-                                                <td >
-                                                    {bus.tripCode}
-                                                </td>
-                                            </td>
-                                            <td>
-                                                <td >
-                                                    تعداد تراکنش ها :
-                                            </td>
                                                 <td>
-                                                    {bus.dcTransactionCount}
-                                                </td>
+                                                    <td>
+                                                        وضعیت اتوبوس :
                                             </td>
-                                        </tr>
-                                        <tr >
-                                            <td >
+                                                    <td >
+                                                        {bus.busStatus}
+                                                    </td>
+                                                </td>
+                                            </tr>
+                                            <tr>
                                                 <td>
-                                                    تراکنش های در جلو :
+                                                    <td >
+                                                        کد خط :
                                             </td>
-                                                <td >
-                                                    {bus.frontDoorTransactionCount}
+                                                    <td >
+                                                        {bus.tripCode}
+                                                    </td>
                                                 </td>
-                                            </td>
-                                            <td className="col">
-                                                <td >
-                                                    تراکنش های در عقب :
-                                            </td>
                                                 <td>
-                                                    {bus.backDoorTransactionCount}
-                                                </td>
+                                                    <td >
+                                                        تعداد تراکنش ها :
                                             </td>
-                                        </tr>
+                                                    <td>
+                                                        {bus.dcTransactionCount}
+                                                    </td>
+                                                </td>
+                                            </tr>
+                                            <tr >
+                                                <td >
+                                                    <td>
+                                                        تراکنش های در جلو :
+                                            </td>
+                                                    <td >
+                                                        {bus.frontDoorTransactionCount}
+                                                    </td>
+                                                </td>
+                                                <td className="col">
+                                                    <td >
+                                                        تراکنش های در عقب :
+                                            </td>
+                                                    <td>
+                                                        {bus.backDoorTransactionCount}
+                                                    </td>
+                                                </td>
+                                            </tr>
 
-                                        <tr >
-                                    
+                                            <tr >
+
                                                 <td>
                                                     تاریخ :
                                             </td>
-                                                <td style={{direction:'ltr',textAlign:'right'}}>
+                                                <td style={{ direction: 'ltr', textAlign: 'right' }}>
                                                     {
-                                                    moment.unix(parseInt(bus.clientDate).toString().substring(0,10)).format('jYYYY/jM/jD HH:mm:ss')
+                                                        moment.unix(parseInt(bus.clientDate).toString().substring(0, 10)).format('jYYYY/jM/jD HH:mm:ss')
                                                     }
                                                 </td>
-                                           
-                                        </tr>
+
+                                            </tr>
+                                        </tbody>
                                     </table>
                                     {/* <div className="card">
                                     <div className="row">
