@@ -4,7 +4,7 @@ import './AllBusLocations.scss'
 import Ripples from 'react-ripples'
 import Select from 'react-select'
 import { IoMdPin } from "react-icons/io";
-
+import moment from 'jalali-moment'
 const AllBusLocations = () => {
     // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
     const [markers, setMarkers] = useState([])
@@ -52,14 +52,14 @@ const AllBusLocations = () => {
             setBusOptions(busTempOptions)
             console.log('pinnd', pinnedMarkers)
             if (isFirstMessageReceived === false) {
-            setSelectedBusOptions(busTempOptions)
-            var tempArr = []
-            busTempOptions.map(item => {
-                tempArr.push(item.value)
-            })
-            setSelectedBusOptionsString(tempArr)
-            isFirstMessageReceived = true
-        }
+                setSelectedBusOptions(busTempOptions)
+                var tempArr = []
+                busTempOptions.map(item => {
+                    tempArr.push(item.value)
+                })
+                setSelectedBusOptionsString(tempArr)
+                isFirstMessageReceived = true
+            }
 
         };
     }, [isPaused, ws]);
@@ -115,15 +115,15 @@ const AllBusLocations = () => {
             setPinnedMarkers([...pinnedMarkers, id])
         }
     }
-    const  getMarkers = ()=>{
-        const filteredMarkers =markers.filter(item => selectedBusOptionsString.includes(item.busCode));
-        const markersWithIsPinned = markers.map(marker=>{
-           return {
-            ...marker,
-            isPinned:pinnedMarkers.includes(marker.busCode)
+    const getMarkers = () => {
+        const filteredMarkers = markers.filter(item => selectedBusOptionsString.includes(item.busCode));
+        const markersWithIsPinned = filteredMarkers.map(marker => {
+            return {
+                ...marker,
+                isPinned: pinnedMarkers.includes(marker.busCode)
             }
         })
-        console.log('markersWithIsPinned',markersWithIsPinned)
+        console.log('markersWithIsPinned', markersWithIsPinned)
         return markersWithIsPinned
     }
     return (
@@ -241,6 +241,19 @@ const AllBusLocations = () => {
                                                     {bus.backDoorTransactionCount}
                                                 </td>
                                             </td>
+                                        </tr>
+
+                                        <tr >
+                                    
+                                                <td>
+                                                    تاریخ :
+                                            </td>
+                                                <td style={{direction:'ltr',textAlign:'right'}}>
+                                                    {
+                                                    moment.unix(parseInt(bus.clientDate).toString().substring(0,10)).format('jYYYY/jM/jD HH:mm:ss')
+                                                    }
+                                                </td>
+                                           
                                         </tr>
                                     </table>
                                     {/* <div className="card">
