@@ -68,46 +68,6 @@ const AllBusLocations = () => {
         };
     }, [isPaused, ws]);
 
-    // useEffect(() => {
-    //     ws.onopen = () => {
-    //         // on connecting, do nothing but log it to the console
-    //         console.log('connected')
-    //     }
-    //     var isFirstMessageReceived = false;
-    //     ws.onmessage = evt => {
-    //         // listen to data sent from the websocket server
-    //         const message = JSON.parse(evt.data)
-    //         // this.setState({dataFromServer: message})
-    //         setMarkers(message.payload)
-    //         console.log(message.payload)
-    //         const busTempOptions = message.payload.map((item, index) => {
-    //             return {
-    //                 value: item.busCode,
-    //                 label: item.busCode
-    //             }
-    //         })
-
-    //         setBusOptions(busTempOptions)
-    //         console.log('pinnd',pinnedMarkers)
-    //         if (isFirstMessageReceived === false) {
-
-    //             setSelectedBusOptions(busTempOptions)
-    //             var tempArr = []
-    //             busTempOptions.map(item => {
-    //                 tempArr.push(item.value)
-    //             })
-    //             setSelectedBusOptionsString(tempArr)
-    //             isFirstMessageReceived = true
-    //         }
-    //     }
-    // }, [ws.onmessage, ws.onopen]);
-    // useEffect(() => {
-
-    //     return () => {
-    //         ws.close()
-    //     };
-    // }, []);
-
     const onBusDetailClick = (bus) => {
         setMapZoom(14)
         setMapCenter([bus.latitude, bus.longitude])
@@ -143,14 +103,19 @@ const AllBusLocations = () => {
             <div ref={actionMenuRef} className="action-menu" >
                 <div ref={actionMenuHeaderRef}>
                     <Select withAll={true} ref={searchBoxRef} value={selectedBusOptions} onChange={(selectedBuses) => {
-                        setSelectedBusOptions(selectedBuses);
                         var tempArr = []
+                        // console.log('fff',selectedBuses,'sdadd',(selectedBuses.filter(item=>item.value==="All")) )
                         if (selectedBuses !== null) {
-                            selectedBuses.map(item => {
-                                tempArr.push(item.value)
-                            })
+                            if(selectedBuses.filter(item=>item.value==="All").length>0){
+                                selectedBuses=[{ value: 'All', label: 'همه اتوبوس ها' }];
+                                tempArr=['All'];
+                            }else{
+                                selectedBuses.map(item => {
+                                    tempArr.push(item.value)
+                                })
+                            }
                         }
-                        console.log(tempArr)
+                        setSelectedBusOptions(selectedBuses);
                         setSelectedBusOptionsString(tempArr)
                     }}
                         className="bus-select-input" closeMenuOnSelect={false} isMulti={true} options={busOptions} isRtl={true} />
