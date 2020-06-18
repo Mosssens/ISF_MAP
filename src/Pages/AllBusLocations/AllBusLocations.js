@@ -46,22 +46,22 @@ const AllBusLocations = () => {
             // this.setState({dataFromServer: message})
             setMarkers(message.payload)
             console.log(message.payload)
-            const busTempOptions = message.payload.map((item, index) => {
+            var busTempOptions = message.payload.map((item, index) => {
                 return {
                     value: item.busCode,
                     label: item.busCode
                 }
             })
-
+            busTempOptions.push({ value: 'All', label: 'همه اتوبوس ها' })
             setBusOptions(busTempOptions)
             console.log('pinnd', pinnedMarkers)
             if (isFirstMessageReceived === false) {
-                setSelectedBusOptions(busTempOptions)
-                var tempArr = []
-                busTempOptions.map(item => {
-                    tempArr.push(item.value)
-                })
-                setSelectedBusOptionsString(tempArr)
+                setSelectedBusOptions([{ value: 'All', label: 'همه اتوبوس ها' }])
+                // var tempArr = [{value:'All',label:'همه اتوبوس ها'}]
+                // busTempOptions.map(item => {
+                //     tempArr.push(item.value)
+                // })
+                setSelectedBusOptionsString(['All'])
                 isFirstMessageReceived = true
             }
 
@@ -120,7 +120,7 @@ const AllBusLocations = () => {
         }
     }
     const getMarkers = () => {
-        const filteredMarkers = markers.filter(item => selectedBusOptionsString.includes(item.busCode));
+        const filteredMarkers = markers.filter(item => selectedBusOptionsString.includes(item.busCode)||selectedBusOptionsString.includes('All'));
         const markersWithIsPinned = filteredMarkers.map(marker => {
             return {
                 ...marker,
@@ -130,91 +130,91 @@ const AllBusLocations = () => {
         console.log('markersWithIsPinned', markersWithIsPinned)
         return markersWithIsPinned
     }
-    const onMarkerClick = (id,index) => {
+    const onMarkerClick = (id, index) => {
         setSelectedMarker(id)
         console.log('sss', actionMenuHeaderRef.current.offsetHeight)
-        actionMenuRef.current.scrollTo(0, actionMenuHeaderRef.current.offsetHeight * index -100,{behavior: 'smooth'})
+        actionMenuRef.current.scrollTo(0, actionMenuHeaderRef.current.offsetHeight * index - 100, { behavior: 'smooth' })
     }
     return (
         <section className="all-bus-locations-container">
             <div className="map-contianer">
-                <Map onMarkerClick={(id,index) => onMarkerClick(id,index)} markers={getMarkers()} center={mapCenter} zoom={mapZoom} />
+                <Map onMarkerClick={(id, index) => onMarkerClick(id, index)} markers={getMarkers()} center={mapCenter} zoom={mapZoom} />
             </div>
             <div ref={actionMenuRef} className="action-menu" >
                 <div ref={actionMenuHeaderRef}>
-                <Select ref={searchBoxRef} value={selectedBusOptions} onChange={(selectedBuses) => {
-                    setSelectedBusOptions(selectedBuses);
-                    var tempArr = []
-                    if (selectedBuses !== null) {
-                        selectedBuses.map(item => {
-                            tempArr.push(item.value)
-                        })
-                    }
-                    console.log(tempArr)
-                    setSelectedBusOptionsString(tempArr)
-                }}
-                    className="bus-select-input" closeMenuOnSelect={false} isMulti={true} options={busOptions} isRtl={true} />
-             
-                {(markers.length > 0) ?
-                    <div ref={overviewBoxRef} className="overview-container">
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td >
-                                        تعداد کل اتوبوس ها:
-                                        </td>
-                                    <td >
-                                        {markers.length + 1}
-                                    </td>
-                                </tr>
-                                <tr >
-                                    <td >
-                                        <td >
-                                            اتوبوس های فعال:
-                                        </td>
-                                        <td >
-                                            {markers.filter(item => item.active === true).length + 1}
-                                        </td>
-                                    </td>
-                                    <td>
-                                        <td >
-                                            اتوبوس های غیر فعال:
-                                        </td>
-                                        <td >
-                                            {markers.filter(item => item.active === false).length + 1}
-                                        </td>
-                                    </td>
-                                </tr>
-                                <tr >
-                                    <td >
-                                        <td>
-                                            اتوبوس های شاغل :
-                                        </td>
-                                        <td>
-                                            {markers.filter(item => item.busy === true).length + 1}
-                                        </td>
-                                    </td>
-                                    <td>
-                                        <td>
-                                            اتوبوس های غیر شاغل :
-                                        </td>
-                                        <td >
-                                            {markers.filter(item => item.busy === false).length + 1}
-                                        </td>
-                                    </td>
-                                </tr>
+                    <Select withAll={true} ref={searchBoxRef} value={selectedBusOptions} onChange={(selectedBuses) => {
+                        setSelectedBusOptions(selectedBuses);
+                        var tempArr = []
+                        if (selectedBuses !== null) {
+                            selectedBuses.map(item => {
+                                tempArr.push(item.value)
+                            })
+                        }
+                        console.log(tempArr)
+                        setSelectedBusOptionsString(tempArr)
+                    }}
+                        className="bus-select-input" closeMenuOnSelect={false} isMulti={true} options={busOptions} isRtl={true} />
 
-                            </tbody>
-                        </table>
-                    </div>
-                    :
-                    ''}
-</div>
+                    {(markers.length > 0) ?
+                        <div ref={overviewBoxRef} className="overview-container">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td >
+                                            تعداد کل اتوبوس ها:
+                                        </td>
+                                        <td >
+                                            {markers.length + 1}
+                                        </td>
+                                    </tr>
+                                    <tr >
+                                        <td >
+                                            <td >
+                                                اتوبوس های فعال:
+                                        </td>
+                                            <td >
+                                                {markers.filter(item => item.active === true).length + 1}
+                                            </td>
+                                        </td>
+                                        <td>
+                                            <td >
+                                                اتوبوس های غیر فعال:
+                                        </td>
+                                            <td >
+                                                {markers.filter(item => item.active === false).length + 1}
+                                            </td>
+                                        </td>
+                                    </tr>
+                                    <tr >
+                                        <td >
+                                            <td>
+                                                اتوبوس های شاغل :
+                                        </td>
+                                            <td>
+                                                {markers.filter(item => item.busy === true).length + 1}
+                                            </td>
+                                        </td>
+                                        <td>
+                                            <td>
+                                                اتوبوس های غیر شاغل :
+                                        </td>
+                                            <td >
+                                                {markers.filter(item => item.busy === false).length + 1}
+                                            </td>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        :
+                        ''}
+                </div>
                 <div className="bus-detail-container">
 
                     {markers.map(bus => {
                         return (
-                            (selectedBusOptionsString.includes(bus.busCode)) ?
+                            (selectedBusOptionsString.includes(bus.busCode) || selectedBusOptionsString.includes('All')) ?
                                 <Ripples key={bus.busCode} onClick={() => { onBusDetailClick(bus); }}>
                                     <table className={(selectedMarker === (bus.busCode) ? "selected" : "")}>
                                         <tbody>
