@@ -30,6 +30,24 @@ var greenIcon = L.icon({
   // shadowAnchor: [4, 62],  // the same for the shadow
   // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 });
+var redIcon = L.icon({
+  iconUrl: require("./img/marker-icon-red.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+  iconSize:     [25, 41], // size of the icon
+  // shadowSize:   [50, 64], // size of the shadow
+  iconAnchor:   [13, 35], // point of the icon which will correspond to marker's location
+  // shadowAnchor: [4, 62],  // the same for the shadow
+  // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
+var blueIcon = L.icon({
+  iconUrl: require("./img/marker-icon-blue.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+  iconSize:     [25, 41], // size of the icon
+  // shadowSize:   [50, 64], // size of the shadow
+  iconAnchor:   [13, 35], // point of the icon which will correspond to marker's location
+  // shadowAnchor: [4, 62],  // the same for the shadow
+  // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
 export default function Map(props) {
   // const [markers, setMarkers] = useState()
   const { markers } = props;
@@ -40,7 +58,7 @@ export default function Map(props) {
     return markers.map(
       (marker,index) => {
         const markerId = marker.busCode;
-        return <Marker icon={(marker.isPinned)?greenIcon:defaultIcon} onclick={() => props.onMarkerClick(markerId,index)} key={`${marker.busCode}`} position={[marker.latitude, marker.longitude]} >
+        return <Marker icon={(marker.isPinned)?blueIcon:(marker.busy)?greenIcon:redIcon} onclick={() => props.onMarkerClick(markerId,index)} key={`${marker.busCode}`} position={[marker.latitude, marker.longitude]} >
           <Tooltip permanent direction="bottom" offset={L.point(63, 1)}>{markerId}</Tooltip>
         </Marker>
       })

@@ -25,6 +25,7 @@
         font-size: 0.85em;
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
         margin: 10px 8px;
+        cursor: pointer;
       }
 
       table:hover {
@@ -41,14 +42,12 @@
         }
       }
 
-      table tr:nth-child(even) {
-        background-color: #e7e7e7;
-      }
+   
 
-      table tr:hover {
-        background-color: #232323;
-        color: white;
-      }
+      // table tr:hover {
+      //   background-color: #232323;
+      //   color: white;
+      // }
 
       table th {
         padding-top: 12px;
@@ -88,7 +87,8 @@
           background-color: white;
           font-size: 2.15em;
           &.active {
-            background-color: greenyellow;
+            background-color: steelblue;
+            color: white;
           }
         }
         table {
@@ -110,7 +110,7 @@
 
         table {
           &.selected tr:first-of-type {
-            background-color: #2684ff ;
+            // background-color: #2684ff ;
             color: white;
             -webkit-animation: argh-my-eyes 1s 5;
             -moz-animation:    argh-my-eyes 1s 5;
@@ -168,6 +168,18 @@
           }
         }
       }
+    }
+  }
+  .checkbox-lable{
+    position: relative;
+    padding: 4px;
+
+    input{
+      margin: 0;
+      height: 16px;
+      width: 16px;
+      // margin-top: 18px;
+
     }
   }
 }

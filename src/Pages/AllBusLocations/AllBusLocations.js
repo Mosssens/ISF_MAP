@@ -1,296 +1,403 @@
-import React, { useState, useEffect, useRef } from 'react'
-import Map from '../../Components/Map/Map'
-import './AllBusLocations.scss'
-import Ripples from 'react-ripples'
-import Select from 'react-select'
+import React, { useState, useEffect, useRef } from "react";
+import Map from "../../Components/Map/Map";
+import "./AllBusLocations.scss";
+import Ripples from "react-ripples";
+import Select from "react-select";
 import { IoMdPin } from "react-icons/io";
-import moment from 'jalali-moment'
+import moment from "jalali-moment";
 const AllBusLocations = () => {
-    // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
-    const [markers, setMarkers] = useState([])
-    const [mapCenter, setMapCenter] = useState([32.634349845364056, 51.55693869732796])
-    const [mapZoom, setMapZoom] = useState(11)
-    const [busOptions, setBusOptions] = useState([])
-    const [selectedBusOptions, setSelectedBusOptions] = useState([])
-    const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([])
-    const [pinnedMarkers, setPinnedMarkers] = useState([])
-    const [selectedMarker, setSelectedMarker] = useState([])
-    const [isPaused, setPause] = useState(false);
-    const [ws, setWs] = useState(null);
+  // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
+  const [markers, setMarkers] = useState([]);
+  const [mapCenter, setMapCenter] = useState([
+    32.634349845364056,
+    51.55693869732796,
+  ]);
+  const [mapZoom, setMapZoom] = useState(11);
+  const [busOptions, setBusOptions] = useState([]);
+  const [selectedBusOptions, setSelectedBusOptions] = useState([]);
+  const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([]);
+  const [pinnedMarkers, setPinnedMarkers] = useState([]);
+  const [selectedMarker, setSelectedMarker] = useState([]);
+  const [isPaused, setPause] = useState(false);
+  const [ws, setWs] = useState(null);
 
-    const actionMenuRef = useRef()
-    const searchBoxRef = useRef()
-    const overviewBoxRef = useRef()
-    const actionMenuHeaderRef = useRef()
-    useEffect(() => {
-        const wsClient = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations');
-        wsClient.onopen = () => {
-            console.log('ws opened');
-            setWs(wsClient);
+  const actionMenuRef = useRef();
+  const searchBoxRef = useRef();
+  const overviewBoxRef = useRef();
+  const actionMenuHeaderRef = useRef();
+  useEffect(() => {
+    const wsClient = new WebSocket(
+      "ws://193.176.241.150:8080/tms/websocket/getAllBusLocations"
+    );
+    wsClient.onopen = () => {
+      console.log("ws opened");
+      setWs(wsClient);
+    };
+    wsClient.onclose = () => console.log("ws closed");
+
+    return () => {
+      wsClient.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ws) return;
+    var isFirstMessageReceived = false;
+    ws.onmessage = (e) => {
+      if (isPaused) return;
+      const message = JSON.parse(e.data);
+      console.log("e", message);
+      // listen to data sent from the websocket server
+      // this.setState({dataFromServer: message})
+      setMarkers(message.payload);
+      console.log(message.payload);
+      var busTempOptions = message.payload.map((item, index) => {
+        return {
+          value: item.busCode,
+          label: item.busCode,
         };
-        wsClient.onclose = () => console.log('ws closed');
+      });
+      busTempOptions.push({ value: "All", label: "همه اتوبوس ها" });
+      setBusOptions(busTempOptions);
+      console.log("pinnd", pinnedMarkers);
+      if (isFirstMessageReceived === false) {
+        setSelectedBusOptions([{ value: "All", label: "همه اتوبوس ها" }]);
+        // var tempArr = [{value:'All',label:'همه اتوبوس ها'}]
+        // busTempOptions.map(item => {
+        //     tempArr.push(item.value)
+        // })
+        setSelectedBusOptionsString(["All"]);
+        isFirstMessageReceived = true;
+      }
+    };
+  }, [isPaused, ws]);
 
-        return () => {
-            wsClient.close();
-        }
-    }, []);
+  const onBusDetailClick = (bus) => {
+    setMapZoom(14);
+    setMapCenter([bus.latitude, bus.longitude]);
+  };
+  const onPinButtonClick = (id) => {
+    if (pinnedMarkers.includes(id)) {
+      setPinnedMarkers(pinnedMarkers.filter((item) => item !== id));
+    } else {
+      setPinnedMarkers([...pinnedMarkers, id]);
+    }
+  };
+  const getMarkers = () => {
+    const filteredMarkers = markers.filter(
+      (item) =>
+        selectedBusOptionsString.includes(item.busCode) ||
+        selectedBusOptionsString.includes("All")
+    );
+    const markersWithIsPinned = filteredMarkers.map((marker) => {
+      return {
+        ...marker,
+        isPinned: pinnedMarkers.includes(marker.busCode),
+      };
+    });
 
-    useEffect(() => {
-        if (!ws) return;
-        var isFirstMessageReceived = false;
-        ws.onmessage = e => {
-            if (isPaused) return;
-            const message = JSON.parse(e.data);
-            console.log('e', message);
-            // listen to data sent from the websocket server
-            // this.setState({dataFromServer: message})
-            setMarkers(message.payload)
-            console.log(message.payload)
-            var busTempOptions = message.payload.map((item, index) => {
-                return {
-                    value: item.busCode,
-                    label: item.busCode
+    console.log("markersWithIsPinned", markersWithIsPinned);
+    return markersWithIsPinned;
+  };
+  const onMarkerClick = (id, index) => {
+    setSelectedMarker(id);
+    console.log("sss", actionMenuHeaderRef.current.offsetHeight);
+    actionMenuRef.current.scrollTo(
+      0,
+      actionMenuHeaderRef.current.offsetHeight * index - 100,
+      { behavior: "smooth" }
+    );
+  };
+  const fitBoundsPinnedMarkers = (markers) => {
+    // var latXTotal = 0;
+    // var latYTotal = 0;
+    // var lonDegreesTotal = 0;
+    // var currentLatLong;
+    // for (var i = 0; (currentLatLong = markers[i]); i++) {
+    //   var latDegrees = currentLatLong.latitude;
+    //   var lonDegrees = currentLatLong.longitude;
+    //   var latRadians = (Math.PI * latDegrees) / 180;
+    //   latXTotal += Math.cos(latRadians);
+    //   latYTotal += Math.sin(latRadians);
+    //   lonDegreesTotal += lonDegrees;
+    // }
+    // var finalLatRadians = Math.atan2(latYTotal, latXTotal);
+    // var finalLatDegrees = (finalLatRadians * 180) / Math.PI;
+    // var finalLonDegrees = lonDegreesTotal / markers.length;
+    // setMapCenter([232,232])
+  };
+  return (
+    <section className="all-bus-locations-container">
+      <div className="map-contianer">
+        <Map
+          onMarkerClick={(id, index) => onMarkerClick(id, index)}
+          markers={getMarkers()}
+          center={mapCenter}
+          zoom={mapZoom}
+        />
+      </div>
+      <div ref={actionMenuRef} className="action-menu">
+        <div ref={actionMenuHeaderRef}>
+          <Select
+            withAll={true}
+            ref={searchBoxRef}
+            value={selectedBusOptions}
+            onChange={(selectedBuses) => {
+              var tempArr = [];
+              // console.log('fff',selectedBuses,'sdadd',(selectedBuses.filter(item=>item.value==="All")) )
+              if (selectedBuses !== null) {
+                if (
+                  selectedBuses.filter((item) => item.value === "All").length >
+                  0
+                ) {
+                  selectedBuses = [{ value: "All", label: "همه اتوبوس ها" }];
+                  tempArr = ["All"];
+                } else {
+                  selectedBuses.map((item) => {
+                    tempArr.push(item.value);
+                  });
                 }
-            })
-            busTempOptions.push({ value: 'All', label: 'همه اتوبوس ها' })
-            setBusOptions(busTempOptions)
-            console.log('pinnd', pinnedMarkers)
-            if (isFirstMessageReceived === false) {
-                setSelectedBusOptions([{ value: 'All', label: 'همه اتوبوس ها' }])
-                // var tempArr = [{value:'All',label:'همه اتوبوس ها'}]
-                // busTempOptions.map(item => {
-                //     tempArr.push(item.value)
-                // })
-                setSelectedBusOptionsString(['All'])
-                isFirstMessageReceived = true
-            }
+              }
+              setSelectedBusOptions(selectedBuses);
+              setSelectedBusOptionsString(tempArr);
+            }}
+            className="bus-select-input"
+            closeMenuOnSelect={false}
+            isMulti={true}
+            options={busOptions}
+            isRtl={true}
+          />
 
-        };
-    }, [isPaused, ws]);
-
-    const onBusDetailClick = (bus) => {
-        setMapZoom(14)
-        setMapCenter([bus.latitude, bus.longitude])
-    }
-    const onPinButtonClick = (id) => {
-        if (pinnedMarkers.includes(id)) {
-            setPinnedMarkers(pinnedMarkers.filter(item => item !== id))
-        } else {
-            setPinnedMarkers([...pinnedMarkers, id])
-        }
-    }
-    const getMarkers = () => {
-        const filteredMarkers = markers.filter(item => selectedBusOptionsString.includes(item.busCode)||selectedBusOptionsString.includes('All'));
-        const markersWithIsPinned = filteredMarkers.map(marker => {
-            return {
-                ...marker,
-                isPinned: pinnedMarkers.includes(marker.busCode)
-            }
-        })
-        console.log('markersWithIsPinned', markersWithIsPinned)
-        return markersWithIsPinned
-    }
-    const onMarkerClick = (id, index) => {
-        setSelectedMarker(id)
-        console.log('sss', actionMenuHeaderRef.current.offsetHeight)
-        actionMenuRef.current.scrollTo(0, actionMenuHeaderRef.current.offsetHeight * index - 100, { behavior: 'smooth' })
-    }
-    return (
-        <section className="all-bus-locations-container">
-            <div className="map-contianer">
-                <Map onMarkerClick={(id, index) => onMarkerClick(id, index)} markers={getMarkers()} center={mapCenter} zoom={mapZoom} />
+          {markers.length > 0 ? (
+            <div ref={overviewBoxRef} className="overview-container">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>تعداد کل اتوبوس ها : {markers.length}</td>
+                  </tr>
+                  <tr>
+                    <Ripples
+                      onClick={() => {
+                        console.log(
+                          "filteredMarkers :",
+                          markers.filter((item) => item.active === true)
+                        );
+                        const filteredMarkers = markers.filter(
+                          (item) => item.active === true
+                        );
+                        var filteredMarkersString = [];
+                        var filteredMarkersOptions = [];
+                        filteredMarkers.map((item) => {
+                          filteredMarkersString.push(item.busCode);
+                          filteredMarkersOptions.push({
+                            value: item.busCode,
+                            label: item.busCode,
+                          });
+                        });
+                        setSelectedBusOptions(filteredMarkersOptions);
+                        setSelectedBusOptionsString(filteredMarkersString);
+                      }}
+                    >
+                      <td>
+                        <td>اتوبوس های فعال:</td>
+                        <td>
+                          {
+                            markers.filter((item) => item.active === true)
+                              .length
+                          }
+                        </td>
+                      </td>
+                    </Ripples>
+                    <Ripples
+                      onClick={() => {
+                        console.log(
+                          "filteredMarkers :",
+                          markers.filter((item) => item.active === false)
+                        );
+                        const filteredMarkers = markers.filter(
+                          (item) => item.active === false
+                        );
+                        var filteredMarkersString = [];
+                        var filteredMarkersOptions = [];
+                        filteredMarkers.map((item) => {
+                          filteredMarkersString.push(item.busCode);
+                          filteredMarkersOptions.push({
+                            value: item.busCode,
+                            label: item.busCode,
+                          });
+                        });
+                        setSelectedBusOptions(filteredMarkersOptions);
+                        setSelectedBusOptionsString(filteredMarkersString);
+                      }}
+                    >
+                      <td>
+                        <td>اتوبوس های غیر فعال:</td>
+                        <td>
+                          {
+                            markers.filter((item) => item.active === false)
+                              .length
+                          }
+                        </td>
+                      </td>
+                    </Ripples>
+                  </tr>
+                  <tr>
+                    <Ripples
+                      onClick={() => {
+                        console.log(
+                          "filteredMarkers :",
+                          markers.filter((item) => item.busy === true)
+                        );
+                        const filteredMarkers = markers.filter(
+                          (item) => item.busy === true
+                        );
+                        var filteredMarkersString = [];
+                        var filteredMarkersOptions = [];
+                        filteredMarkers.map((item) => {
+                          filteredMarkersString.push(item.busCode);
+                          filteredMarkersOptions.push({
+                            value: item.busCode,
+                            label: item.busCode,
+                          });
+                        });
+                        setSelectedBusOptions(filteredMarkersOptions);
+                        setSelectedBusOptionsString(filteredMarkersString);
+                      }}
+                    >
+                      <td>
+                        <td>اتوبوس های شاغل :</td>
+                        <td>
+                          {markers.filter((item) => item.busy === true).length}
+                        </td>
+                      </td>
+                    </Ripples>
+                    <Ripples
+                      onClick={() => {
+                        console.log(
+                          "filteredMarkers :",
+                          markers.filter((item) => item.busy === false)
+                        );
+                        const filteredMarkers = markers.filter(
+                          (item) => item.busy === false
+                        );
+                        var filteredMarkersString = [];
+                        var filteredMarkersOptions = [];
+                        filteredMarkers.map((item) => {
+                          filteredMarkersString.push(item.busCode);
+                          filteredMarkersOptions.push({
+                            value: item.busCode,
+                            label: item.busCode,
+                          });
+                        });
+                        setSelectedBusOptions(filteredMarkersOptions);
+                        setSelectedBusOptionsString(filteredMarkersString);
+                      }}
+                    >
+                      <td>
+                        <td>اتوبوس های غیر شاغل :</td>
+                        <td>
+                          {markers.filter((item) => item.busy === false).length}
+                        </td>
+                      </td>
+                    </Ripples>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div ref={actionMenuRef} className="action-menu" >
-                <div ref={actionMenuHeaderRef}>
-                    <Select withAll={true} ref={searchBoxRef} value={selectedBusOptions} onChange={(selectedBuses) => {
-                        var tempArr = []
-                        // console.log('fff',selectedBuses,'sdadd',(selectedBuses.filter(item=>item.value==="All")) )
-                        if (selectedBuses !== null) {
-                            if(selectedBuses.filter(item=>item.value==="All").length>0){
-                                selectedBuses=[{ value: 'All', label: 'همه اتوبوس ها' }];
-                                tempArr=['All'];
-                            }else{
-                                selectedBuses.map(item => {
-                                    tempArr.push(item.value)
-                                })
-                            }
-                        }
-                        setSelectedBusOptions(selectedBuses);
-                        setSelectedBusOptionsString(tempArr)
-                    }}
-                        className="bus-select-input" closeMenuOnSelect={false} isMulti={true} options={busOptions} isRtl={true} />
+          ) : (
+            ""
+          )}
+        </div>
+        <div className="bus-detail-container">
+          {markers.map((bus) => {
+            return selectedBusOptionsString.includes(bus.busCode) ||
+              selectedBusOptionsString.includes("All") ? (
+              <Ripples
+                key={bus.busCode}
+                onClick={() => {
+                  onBusDetailClick(bus);
+                }}
+              >
+                <table
+                  className={selectedMarker === bus.busCode ? "selected" : ""}
+                >
+                  <tbody>
+                    <tr>
+                      <td>
+                        <td>کد اتوبوس :</td>
+                        <td>{bus.busCode}</td>
+                      </td>
+                      <td>
+                        <td>سرعت لحظه ای :</td>
+                        <td>
+                          {`${bus.groundSpeed}km`}
+                          <div
+                            className={`pin-btn ${
+                              pinnedMarkers.includes(bus.busCode)
+                                ? "active"
+                                : ""
+                            }`}
+                            onClick={() => onPinButtonClick(bus.busCode)}
+                          >
+                            <IoMdPin />
+                          </div>
+                        </td>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <td>شاغل/غیر شاغل:</td>
+                        <td>{bus.busy ? "شاغل" : "غیر شاغل"}</td>
+                      </td>
+                      <td>
+                        <td>فعال/غیر فعال :</td>
+                        <td>{bus.active ? "فعال" : "غیر فعال"}</td>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <td>نوع سوخت:</td>
+                        <td>{bus.fuelType}</td>
+                      </td>
+                      <td>
+                        <td>وضعیت اتوبوس :</td>
+                        <td>{bus.busStatus}</td>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <td>کد خط :</td>
+                        <td>{bus.tripCode}</td>
+                      </td>
+                      <td>
+                        <td>تعداد تراکنش ها :</td>
+                        <td>{bus.dcTransactionCount}</td>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <td>تراکنش های در جلو :</td>
+                        <td>{bus.frontDoorTransactionCount}</td>
+                      </td>
+                      <td className="col">
+                        <td>تراکنش های در عقب :</td>
+                        <td>{bus.backDoorTransactionCount}</td>
+                      </td>
+                    </tr>
 
-                    {(markers.length > 0) ?
-                        <div ref={overviewBoxRef} className="overview-container">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td >
-                                            تعداد کل اتوبوس ها:
-                                        </td>
-                                        <td >
-                                            {markers.length + 1}
-                                        </td>
-                                    </tr>
-                                    <tr >
-                                        <td >
-                                            <td >
-                                                اتوبوس های فعال:
-                                        </td>
-                                            <td >
-                                                {markers.filter(item => item.active === true).length + 1}
-                                            </td>
-                                        </td>
-                                        <td>
-                                            <td >
-                                                اتوبوس های غیر فعال:
-                                        </td>
-                                            <td >
-                                                {markers.filter(item => item.active === false).length + 1}
-                                            </td>
-                                        </td>
-                                    </tr>
-                                    <tr >
-                                        <td >
-                                            <td>
-                                                اتوبوس های شاغل :
-                                        </td>
-                                            <td>
-                                                {markers.filter(item => item.busy === true).length + 1}
-                                            </td>
-                                        </td>
-                                        <td>
-                                            <td>
-                                                اتوبوس های غیر شاغل :
-                                        </td>
-                                            <td >
-                                                {markers.filter(item => item.busy === false).length + 1}
-                                            </td>
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
-                        :
-                        ''}
-                </div>
-                <div className="bus-detail-container">
-
-                    {markers.map(bus => {
-                        return (
-                            (selectedBusOptionsString.includes(bus.busCode) || selectedBusOptionsString.includes('All')) ?
-                                <Ripples key={bus.busCode} onClick={() => { onBusDetailClick(bus); }}>
-                                    <table className={(selectedMarker === (bus.busCode) ? "selected" : "")}>
-                                        <tbody>
-                                            <tr>
-                                                <td >
-                                                    <td >
-                                                        کد اتوبوس :
-                                            </td>
-                                                    <td >
-                                                        {bus.busCode}
-                                                    </td>
-                                                </td>
-                                                <td>
-                                                    <td>
-                                                        سرعت لحظه ای :
-                                            </td>
-                                                    <td>
-                                                        {`${bus.groundSpeed}km`}
-                                                        <div className={`pin-btn ${(pinnedMarkers.includes(bus.busCode)) ? 'active' : ''}`} onClick={() => onPinButtonClick(bus.busCode)}><IoMdPin /></div>
-                                                    </td>
-                                                </td>
-                                            </tr>
-                                            <tr >
-                                                <td >
-                                                    <td >
-                                                        شاغل/غیر شاغل:
-                                            </td>
-                                                    <td >
-                                                        {(bus.busy) ? "شاغل" : "غیر شاغل"}
-                                                    </td>
-                                                </td>
-                                                <td>
-                                                    <td >
-                                                        فعال/غیر فعال :
-                                            </td>
-                                                    <td >
-                                                        {(bus.busy) ? "فعال" : "غیر فعال"}
-
-                                                    </td>
-                                                </td>
-                                            </tr>
-                                            <tr >
-                                                <td >
-                                                    <td>
-                                                        نوع سوخت:
-                                            </td>
-                                                    <td>
-                                                        {bus.fuelType}
-                                                    </td>
-                                                </td>
-                                                <td>
-                                                    <td>
-                                                        وضعیت اتوبوس :
-                                            </td>
-                                                    <td >
-                                                        {bus.busStatus}
-                                                    </td>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <td >
-                                                        کد خط :
-                                            </td>
-                                                    <td >
-                                                        {bus.tripCode}
-                                                    </td>
-                                                </td>
-                                                <td>
-                                                    <td >
-                                                        تعداد تراکنش ها :
-                                            </td>
-                                                    <td>
-                                                        {bus.dcTransactionCount}
-                                                    </td>
-                                                </td>
-                                            </tr>
-                                            <tr >
-                                                <td >
-                                                    <td>
-                                                        تراکنش های در جلو :
-                                            </td>
-                                                    <td >
-                                                        {bus.frontDoorTransactionCount}
-                                                    </td>
-                                                </td>
-                                                <td className="col">
-                                                    <td >
-                                                        تراکنش های در عقب :
-                                            </td>
-                                                    <td>
-                                                        {bus.backDoorTransactionCount}
-                                                    </td>
-                                                </td>
-                                            </tr>
-
-                                            <tr >
-
-                                                <td>
-                                                    تاریخ :
-                                            </td>
-                                                <td style={{ direction: 'ltr', textAlign: 'right' }}>
-                                                    {
-                                                        moment.unix(parseInt(bus.clientDate).toString().substring(0, 10)).format('jYYYY/jM/jD HH:mm:ss')
-                                                    }
-                                                </td>
-
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    {/* <div className="card">
+                    <tr>
+                      <td>تاریخ :</td>
+                      <td style={{ direction: "ltr", textAlign: "right" }}>
+                        {moment
+                          .unix(
+                            parseInt(bus.clientDate).toString().substring(0, 10)
+                          )
+                          .format("jYYYY/jM/jD HH:mm:ss")}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                {/* <div className="card">
                                     <div className="row">
                                         <div className="col">
                                             <div className="col">
@@ -393,16 +500,15 @@ const AllBusLocations = () => {
                                         </div>
                                     </div>
                                 </div> */}
-                                </Ripples>
-                                :
-                                ''
-                        )
-                    })}
+              </Ripples>
+            ) : (
+              ""
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
 
-                </div>
-            </div>
-        </section>
-    )
-}
-
-export default AllBusLocations
+export default AllBusLocations;
