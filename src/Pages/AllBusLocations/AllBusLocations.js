@@ -104,7 +104,7 @@ const AllBusLocations = () => {
     // console.log("sss", actionMenuHeaderRef.current.offsetHeight);
     actionMenuRef.current.scrollTo(
       0,
-      actionMenuHeaderRef.current.offsetHeight * index - 100,
+     (173 * index )+  actionMenuHeaderRef.current.offsetHeight + 10,
       { behavior: "smooth" }
     );
   };
@@ -177,6 +177,7 @@ const AllBusLocations = () => {
                   </tr>
                   <tr>
                     <Ripples
+                      className="btn"
                       onClick={() => {
                         // console.log(
                         //   "filteredMarkers :",
@@ -209,6 +210,7 @@ const AllBusLocations = () => {
                       </td>
                     </Ripples>
                     <Ripples
+                      className="btn"
                       onClick={() => {
                         // console.log(
                         //   "filteredMarkers :",
@@ -243,6 +245,7 @@ const AllBusLocations = () => {
                   </tr>
                   <tr>
                     <Ripples
+                    className="btn"
                       onClick={() => {
                         // console.log(
                         //   "filteredMarkers :",
@@ -272,6 +275,7 @@ const AllBusLocations = () => {
                       </td>
                     </Ripples>
                     <Ripples
+                      className="btn"
                       onClick={() => {
                         // console.log(
                         //   "filteredMarkers :",
@@ -374,7 +378,7 @@ const AllBusLocations = () => {
                         <td>{bus.dcTransactionCount}</td>
                       </td>
                     </tr>
-                    <tr>
+                    {/* <tr>
                       <td>
                         <td>تراکنش های در جلو :</td>
                         <td>{bus.frontDoorTransactionCount}</td>
@@ -383,7 +387,7 @@ const AllBusLocations = () => {
                         <td>تراکنش های در عقب :</td>
                         <td>{bus.backDoorTransactionCount}</td>
                       </td>
-                    </tr>
+                    </tr> */}
 
                     <tr>
                       <td>تاریخ :</td>
