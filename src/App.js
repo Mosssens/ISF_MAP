@@ -28,7 +28,7 @@ function App() {
   return (
 
 
-    <HashRouter basename="/tms/newreports/">
+    <HashRouter basename="/tms/">
       <Layout>
         <Switch>
           <Route path="/SchematicTripState" component={SchematicTripState} />
