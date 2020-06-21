@@ -9,10 +9,10 @@ const AllBusLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
   const [markers, setMarkers] = useState([]);
   const [mapCenter, setMapCenter] = useState([
-    32.634349845364056,
-    51.55693869732796,
+    34.6088466,
+    50.8769083,
   ]);
-  const [mapZoom, setMapZoom] = useState(11);
+  const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
   const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([]);
@@ -27,7 +27,7 @@ const AllBusLocations = () => {
   const actionMenuHeaderRef = useRef();
   useEffect(() => {
     const wsClient = new WebSocket(
-      "ws://193.176.241.150:8080/tms/websocket/getAllBusLocations"
+      "ws://afc.qom.ir:9051/tms/websocket/getAllBusLocations"
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -46,11 +46,11 @@ const AllBusLocations = () => {
     ws.onmessage = (e) => {
       if (isPaused) return;
       const message = JSON.parse(e.data);
-      console.log("e", message);
+      // console.log("e", message);
       // listen to data sent from the websocket server
       // this.setState({dataFromServer: message})
       setMarkers(message.payload);
-      console.log(message.payload);
+      // console.log(message.payload);
       var busTempOptions = message.payload.map((item, index) => {
         return {
           value: item.busCode,
@@ -59,7 +59,7 @@ const AllBusLocations = () => {
       });
       busTempOptions.push({ value: "All", label: "همه اتوبوس ها" });
       setBusOptions(busTempOptions);
-      console.log("pinnd", pinnedMarkers);
+      // console.log("pinnd", pinnedMarkers);
       if (isFirstMessageReceived === false) {
         setSelectedBusOptions([{ value: "All", label: "همه اتوبوس ها" }]);
         // var tempArr = [{value:'All',label:'همه اتوبوس ها'}]
@@ -96,12 +96,12 @@ const AllBusLocations = () => {
       };
     });
 
-    console.log("markersWithIsPinned", markersWithIsPinned);
+    // console.log("markersWithIsPinned", markersWithIsPinned);
     return markersWithIsPinned;
   };
   const onMarkerClick = (id, index) => {
     setSelectedMarker(id);
-    console.log("sss", actionMenuHeaderRef.current.offsetHeight);
+    // console.log("sss", actionMenuHeaderRef.current.offsetHeight);
     actionMenuRef.current.scrollTo(
       0,
       actionMenuHeaderRef.current.offsetHeight * index - 100,
@@ -178,10 +178,10 @@ const AllBusLocations = () => {
                   <tr>
                     <Ripples
                       onClick={() => {
-                        console.log(
-                          "filteredMarkers :",
-                          markers.filter((item) => item.active === true)
-                        );
+                        // console.log(
+                        //   "filteredMarkers :",
+                        //   markers.filter((item) => item.active === true)
+                        // );
                         const filteredMarkers = markers.filter(
                           (item) => item.active === true
                         );
@@ -210,10 +210,10 @@ const AllBusLocations = () => {
                     </Ripples>
                     <Ripples
                       onClick={() => {
-                        console.log(
-                          "filteredMarkers :",
-                          markers.filter((item) => item.active === false)
-                        );
+                        // console.log(
+                        //   "filteredMarkers :",
+                        //   markers.filter((item) => item.active === false)
+                        // );
                         const filteredMarkers = markers.filter(
                           (item) => item.active === false
                         );
@@ -244,10 +244,10 @@ const AllBusLocations = () => {
                   <tr>
                     <Ripples
                       onClick={() => {
-                        console.log(
-                          "filteredMarkers :",
-                          markers.filter((item) => item.busy === true)
-                        );
+                        // console.log(
+                        //   "filteredMarkers :",
+                        //   markers.filter((item) => item.busy === true)
+                        // );
                         const filteredMarkers = markers.filter(
                           (item) => item.busy === true
                         );
@@ -273,10 +273,10 @@ const AllBusLocations = () => {
                     </Ripples>
                     <Ripples
                       onClick={() => {
-                        console.log(
-                          "filteredMarkers :",
-                          markers.filter((item) => item.busy === false)
-                        );
+                        // console.log(
+                        //   "filteredMarkers :",
+                        //   markers.filter((item) => item.busy === false)
+                        // );
                         const filteredMarkers = markers.filter(
                           (item) => item.busy === false
                         );

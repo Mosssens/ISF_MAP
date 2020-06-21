@@ -7,7 +7,7 @@ const SchematicTripState = () => {
   const forwardLineRef = useRef();
   const backwardLineRef = useRef();
   const ws = new WebSocket(
-    "ws://193.176.241.150:8080/tms/websocket/getSchematicTripState"
+    "ws://afc.qom.ir:9051/tms/websocket/getSchematicTripState"
   );
   const [inboundBusStops, setInboundBusStops] = useState([]);
   const [inboundBuses, setInboundBuses] = useState([]);
