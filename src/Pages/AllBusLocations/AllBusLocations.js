@@ -8,10 +8,7 @@ import moment from "jalali-moment";
 const AllBusLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
   const [markers, setMarkers] = useState([]);
-  const [mapCenter, setMapCenter] = useState([
-    34.6088466,
-    50.8769083,
-  ]);
+  const [mapCenter, setMapCenter] = useState([34.6088466, 50.8769083]);
   const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
@@ -27,7 +24,7 @@ const AllBusLocations = () => {
   const actionMenuHeaderRef = useRef();
   useEffect(() => {
     const wsClient = new WebSocket(
-      "ws://afc.qom.ir:9051/tms/websocket/getAllBusLocations"
+      "ws://afc.qom.ir:9051/tms/websocket/getAllBusLocationsNewDate"
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -50,7 +47,7 @@ const AllBusLocations = () => {
       // listen to data sent from the websocket server
       // this.setState({dataFromServer: message})
       setMarkers(message.payload);
-      // console.log(message.payload);
+      console.log(message.payload);
       var busTempOptions = message.payload.map((item, index) => {
         return {
           value: item.busCode,
@@ -104,7 +101,7 @@ const AllBusLocations = () => {
     // console.log("sss", actionMenuHeaderRef.current.offsetHeight);
     actionMenuRef.current.scrollTo(
       0,
-     (173 * index )+  actionMenuHeaderRef.current.offsetHeight + 10,
+      170.4 * index + actionMenuHeaderRef.current.offsetHeight + 10,
       { behavior: "smooth" }
     );
   };
@@ -245,7 +242,7 @@ const AllBusLocations = () => {
                   </tr>
                   <tr>
                     <Ripples
-                    className="btn"
+                      className="btn"
                       onClick={() => {
                         // console.log(
                         //   "filteredMarkers :",
@@ -392,11 +389,9 @@ const AllBusLocations = () => {
                     <tr>
                       <td>تاریخ :</td>
                       <td style={{ direction: "ltr", textAlign: "right" }}>
-                        {moment
-                          .unix(
-                            parseInt(bus.clientDate).toString().substring(0, 10)
-                          )
-                          .format("jYYYY/jM/jD HH:mm:ss")}
+                          {
+                            moment(bus.clientDate, "YYYYMMDDhhmmss").format("jYYYY/jM/jD HH:mm:ss")
+                          }
                       </td>
                     </tr>
                   </tbody>
