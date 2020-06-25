@@ -170,7 +170,13 @@ const AllBusLocations = () => {
               <table>
                 <tbody>
                   <tr>
-                    <td>تعداد کل اتوبوس ها : {markers.length}</td>
+                    <Ripples onClick={()=>{
+                      setSelectedBusOptions([{ value: "All", label: "همه اتوبوس ها" }]);
+                      setSelectedBusOptionsString(["All"]);
+                
+                    }}>
+                    <td >تعداد کل اتوبوس ها : {markers.length}</td>
+                    </Ripples>
                   </tr>
                   <tr>
                     <Ripples
@@ -196,7 +202,7 @@ const AllBusLocations = () => {
                         setSelectedBusOptionsString(filteredMarkersString);
                       }}
                     >
-                      <td>
+                      <td className="active-buses">
                         <td>اتوبوس های فعال:</td>
                         <td>
                           {
@@ -229,8 +235,8 @@ const AllBusLocations = () => {
                         setSelectedBusOptionsString(filteredMarkersString);
                       }}
                     >
-                      <td>
-                        <td>اتوبوس های غیر فعال:</td>
+                      <td className="deactive-buses">
+                        <td >اتوبوس های غیر فعال:</td>
                         <td>
                           {
                             markers.filter((item) => item.active === false)
@@ -294,7 +300,7 @@ const AllBusLocations = () => {
                         setSelectedBusOptionsString(filteredMarkersString);
                       }}
                     >
-                      <td>
+                      <td className="unbusy-buses">
                         <td>اتوبوس های غیر شاغل :</td>
                         <td>
                           {markers.filter((item) => item.busy === false).length}
@@ -396,109 +402,7 @@ const AllBusLocations = () => {
                     </tr>
                   </tbody>
                 </table>
-                {/* <div className="card">
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="col">
-                                                <div className="col">
-                                                    کد اتوبوس :
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.busCode}
-                                                </div>
-                                            </div>
-                                            <div className="col">
-                                                <div className="col">
-                                                    سرعت لحظه ای :
-                                            </div>
-                                                <div className="col value">
-                                                    {`${bus.groundSpeed}km`}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="col">
-                                                <div className="col">
-                                                    شاغل/غیر شاغل:
-                                            </div>
-                                                <div className="col value">
-                                                    {(bus.busy) ? "شاغل" : "غیر شاغل"}
-                                                </div>
-                                            </div>
-                                            <div className="col">
-                                                <div className="col">
-                                                    فعال/غیر فعال :
-                                            </div>
-                                                <div className="col value">
-                                                    {(bus.busy) ? "فعال" : "غیر فعال"}
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="col">
-                                                <div className="col" style={{ flexBasis: "45%" }}>
-                                                    نوع سوخت:
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.fuelType}
-                                                </div>
-                                            </div>
-                                            <div className="col">
-                                                <div className="col">
-                                                    وضعیت اتوبوس :
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.busStatus}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="col">
-                                                <div className="col" style={{ flexBasis: "80%" }}>
-                                                    کد خط :
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.tripCode}
-                                                </div>
-                                            </div>
-                                            <div className="col">
-                                                <div className="col" style={{ flexBasis: "80%" }}>
-                                                    تعداد تراکنش ها :
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.dcTransactionCount}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col">
-                                            <div className="col">
-                                                <div className="col" style={{ flexBasis: "90%" }}>
-                                                    تراکنش های در جلو :
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.frontDoorTransactionCount}
-                                                </div>
-                                            </div>
-                                            <div className="col">
-                                                <div className="col" style={{ flexBasis: "90%" }}>
-                                                    تراکنش های در عقب :
-                                            </div>
-                                                <div className="col value">
-                                                    {bus.backDoorTransactionCount}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> */}
+               
               </Ripples>
             ) : (
               ""

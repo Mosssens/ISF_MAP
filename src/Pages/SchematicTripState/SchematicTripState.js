@@ -6,13 +6,14 @@ import data from "./data.js";
 const SchematicTripState = () => {
   const forwardLineRef = useRef();
   const backwardLineRef = useRef();
-  const ws = new WebSocket(
-    "ws://afc.qom.ir:9051/tms/websocket/getSchematicTripState"
-  );
+  const [ws, setWs] = useState(null);
+  const [isPaused, setPause] = useState(false);
   const [inboundBusStops, setInboundBusStops] = useState([]);
   const [inboundBuses, setInboundBuses] = useState([]);
   const [outboundBusStops, setOutboundBusStops] = useState([]);
   const [outboundBuses, setOutboundBuses] = useState([]);
+  const [lines, setLines] = useState([]);
+  const [selectedLine, setSelectedLine] = useState([]);
   const makeRnd = () => {
     return (Math.random() * (9.0 - 1.0 + 1.0) + 1.0).toFixed(2);
   };
@@ -26,26 +27,27 @@ const SchematicTripState = () => {
 
     return color;
   };
-
   useEffect(() => {
-    ws.onopen = () => {
-      // on connecting, do nothing but log it to the console
-      console.log("connected");
-      ws.send(
-        JSON.stringify({
-          messageType: "getSchematicTripState",
-          payloadType: "getSchematicTripState",
-          payload: 9,
-        })
-      );
+    const wsClient = new WebSocket(
+      "ws://afc.qom.ir:9051/tms/websocket/getSchematicTripState"
+    );
+    wsClient.onopen = () => {
+      console.log("ws opened");
+      setWs(wsClient);
+    };
+    wsClient.onclose = () => console.log("ws closed");
+
+    return () => {
+      wsClient.close();
     };
   }, []);
   useEffect(() => {
-    ws.onmessage = (evt) => {
-      // listen to data sent from the websocket server
-      const message = JSON.parse(evt.data);
+    if (!ws) return;
+    var isFirstMessageReceived = false;
+    ws.onmessage = (e) => {
+      if (isPaused) return;
+      const message = JSON.parse(e.data);
       // this.setState({dataFromServer: message})
-      console.log(message);
       const busStopsTemp = message.payload.inboundPoints.filter(
         (item) => item.stopName !== null
       );
@@ -84,9 +86,8 @@ const SchematicTripState = () => {
                     busStopsTemp.length
               ) /
                 busStopsTempFinal.length) *
-              indexBusStop -
-              (busStopsTempFinal[indexBusStop].order -
-                bus.pointOrder);
+                indexBusStop -
+              (busStopsTempFinal[indexBusStop].order - bus.pointOrder);
           }
         });
         return {
@@ -150,55 +151,99 @@ const SchematicTripState = () => {
           };
         }
       );
-      //addd
-      // const outbusesTemp = message.payload.outboundBusList.map(
-      //   (bus, indexBus) => {
-      //     var marginRight;
-      //     outboundBusStopsTempFinal.map((busStop, indexBusStop) => {
-      //       if (
-      //         busStop.order <= bus.pointOrder &&
-      //         outboundBusStopsTempFinal[
-      //           outboundBusStopsTempFinal.length === indexBusStop + 1
-      //             ? indexBusStop
-      //             : indexBusStop + 1
-      //         ].order >= bus.pointOrder
-      //       ) {
-      //         marginRight =
-      //         (parseFloat(
-      //           backwardLineRef.current.offsetWidth -
-      //             20 +
-      //             parseFloat(backwardLineRef.current.offsetWidth - 20) /
-      //               outboundBusStopsTemp.length
-      //         ) /
-      //           outboundBusStopsTemp.length) *
-      //           indexBusStop
-      //       }
-      //     });
-      //     return {
-      //       ...bus,
-      //       marginRight: marginRight,
-      //     };
-      //   }
-      // );
+
       setOutboundBuses(outbusesTemp);
-      // console.log("sada", outbusesTemp);
     };
-  }, [outboundBusStops, inboundBusStops, ws.onmessage]);
+  }, [isPaused, ws]);
+  const onSubmitBtnClick = () => {
+    ws.send(
+      JSON.stringify({
+        messageType: "getSchematicTripState",
+        payloadType: "getSchematicTripState",
+        payload: selectedLine,
+      })
+    );
+  };
+  async function getLines(name) {
+    let response = await fetch(
+      `http://afc.qom.ir:9051/tms/api/reactService/trip/all`
+    );
+    let data = await response.json();
+    return data;
+  }
   useEffect(() => {
-    return () => {
-      ws.close();
-    };
+    getLines().then((data) =>{ setLines(data); console.log(data,'sdasa')});
   }, []);
-
-  // useEffect(() => {
-
-  //   console.log(
-  //     "width",
-  //     forwardLineRef.current ? forwardLineRef.current.offsetWidth : 0
-  //   );
-  // }, [ws.onmessage]);
+  
   return (
     <section className="SchematicTripState">
+      <section className="header-container">
+        <div className="header-card line-select-container">
+          <div>خط :</div>
+          <select
+            onChange={(e) => {
+              let { name, value } = e.target;
+              setSelectedLine(value);
+            }}
+          >
+            <option value="0">انتخاب کنید ...</option>
+            {lines.map((line, index) => (
+              <option key={index} value={line.code}>
+                {line.name}
+              </option>
+            ))}
+          </select>
+          <button className="submit-btn" onClick={onSubmitBtnClick}>
+            نمایش
+          </button>
+        </div>
+        <div className="header-card line-info-container">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                تعداد ایستگاه های مسیر رفت :
+                </td>
+                <td>
+                  {
+                    inboundBusStops.length
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td>
+                   تعداد اتوبوس های مسیر رفت :
+                </td>
+                <td>
+                 {
+                   inboundBuses.length
+                 }
+                </td>
+              </tr>
+              <tr>
+                <td>
+                   تعداد ایستگاه های مسیر برگشت :
+                </td>
+                <td>
+                {
+                    outboundBusStops.length
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td>
+                   تعداد اتوبوس های مسیر برگشت :
+                </td>
+                <td>
+                  {
+                    outboundBuses.length
+                  }
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
       <div className="card">
         <div className="header">مسیر رفت :</div>
         <div className="line forward" ref={forwardLineRef}>

@@ -8,7 +8,7 @@
 
   .action-menu {
     flex-basis: 30%;
-    background-color: white;
+    background-color: #232323;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
     z-index: 1000;
     max-height: 100vh;
@@ -21,6 +21,17 @@
       font-size: 1.05em;
       font-weight: bold;
 
+      .active-buses{
+        background-color: rgb(255, 255, 255);
+        color: #2ecc71;
+      }
+      .deactive-buses{
+        background-color: crimson;
+      }
+      .unbusy-buses{
+        background-color: rgb(255, 255, 255);
+        color: crimson;
+      }
       .btn {
         
         position: relative;
@@ -38,6 +49,7 @@
       }
 
       table {
+        background-color: white;
         border-collapse: collapse;
         width: 100%;
         font-size: 0.85em;
@@ -87,7 +99,7 @@
       display: flex;
       flex-direction: column;
       font-family: 'Yekan';
-
+    
       .react-ripples {
         cursor: pointer;
         min-height: 170px;
@@ -101,12 +113,12 @@
           width: 30px;
           height: 31px;
           font-size: 22px;
-          color: #232323;
+          color: #ffffff;
           top: 10px;
           align-items: center;
           justify-content: center;
           left: 8px;
-          background-color: white;
+          background-color: #696969;
           font-size: 2.15em;
 
           &.active {
@@ -135,7 +147,7 @@
         table {
           &.selected tr:first-of-type {
             // background-color: #2684ff ;
-            color: white;
+            color: black;
             -webkit-animation: argh-my-eyes 1s 10;
             -moz-animation: argh-my-eyes 1s 10;
             animation: argh-my-eyes 1s 10;
@@ -143,18 +155,21 @@
           }
 
           tr:first-of-type {
-            background-color: #333333;
-            color: white;
+            background-color: #ffffff;
+            color: black;
           }
         }
 
         table tr:nth-child(even) {
           background-color: #e7e7e7;
         }
+        table tr:nth-child(odd) {
+          background-color: #ffffff;
+        }
 
         table tr:hover {
-          background-color: #232323;
-          color: white;
+          background-color: #ffffff;
+          color: black;
         }
 
         table th {
@@ -220,7 +235,7 @@
   }
 
   100% {
-    background-color: #232323;
+    background-color: #ffffff;
   }
 }
 
@@ -230,7 +245,7 @@
   }
 
   100% {
-    background-color: #232323;
+    background-color: #ffffff;
   }
 }
 
@@ -240,6 +255,6 @@
   }
 
   100% {
-    background-color: #232323;
+    background-color: #ffffff;
   }
 }
