@@ -1,0 +1,177 @@
+@keyframes blink {
+    /**
+     * At the start of the animation the dot
+     * has an opacity of .2
+     */
+    0% {
+      opacity: .2;
+    }
+    /**
+     * At 20% the dot is fully visible and
+     * then fades out slowly
+     */
+    20% {
+      opacity: 1;
+    }
+    /**
+     * Until it reaches an opacity of .2 and
+     * the animation can start again
+     */
+    100% {
+      opacity: .2;
+    }
+}
+@mixin obj($w, $h, $bg) {
+    width: $w;
+    height: $h;
+    background: $bg;
+}
+
+@mixin anim($listName, $delay) {
+    @each $currentBox in $listName {
+        $i: index($listName, $currentBox);
+
+        &:nth-child(#{$currentBox}) {
+            animation-delay: 0.1s * $i + $delay;
+        }
+    }
+}
+
+.loader-container {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: #2e2e2e;
+    flex-direction: column;
+    .title{
+        // margin-right: 2em;
+        margin-top: 2.5em;
+        // margin-left: 2em;
+        color: white;
+        font-size: 1.25em;
+        span {
+            /**
+             * Use the blink animation, which is defined above
+             */
+            animation-name: blink;
+            /**
+             * The animation should take 1.4 seconds
+             */
+            animation-duration: 1.4s;
+            /**
+             * It will repeat itself forever
+             */
+            animation-iteration-count: infinite;
+            /**
+             * This makes sure that the starting style (opacity: .2)
+             * of the animation is applied before the animation starts.
+             * Otherwise we would see a short flash or would have
+             * to set the default styling of the dots to the same
+             * as the animation. Same applies for the ending styles.
+             */
+            animation-fill-mode: both;
+            font-size: 2em;
+        }
+        span:nth-child(2) {
+            /**
+             * Starts the animation of the third dot
+             * with a delay of .2s, otherwise all dots
+             * would animate at the same time
+             */
+            animation-delay: .2s;
+        }
+        span:nth-child(3) {
+            /**
+             * Starts the animation of the third dot
+             * with a delay of .4s, otherwise all dots
+             * would animate at the same time
+             */
+            animation-delay: .4s;
+        }
+    }
+}
+
+.wrapper {
+    @include obj(auto, auto, null);
+}
+
+ul {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: .85em;
+    animation: rot 16s linear infinite;
+    list-style: none;
+
+    @keyframes rot {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+li {
+    @include obj(40px, 40px, #c2185b);
+    border-radius: 4px;
+    box-shadow: 0 0 1px #fff, 0 0 5px #c2185b, 0 0 10px #c2185b, 0 0 15px #c2185b, 0 0 25px #c2185b, 0 0 55px #c2185b;
+    animation: scale 0.8s linear alternate infinite;
+
+    @keyframes scale {
+        100% {
+            transform: scale(.1);
+            opacity: 0;
+        }
+    }
+
+    @for $i from 1 through 25 {
+        &:nth-child(#{$i}) {
+            z-index: 25 - $i;
+        }
+    }
+
+    @for $i from 1 through 5 {
+        &:nth-child(#{$i}) {
+            animation-delay: 0.1s * $i;
+        }
+
+        &:nth-child(#{$i + 6}) {
+            @if ($i<5) {
+                animation-delay: 0.1s * $i + 0.2s;
+            }
+        }
+
+        &:nth-child(#{$i + 12}) {
+            @if ($i<4) {
+                animation-delay: 0.1s * $i + 0.4s;
+            }
+        }
+
+        &:nth-child(#{$i + 18}) {
+            @if ($i<3) {
+                animation-delay: 0.1s * $i + 0.6s;
+            }
+        }
+
+        &:nth-child(#{$i + 23}) {
+            @if ($i<2) {
+                animation-delay: 0.1s * $i + 0.8s;
+            }
+        }
+    }
+
+    $fCol: 1 6 11 16 21;
+    @include anim($fCol, 0);
+
+    $sCol: 7 12 17 22;
+    @include anim($sCol, 0.2s);
+
+    $tCol: 13 18 23;
+    @include anim($tCol, 0.4s);
+
+    $foCol: 19 24;
+    @include anim($foCol, 0.6s);
+
+    &:nth-child(25) {
+        animation-delay: 0.9s;
+    }
+}
