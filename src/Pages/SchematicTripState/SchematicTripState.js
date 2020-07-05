@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import Map from "../../Components/Map/Map";
 import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import data from "./data.js";
@@ -14,6 +13,22 @@ const SchematicTripState = () => {
   const [outboundBuses, setOutboundBuses] = useState([]);
   const [lines, setLines] = useState([]);
   const [selectedLine, setSelectedLine] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lineDetail, setLineDetail] = useState({
+    activeBusCount: 0,
+    busCountInLine: 0,
+    busCountInGarage: 0,
+    busCountInOffSide: 0,
+    busCountInParking: 0,
+    busCountOutbound: 0,
+    inActiveBusCount: 0,
+    inboundDistance: 0,
+    inboundTripDuration: 0,
+    legalSpeed: 0,
+    outboundDistance: 0,
+    outboundTripDuration: 0,
+    busCountInbound: 0,
+  });
   const makeRnd = () => {
     return (Math.random() * (9.0 - 1.0 + 1.0) + 1.0).toFixed(2);
   };
@@ -46,116 +61,124 @@ const SchematicTripState = () => {
     var isFirstMessageReceived = false;
     ws.onmessage = (e) => {
       if (isPaused) return;
+      if (isLoading) {
+        setIsLoading(false);
+      }
       const message = JSON.parse(e.data);
       // this.setState({dataFromServer: message})
       const busStopsTemp = message.payload.inboundPoints.filter(
         (item) => item.stopName !== null
       );
+      const stepWidthForwardLine = parseFloat(
+        forwardLineRef.current.offsetWidth / busStopsTemp.length
+      );
       const busStopsTempFinal = busStopsTemp.map((busStop, index) => {
         return {
           ...busStop,
-          marginLeft:
-            (parseFloat(
-              forwardLineRef.current.offsetWidth -
-                20 +
-                parseFloat(forwardLineRef.current.offsetWidth - 20) /
-                  busStopsTemp.length
-            ) /
-              busStopsTemp.length) *
-            index,
+          marginLeft: stepWidthForwardLine * index,
         };
       });
 
       setInboundBusStops(busStopsTempFinal);
+
+      var marginLeft;
       const busesTemp = message.payload.inboundBusList.map((bus, indexBus) => {
-        var marginLeft;
-        busStopsTempFinal.map((busStop, indexBusStop) => {
-          if (
-            busStop.order <= bus.pointOrder &&
-            busStopsTempFinal[
-              busStopsTempFinal.length === indexBusStop + 1
-                ? indexBusStop
-                : indexBusStop + 1
-            ].order >= bus.pointOrder
-          ) {
-            marginLeft =
-              (parseFloat(
-                forwardLineRef.current.offsetWidth -
-                  20 +
-                  parseFloat(forwardLineRef.current.offsetWidth - 20) /
-                    busStopsTemp.length
-              ) /
-                busStopsTempFinal.length) *
-                indexBusStop -
-              (busStopsTempFinal[indexBusStop].order - bus.pointOrder);
+        var filteredBusStopIndex;
+        const filteredBusStop = busStopsTempFinal.filter(
+          (busStop, indexBusStop) => {
+            filteredBusStopIndex = indexBusStop;
+            return (
+              busStop.order <= bus.pointOrder &&
+              busStopsTempFinal[
+                busStopsTempFinal.length === indexBusStop + 1
+                  ? indexBusStop
+                  : indexBusStop + 1
+              ].order >= bus.pointOrder
+            );
           }
-        });
+        )[0];
+        var indexOfFiltredBusStop = busStopsTempFinal.indexOf(filteredBusStop);
+        var persentOfProgress =
+          (bus.pointOrder - filteredBusStop.order) /
+          (busStopsTempFinal[indexOfFiltredBusStop + 1].order -
+            filteredBusStop.order);
+        // console.log("prer", persentOfProgress);
+        marginLeft =
+          indexOfFiltredBusStop * stepWidthForwardLine +
+          stepWidthForwardLine * persentOfProgress;
         return {
           ...bus,
           marginLeft: marginLeft,
         };
       });
       setInboundBuses(busesTemp);
+      // console.log("busesTemp", busesTemp);
+      // console.log("ibs", busStopsTempFinal);
       //outBound
       const outboundBusStopsTemp = message.payload.outboundPoints.filter(
         (item) => item.stopName !== null
+      );
+      const stepWidthBackwardLine = parseFloat(
+        backwardLineRef.current.offsetWidth / outboundBusStopsTemp.length
       );
       const outboundBusStopsTempFinal = outboundBusStopsTemp.map(
         (busStop, index) => {
           return {
             ...busStop,
-            marginRight:
-              (parseFloat(
-                backwardLineRef.current.offsetWidth -
-                  20 +
-                  parseFloat(backwardLineRef.current.offsetWidth - 20) /
-                    outboundBusStopsTemp.length
-              ) /
-                outboundBusStopsTemp.length) *
-              index,
+            marginLeft: stepWidthBackwardLine * index,
           };
         }
       );
-      // console.log("oi", outboundBusStopsTempFinal);
 
       setOutboundBusStops(outboundBusStopsTempFinal);
-      //fff
-      const outbusesTemp = message.payload.outboundBusList.map(
+      var marginLeft;
+      const outBusesTemp = message.payload.outboundBusList.map(
         (bus, indexBus) => {
-          var marginLeft;
-          outboundBusStopsTempFinal.map((busStop, indexBusStop) => {
-            if (
-              busStop.order <= bus.pointOrder &&
-              outboundBusStopsTempFinal[
-                outboundBusStopsTempFinal.length === indexBusStop + 1
-                  ? indexBusStop
-                  : indexBusStop + 1
-              ].order >= bus.pointOrder
-            ) {
-              marginLeft =
-                (parseFloat(
-                  forwardLineRef.current.offsetWidth -
-                    20 +
-                    parseFloat(forwardLineRef.current.offsetWidth - 20) /
-                      outboundBusStopsTempFinal.length
-                ) /
-                  outboundBusStopsTempFinal.length) *
-                  indexBusStop -
-                (outboundBusStopsTempFinal[indexBusStop].order -
-                  bus.pointOrder);
+          var filteredBusStopIndex;
+          const filteredBusStop = outboundBusStopsTempFinal.filter(
+            (busStop, indexBusStop) => {
+              filteredBusStopIndex = indexBusStop;
+              return (
+                busStop.order <= bus.pointOrder &&
+                outboundBusStopsTempFinal[
+                  outboundBusStopsTempFinal.length === indexBusStop + 1
+                    ? indexBusStop
+                    : indexBusStop + 1
+                ].order >= bus.pointOrder
+              );
             }
-          });
+          )[0];
+          var indexOfFiltredBusStop = outboundBusStopsTempFinal.indexOf(
+            filteredBusStop
+          );
+          var persentOfProgress =
+            (bus.pointOrder - filteredBusStop.order) /
+            (outboundBusStopsTempFinal[indexOfFiltredBusStop + 1].order -
+              filteredBusStop.order);
+          // console.log("prer", persentOfProgress);
+          marginLeft =
+            indexOfFiltredBusStop * stepWidthBackwardLine +
+            stepWidthBackwardLine * persentOfProgress;
           return {
             ...bus,
             marginLeft: marginLeft,
           };
         }
       );
-
-      setOutboundBuses(outbusesTemp);
+      setOutboundBuses(outBusesTemp);
     };
   }, [isPaused, ws]);
   const onSubmitBtnClick = () => {
+    setIsLoading(true);
+    fetch(
+      `http://afc.qom.ir:9051/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
+      { method: "post" }
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        setLineDetail(res);
+        console.log("res", res);
+      });
     ws.send(
       JSON.stringify({
         messageType: "getSchematicTripState",
@@ -172,14 +195,17 @@ const SchematicTripState = () => {
     return data;
   }
   useEffect(() => {
-    getLines().then((data) =>{ setLines(data); console.log(data,'sdasa')});
+    getLines().then((data) => {
+      setLines(data);
+      setIsLoading(false);
+    });
   }, []);
-  
+
   return (
     <section className="SchematicTripState">
       <section className="header-container">
         <div className="header-card line-select-container">
-          <div>خط :</div>
+          <div>خط:</div>
           <select
             onChange={(e) => {
               let { name, value } = e.target;
@@ -196,48 +222,75 @@ const SchematicTripState = () => {
           <button className="submit-btn" onClick={onSubmitBtnClick}>
             نمایش
           </button>
+          {isLoading ? (
+            <div class="loadingio-spinner-dual-ring-wpkltzczrj">
+              <div class="ldio-i3rs1wndzvh">
+                <div></div>
+                <div>
+                  <div></div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
         </div>
         <div className="header-card line-info-container">
           <table>
             <tbody>
               <tr>
                 <td>
-                تعداد ایستگاه های مسیر رفت :
+                  <td>تعداد ایستگاه های مسیر رفت :</td>
+                  <td>{inboundBusStops.length}</td>
                 </td>
                 <td>
-                  {
-                    inboundBusStops.length
-                  }
-                </td>
-              </tr>
-              <tr>
-                <td>
-                   تعداد اتوبوس های مسیر رفت :
-                </td>
-                <td>
-                 {
-                   inboundBuses.length
-                 }
+                  <td>تعداد ایستگاه های مسیر برگشت :</td>
+                  <td>{outboundBusStops.length}</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                   تعداد ایستگاه های مسیر برگشت :
+                  <td>تعداد اتوبوس های فعال خط npm:</td>
+                  <td>{lineDetail.activeBusCount}</td>
                 </td>
+                {/* <td>
+                  <td>تعداد اتوبوس های در گاراژ :</td>
+                  <td>{lineDetail.busCountInGarage}</td>
+                </td> */}
                 <td>
-                {
-                    outboundBusStops.length
-                  }
+                  <td>سرعت مجاز :</td>
+                  <td>{lineDetail.legalSpeed} Km</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                   تعداد اتوبوس های مسیر برگشت :
+                  <td>تعداد اتوبوس های مسیر رفت :</td>
+                  <td>{lineDetail.busCountInbound}</td>
                 </td>
                 <td>
-                  {
-                    outboundBuses.length
-                  }
+                  <td>تعداد اتوبوس های مسیر برگشت :</td>
+                  <td>{lineDetail.busCountOutbound}</td>
+                </td>
+                
+              </tr>
+              <tr>
+                <td>
+                  <td>مسافت مسیر رفت :</td>
+                  <td>{lineDetail.inboundDistance} Km</td>
+                </td>
+                <td>
+                  <td>مسافت مسیر برگشت :</td>
+                  <td>{lineDetail.outboundDistance} Km</td>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <td>زمان مسیر رفت :</td>
+                  <td>{lineDetail.inboundTripDuration} دقیقه</td>
+                </td>
+                <td>
+                  <td>زمان مسیر برگشت :</td>
+                  <td>{lineDetail.outboundTripDuration} دقیقه</td>
                 </td>
               </tr>
             </tbody>
@@ -272,10 +325,6 @@ const SchematicTripState = () => {
               </div>
             );
           })}
-          {/*                     
-                    <div className="arrows">
-                        <FaAngleDoubleRight />
-                    </div> */}
         </div>
         <div className="gap"></div>
       </div>
@@ -300,17 +349,13 @@ const SchematicTripState = () => {
               <div
                 key={index}
                 className="bus-stop"
-                style={{ left: busStop.marginRight }}
+                style={{ left: busStop.marginLeft }}
               >
                 <div className="bus-stop-counter">{busStop.stopCode}</div>
                 <div className="bus-stop-name">{busStop.stopName}</div>
               </div>
             );
           })}
-          {/*                     
-                    <div className="arrows">
-                        <FaAngleDoubleRight />
-                    </div> */}
         </div>
         <div className="gap"></div>
       </div>

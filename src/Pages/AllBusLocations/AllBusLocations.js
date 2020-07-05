@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Map from "../../Components/Map/Map";
+import Map from "../../Components/AllBusLocationsMap/Map";
 import "./AllBusLocations.scss";
 import Ripples from "react-ripples";
 import Select from "react-select";
