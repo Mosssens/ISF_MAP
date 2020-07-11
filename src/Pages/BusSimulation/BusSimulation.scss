@@ -12,7 +12,64 @@
         z-index: 1000;
         max-height: 100vh;
         scroll-behavior: smooth;
-        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+
+        .media-controler-container {
+            width: 560px;
+            height: 75px;
+            background-color: #2e2e2e;
+            position: absolute;
+            bottom: 0;
+            left: 100%;
+            font-size: 2.45em;
+            color: white;
+            border-radius: 0 6px 0 0;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            // padding: 0 20px;
+            .react-ripples {
+                margin: 0 10px;
+                background-color: seagreen;
+                padding: 10px;
+                border-radius: 4px;
+                cursor: pointer;
+
+            }
+
+            .speed-control {
+                background-color: #545454;
+
+                // font-size: .45em;
+                div {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 1em;
+                    width: 1em;
+                }
+            }
+
+            .marker-interval {
+                flex-grow: 1;
+            }
+
+            .stop-btn {
+                background-color: crimson;
+            }
+
+            .fit-marker {
+                background-color: crimson;
+
+                &.active {
+                    background-color: seagreen;
+                }
+            }
+        }
 
         .overview-container {
             display: flex;
@@ -167,10 +224,12 @@
             display: flex;
             flex-direction: column;
             font-family: 'Yekan';
+            overflow-y: scroll;
 
+            // height: 70%;
             .react-ripples {
                 cursor: pointer;
-                min-height: 170px;
+                min-height: 45px;
                 width: 100%;
                 padding: 0;
                 margin: 0;
@@ -202,7 +261,7 @@
                     font-size: 0.85em;
                     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
                         0 3px 6px rgba(0, 0, 0, 0.23);
-                    margin: 28px 8px;
+                    margin: 0px 8px;
                     position: relative;
                 }
 
@@ -231,6 +290,27 @@
                     // padding: 8px;
                 }
 
+                table tr .index {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    font-size: 1.25em;
+                    font-weight: bold;
+                    // width: 30%;
+                    color: white;
+                    background-color: rgb(96, 72, 233);
+                }
+
+                table tr .speed {
+                    width: 40%;
+                    padding-right: 20px;
+                }
+
+                table tr .date {
+                    width: 50%;
+                }
+
                 table {
                     &.selected .bus-code {
                         // background-color: #2684ff ;
@@ -241,24 +321,24 @@
 
                     }
 
-                    tr:first-of-type {
+                    tr {
                         background-color: #ffffff;
                         color: black;
                     }
                 }
 
-                table tr:nth-child(even) {
-                    background-color: #cecece;
-                }
+                // table tr:nth-child(even) {
+                //     background-color: #cecece;
+                // }
 
-                table tr:nth-child(odd) {
-                    background-color: #ffffff;
-                }
+                // table tr:nth-child(odd) {
+                //     background-color: #ffffff;
+                // }
 
-                table tr:hover {
-                    background-color: #ffffff;
-                    color: black;
-                }
+                // table tr:hover {
+                //     background-color: #232323;
+                //     color: white;
+                // }
 
                 table .value {
                     color: seagreen;
@@ -305,6 +385,14 @@
                         }
                     }
                 }
+
+                &.active {
+                    table tbody tr .index {
+                        -webkit-animation: argh-my-eyes 1s 30;
+                        -moz-animation: argh-my-eyes 1s 30;
+                        animation: argh-my-eyes 1s 30;
+                    }
+                }
             }
         }
     }
@@ -326,6 +414,7 @@
         margin-right: 5px;
         margin-bottom: 0px;
         line-height: 40px;
+
         @keyframes blink {
 
             /**
@@ -399,7 +488,7 @@
 
 @-webkit-keyframes argh-my-eyes {
     0% {
-        background-color: #0277bd;
+        background-color: #6048e9;
     }
 
     100% {
@@ -409,7 +498,7 @@
 
 @-moz-keyframes argh-my-eyes {
     0% {
-        background-color: #0277bd;
+        background-color: #6048e9;
     }
 
     100% {
@@ -419,7 +508,7 @@
 
 @keyframes argh-my-eyes {
     0% {
-        background-color: #0277bd;
+        background-color: #6048e9;
     }
 
     100% {
