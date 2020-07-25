@@ -56,13 +56,13 @@ var blueIcon = L.icon({
   // shadowAnchor: [4, 62],  // the same for the shadow
   // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 });
-export default function Map(props) {
+export default React.memo(function Map(props) {
   // const [markers, setMarkers] = useState()
   // const { markers } = props;
   const mapRef = useRef();
   const mapGroupRef = useRef();
-  const [markers,setMarkers]=useState([])
-
+  const [markers, setMarkers] = useState([[], []]);
+ 
   // const renderMarkers = () => {
   //   return markers.map(
   //     (marker,index) => {
@@ -87,9 +87,11 @@ export default function Map(props) {
     }
   }, [props.marker]);
   useEffect(() => {
-    setMarkers(props.circles)
-  }, [props.circles]);
-  const renderCircles = (markers) => {
+    setMarkers([props.firstBusPath ,props.secondBusPath]);
+    console.log('asdaad',[props.firstBusPath], [props.secondBusPath]);
+  }, [props.firstBusPath, props.secondBusPath]);
+
+  const renderCircles = (markers,color) => {
     return markers.map((marker, markerIndex) => {
       return (
         <Circle
@@ -98,7 +100,8 @@ export default function Map(props) {
             lat: marker.latitude,
             lng: marker.longitude,
           }}
-          fillColor="blue"
+          fillColor={color}
+          color={color}
           radius={10}
         />
       );
@@ -118,18 +121,38 @@ export default function Map(props) {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       <FeatureGroup ref={mapGroupRef}>
-        {markers.length!==0 ? (
+        {markers[0].length !== 0 && markers[0].length > props.marker ? (
           <React.Fragment>
             <Marker
               icon={blueIcon}
-              key={`${markers[props.marker].busCode}`}
-              position={[markers[props.marker].latitude, markers[props.marker].longitude]}
+              key={`${markers[0][props.marker].busCode}`}
+              position={[
+                markers[0][props.marker].latitude,
+                markers[0][props.marker].longitude,
+              ]}
             >
               <Tooltip permanent direction="bottom" offset={L.point(63, 1)}>
-                {markers[props.marker].busCode}
+                {markers[0][props.marker].busCode}
               </Tooltip>
             </Marker>
-            {renderCircles(markers)}
+            {renderCircles(markers[0],'blue')}
+          </React.Fragment>
+        ) : null}
+        { markers[1].length !== 0 && markers[1].length > props.marker? (
+          <React.Fragment>
+            <Marker
+              icon={redIcon}
+              key={`${markers[1][props.marker].busCode}`}
+              position={[
+                markers[1][props.marker].latitude,
+                markers[1][props.marker].longitude,
+              ]}
+            >
+              <Tooltip permanent direction="bottom" offset={L.point(63, 1)}>
+                {markers[1][props.marker].busCode}
+              </Tooltip>
+            </Marker>
+            {renderCircles(markers[1],'red')}
           </React.Fragment>
         ) : null}
       </FeatureGroup>
@@ -140,4 +163,4 @@ export default function Map(props) {
       </Control>
     </LeafletMap>
   );
-}
+})

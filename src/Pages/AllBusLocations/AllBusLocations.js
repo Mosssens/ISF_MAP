@@ -9,7 +9,10 @@ import Loader from "../../Components/Loader/Loader";
 const AllBusLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
   const [markers, setMarkers] = useState([]);
-  const [mapCenter, setMapCenter] = useState([34.6088466, 50.8769083]);
+  const [mapCenter, setMapCenter] = useState([
+    32.654492278497646,
+    51.64067001473507,
+  ])
   const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
@@ -25,7 +28,7 @@ const AllBusLocations = () => {
   const actionMenuHeaderRef = useRef();
   useEffect(() => {
     const wsClient = new WebSocket(
-      "ws://afc.qom.ir:9051/tms/websocket/getAllBusLocationsNewDate"
+      "ws://193.176.241.150:8080/tms/websocket/getAllBusLocationsNewDate"
     );
     wsClient.onopen = () => {
       console.log("ws opened");

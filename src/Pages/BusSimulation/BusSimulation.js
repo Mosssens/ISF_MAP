@@ -52,7 +52,7 @@ function useEventListener(eventName, handler, element = window) {
 }
 const BusSimulation = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getBusSimulation')
-  const [markers, setMarkers] = useState([]);
+  const [markers, setMarkers] = useState([[], []]);
   const [mapCenter, setMapCenter] = useState([
     32.654492278497646,
     51.64067001473507,
@@ -61,8 +61,7 @@ const BusSimulation = () => {
   const [busOptions, setBusOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
   const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([]);
-  const [pinnedMarkers, setPinnedMarkers] = useState([]);
-  const [selectedMarker, setSelectedMarker] = useState([]);
+
   const [isLoading, setIsLoading] = useState(false);
   //   const [busOptions,setBusOptions]=useState(false)
   const actionMenuRef = useRef();
@@ -71,13 +70,16 @@ const BusSimulation = () => {
   const actionMenuHeaderRef = useRef();
   const nextMarkerRef = useRef();
   const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
+  const [toDate, setToDate] = useState(moment().format("YYYYMMDDHHmmss"));
   const [isBusDataIsLoading, setIsBusDataIsLoading] = useState(false);
   const [markerInterval, setMarkerInterval] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [fitMarkerIntervalBounds, setFitMarkerIntervalBounds] = useState(false);
   const [markerIntervalSpeed, setMarkerIntervalSpeed] = useState(1000);
   const busDetailsContainerRef = useRef();
+  const [diffsecond,setDiffSecond]=useState(0)
+  const [timeLineInterval,setTimeLineInterval]=useState(0)
+
   const [speedOptions, setSpeedOptions] = useState([
     {
       id: 0,
@@ -138,24 +140,49 @@ const BusSimulation = () => {
   // }, [markerInterval]); // Empty array ensures that effect is only run on mount and unmount
   useEffect(() => {
     let interval = null;
-    if (markers.length === markerInterval + 1) {
-      setIsTimerActive(false);
-      setMarkerInterval(0);
+    
+    if (markers[0].length > markers[1].length) {
+      if (markers[0].length === markerInterval + 1) {
+        setIsTimerActive(false);
+        setMarkerInterval(0);
+      }
+    } else {
+      if (markers[1].length === markerInterval + 1) {
+        setIsTimerActive(false);
+        setMarkerInterval(0);
+      }
     }
+
     if (isTimerActive) {
       interval = setInterval(() => {
         setMarkerInterval((markerInterval) => markerInterval + 1);
-        busDetailsContainerRef.current.scrollTo(
-          0,
-          busDetailsContainerRef.current.offsetHeight *
-            parseInt(
-              markerInterval /
-                (busDetailsContainerRef.current.offsetHeight / 45)
-            ),
-          {
-            behavior: "smooth",
-          }
-        );
+        if (markers[1].length === 0) {
+          busDetailsContainerRef.current.scrollTo(
+            0,
+            busDetailsContainerRef.current.offsetHeight *
+              parseInt(
+                markerInterval /
+                  (busDetailsContainerRef.current.offsetHeight / 45)
+              ) +
+              45,
+            {
+              behavior: "smooth",
+            }
+          );
+        } else {
+          busDetailsContainerRef.current.scrollTo(
+            0,
+            busDetailsContainerRef.current.offsetHeight *
+              parseInt(
+                markerInterval /
+                  (busDetailsContainerRef.current.offsetHeight / 70.8)
+              ) +
+              82,
+            {
+              behavior: "smooth",
+            }
+          );
+        }
       }, speedOptions.filter((item) => item.selected === true)[0].speed);
     } else if (!isTimerActive && markerInterval !== 0) {
       clearInterval(interval);
@@ -180,7 +207,7 @@ const BusSimulation = () => {
   }, []);
   async function getBuses() {
     let response = await fetch(
-      `http://193.176.241.150:8080/tms/api/reactService/bus/all`
+      `http://192.168.1.158:4546/tms/api/reactService/bus/all`
     );
     console.log(response);
     let data = await response.json();
@@ -188,7 +215,7 @@ const BusSimulation = () => {
   }
   async function getSelectedBusesData(inputJson) {
     let response = await fetch(
-      `http://193.176.241.150:8080/tms/api/reactService/bus/track`,
+      `http://192.168.1.158:4546/tms/api/reactService/bus/track`,
       {
         headers: { "content-type": "application/json" },
         method: "POST",
@@ -205,16 +232,26 @@ const BusSimulation = () => {
       selectedBusOptions[0] !== undefined ? selectedBusOptions[0].value : "0";
     const bus2 =
       selectedBusOptions[1] !== undefined ? selectedBusOptions[1].value : "0";
-    // setMarkers(FakeData.busData[2]);
+    console.log({
+      busCode1: bus1,
+      busCode2: bus2,
+      tripCode: 0,
+      fromDate: fromDate,
+      toDate: toDate,
+    });
+    setDiffSecond(moment(toDate,"YYYYMMDDHHmmss").diff(moment(fromDate,"YYYYMMDDHHmmss"), 'seconds'))
     getSelectedBusesData({
       busCode1: bus1,
-      busCode2: 0,
-      tripCode: 9,
+      busCode2: bus2,
+      tripCode: 0,
       fromDate: fromDate,
       toDate: toDate,
     }).then((data) => {
-      console.log(data, "sdsds");
-      setMarkers(data.busData[9]);
+      // console.log(data, "sdsds");
+      setMarkers([
+        data[0].busData[0],
+        data[1] === undefined ? [] : data[1].busData[0],
+      ]);
       setIsBusDataIsLoading(false);
     });
   };
@@ -241,64 +278,77 @@ const BusSimulation = () => {
         };
       })
     );
-    console.log(speedOptions)
+    console.log(speedOptions);
   };
   return (
     <section className="bus-simulation-container">
+
       <div className="map-contianer">
         {isLoading ? (
           <Loader />
         ) : (
           <Map
             center={mapCenter}
-            circles={markers}
+            firstBusPath={markers[0]}
+            secondBusPath={markers[1]}
             zoom={mapZoom}
             fitMarkerIntervalBounds={fitMarkerIntervalBounds}
             marker={markerInterval}
           />
         )}
+        <div className="media-controler-container">
+        <div className="playback-bar">
+        <progress  value={markerInterval} max={diffsecond}> 32% </progress>
+        </div>
+          <div className="buttons">
+            <Ripples
+              onClick={() => handleSpeedChange()}
+              className="speed-control"
+            >
+              <div>
+                {speedOptions.filter((item) => item.selected === true)[0].lable}
+              </div>
+            </Ripples>
+            <Ripples
+              onClick={() =>
+                setFitMarkerIntervalBounds(!fitMarkerIntervalBounds)
+              }
+              className={`fit-marker ${
+                fitMarkerIntervalBounds ? "active" : ""
+              }`}
+            >
+              <FaMapMarkerAlt />
+            </Ripples>
+            <Ripples
+              onClick={() => {
+                setIsTimerActive(false);
+                setMarkerInterval(markerInterval + 1);
+              }}
+            >
+              <FaChevronRight />
+            </Ripples>
+            <Ripples onClick={toggleTimer}>
+              {!isTimerActive ? <FaPlay /> : <FaPause />}
+            </Ripples>
+            <Ripples className="stop-btn" onClick={resetTimer}>
+              <FaStop />
+            </Ripples>
+            <Ripples
+              onClick={() => {
+                setIsTimerActive(false);
+                setMarkerInterval(markerInterval - 1);
+              }}
+            >
+              <FaChevronLeft />
+            </Ripples>
+            <div style={{ flexGrow: 1 }}></div>
+            <div className="marker-interval">{markerInterval + 1}</div>
+          </div>
+      
+        </div>
+       
       </div>
       <div ref={actionMenuRef} className="action-menu">
-        <div className="media-controler-container">
-          <Ripples
-            onClick={() => handleSpeedChange()}
-            className="speed-control"
-          >
-            <div>
-              {speedOptions.filter((item) => item.selected === true)[0].lable}
-            </div>
-          </Ripples>
-          <Ripples
-            onClick={() => setFitMarkerIntervalBounds(!fitMarkerIntervalBounds)}
-            className={`fit-marker ${fitMarkerIntervalBounds ? "active" : ""}`}
-          >
-            <FaMapMarkerAlt />
-          </Ripples>
-          <Ripples
-            onClick={() => {
-              setIsTimerActive(false);
-              setMarkerInterval(markerInterval + 1);
-            }}
-          >
-            <FaChevronRight />
-          </Ripples>
-          <Ripples onClick={toggleTimer}>
-            {!isTimerActive ? <FaPlay /> : <FaPause />}
-          </Ripples>
-          <Ripples className="stop-btn" onClick={resetTimer}>
-            <FaStop />
-          </Ripples>
-          <Ripples
-            onClick={() => {
-              setIsTimerActive(false);
-              setMarkerInterval(markerInterval - 1);
-            }}
-          >
-            <FaChevronLeft />
-          </Ripples>
-          <div style={{ flexGrow: 1 }}></div>
-          <div className="marker-interval">{markerInterval + 1}</div>
-        </div>
         <div className="action-menu-header" ref={actionMenuHeaderRef}>
           <Select
             isLoading={busOptions.length === 0}
@@ -368,48 +418,133 @@ const BusSimulation = () => {
             )}
           </button>
         </div>
-        <div className="bus-detail-container" ref={busDetailsContainerRef}>
-          {markers.map((bus, rcdIndex) => {
-            return (
-              <Ripples
-                onClick={() => setMarkerInterval(rcdIndex)}
-                key={rcdIndex}
-                className={markerInterval === rcdIndex ? "active" : ""}
-              >
-                <table>
-                  {/* <div className="bus-code">
-                    کد اتوبوس : {bus.busCode}
-                    <div
-                      //   onClick={() => onPinButtonClick(bus.busCode)}
-                    >
-                      <IoMdPin />
-                    </div>
-                  </div> */}
-                  <tbody>
-                    <tr>
-                      <td className="index">{rcdIndex + 1}</td>
-                      <td className="speed">
-                        <td>سرعت لحظه ای :</td>
-                        <td className="value">{`${bus.groundSpeed}km`}</td>
-                      </td>
-                      <td className="date">
-                        <td>تاریخ :</td>
-                        <td
-                          className="value"
-                          style={{ direction: "ltr", textAlign: "right" }}
-                        >
-                          {moment(bus.clientDate, "YYYYMMDDhhmmss").format(
-                            "jYYYY/jM/jD HH:mm:ss"
-                          )}
-                        </td>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </Ripples>
-            );
-          })}
-        </div>
+        {markers[1].length === 0 ? (
+          <div
+            className="bus-detail-container single"
+            ref={busDetailsContainerRef}
+          >
+            <div className="col col-1">
+              {markers[0].map((bus, rcdIndex) => {
+                return (
+                  <div
+                    onClick={() => setMarkerInterval(rcdIndex)}
+                    key={rcdIndex}
+                    className={`bus-detail ${
+                      markerInterval === rcdIndex ? "active" : ""
+                    }`}
+                  >
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td className="index">{rcdIndex + 1}</td>
+                          <td className="speed">
+                            <td>سرعت لحظه ای :</td>
+                            <td className="value">{`${bus.groundSpeed}km`}</td>
+                          </td>
+                          <td className="date">
+                            <td>تاریخ :</td>
+                            <td
+                              className="value"
+                              style={{ direction: "ltr", textAlign: "right" }}
+                            >
+                              {moment(bus.clientDate, "YYYYMMDDhhmmss").format(
+                                "jYYYY/jM/jD HH:mm:ss"
+                              )}
+                            </td>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div
+            className="bus-detail-container double"
+            ref={busDetailsContainerRef}
+          >
+            <div className="col col-1">
+              {markers[0].map((bus, rcdIndex) => {
+                return (
+                  <div
+                    onClick={() => setMarkerInterval(rcdIndex)}
+                    key={rcdIndex}
+                    className={`bus-detail ${
+                      markerInterval === rcdIndex ? "active" : ""
+                    }`}
+                  >
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td className="index">{rcdIndex + 1}</td>
+                          <td className="info-container">
+                            <td className="speed">
+                              <td>سرعت لحظه ای :</td>
+                              <td className="value">{`${bus.groundSpeed}km`}</td>
+                            </td>
+                            <td className="date">
+                              <td>تاریخ :</td>
+                              <td
+                                className="value"
+                                style={{ direction: "ltr", textAlign: "right" }}
+                              >
+                                {moment(
+                                  bus.clientDate,
+                                  "YYYYMMDDhhmmss"
+                                ).format("jYYYY/jM/jD HH:mm:ss")}
+                              </td>
+                            </td>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="col col-2">
+              {markers[1].map((bus, rcdIndex) => {
+                return (
+                  <div
+                    onClick={() => setMarkerInterval(rcdIndex)}
+                    key={rcdIndex}
+                    className={`bus-detail ${
+                      markerInterval === rcdIndex ? "active" : ""
+                    }`}
+                  >
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td className="index">{rcdIndex + 1}</td>
+                          <td className="info-container">
+                            <td className="speed">
+                              <td>سرعت لحظه ای :</td>
+                              <td className="value">{`${bus.groundSpeed}km`}</td>
+                            </td>
+                            <td className="date">
+                              <td>تاریخ :</td>
+                              <td
+                                className="value"
+                                style={{ direction: "ltr", textAlign: "right" }}
+                              >
+                                {moment(
+                                  bus.clientDate,
+                                  "YYYYMMDDhhmmss"
+                                ).format("jYYYY/jM/jD HH:mm:ss")}
+                              </td>
+                            </td>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

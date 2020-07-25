@@ -44,7 +44,7 @@ const SchematicTripState = () => {
   };
   useEffect(() => {
     const wsClient = new WebSocket(
-      "ws://afc.qom.ir:9051/tms/websocket/getSchematicTripState"
+      "ws://193.176.241.150:8080/tms/websocket/getSchematicTripState"
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -171,7 +171,7 @@ const SchematicTripState = () => {
   const onSubmitBtnClick = () => {
     setIsLoading(true);
     fetch(
-      `http://afc.qom.ir:9051/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
+      `http://193.176.241.150:8080/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
       { method: "post" }
     )
       .then((res) => res.json())
@@ -189,7 +189,7 @@ const SchematicTripState = () => {
   };
   async function getLines(name) {
     let response = await fetch(
-      `http://afc.qom.ir:9051/tms/api/reactService/trip/all`
+      `http://193.176.241.150:8080/tms/api/reactService/trip/all`
     );
     let data = await response.json();
     return data;
