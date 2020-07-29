@@ -14,66 +14,100 @@
 
         .media-controler-container {
             display: flex;
-            height: 80px;
+            height: 126px;
             background-color: #2e2e2e;
             bottom: 0;
             left: 100%;
             font-size: 2.45em;
             color: white;
             border-radius: 0 6px 0 0;
+            // padding: 10px 0;
             box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+            flex-direction: column;
 
-            .playback-bar {
-                flex-basis: 50%;
+            .playback-bar-container {
+                // flex-basis: 45%;
                 // background-color: red;
+                // cursor: pointer;
                 display: flex;
+                // flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                // padding: 10px;
                 direction: ltr;
 
-                progress[value] {
-                    /* Reset the default appearance */
-                    -webkit-appearance: none;
-                    appearance: none;
 
-                    width: 90%;
-                    height: 40px;
-                }
 
-                progress[value]::-webkit-progress-bar {
-                    background-color: #eee;
-                    border-radius: 2px;
-                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
-                }
+                .playback-bar {
+                    margin: 0;
+                    padding: 0;
+                    height: 30px;
+                    width: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: relative;
 
-                progress[value]::-webkit-progress-value {
-                   background-image:
-                        -webkit-linear-gradient(-45deg,
-                            transparent 33%, rgba(0, 0, 0, .1) 33%,
-                            rgba(0, 0, 0, .1) 66%, transparent 66%),
-                        -webkit-linear-gradient(top,
-                            rgba(255, 255, 255, .25),
-                            rgba(0, 0, 0, .25)),
-                        -webkit-linear-gradient(left, #09c, rgb(68, 255, 99));
-
-                    border-radius: 2px;
-                    background-size: 70px 40px, 100% 100%, 100% 100%;
-                }
-                progress::-webkit-progress-value{
-                    -webkit-animation: animate-stripes 5s linear infinite;
-                    animation: animate-stripes 5s linear infinite;
-                  
-                }
-
-                @-webkit-keyframes animate-stripes {
-                    100% {
-                        background-position: -100px 0px;
+                    .pin {
+                        height: 30px;
+                        // width: 1.5px;
+                        background-color: rgba(0,0,0,0.5);
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        cursor: pointer;
                     }
-                }
 
-                @keyframes animate-stripes {
-                    100% {
-                        background-position: -100px 0px;
+                    .pin:last-of-type {
+                        right: 0;
+                        left: unset !important;
+                    }
+
+                    progress[value] {
+                        /* Reset the default appearance */
+                        -webkit-appearance: none;
+                        appearance: none;
+
+                        width: 100%;
+                        height: 30px;
+                    }
+
+                    progress[value]::-webkit-progress-bar {
+                        background-color: #eee;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+                    }
+
+                    progress[value]::-webkit-progress-value {
+                        background-image:
+                            -webkit-linear-gradient(-45deg,
+                                transparent 33%, rgba(0, 0, 0, .1) 33%,
+                                rgba(0, 0, 0, .1) 66%, transparent 66%),
+                            -webkit-linear-gradient(top,
+                                rgba(255, 255, 255, .25),
+                                rgba(0, 0, 0, .25)),
+                            -webkit-linear-gradient(left, #09c, rgb(68, 255, 99));
+
+                        border-radius: 2px;
+                        background-size: 70px 40px, 100% 100%, 100% 100%;
+                    }
+
+                    progress::-webkit-progress-value {
+                        -webkit-animation: animate-stripes 5s linear infinite;
+                        animation: animate-stripes 5s linear infinite;
+
+                    }
+
+                    @-webkit-keyframes animate-stripes {
+                        100% {
+                            background-position: -100px 0px;
+                        }
+                    }
+
+                    @keyframes animate-stripes {
+                        100% {
+                            background-position: -100px 0px;
+                        }
                     }
                 }
             }
@@ -82,46 +116,81 @@
             .buttons {
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                flex-basis: 50%;
+                justify-content: center;
+                // flex-basis: 55%;
+                padding: 15px 0;
+                position: relative;
 
-                .react-ripples {
-                    margin: 0 10px;
-                    background-color: seagreen;
-                    padding: 10px;
-                    border-radius: 4px;
-                    cursor: pointer;
+                .media-buttons {
+                    display: flex;
+                    -webkit-user-select: none;
+                    /* Safari */
+                    -moz-user-select: none;
+                    /* Firefox */
+                    -ms-user-select: none;
+                    /* IE10+/Edge */
+                    user-select: none;
 
+                    /* Standard */
+                    .react-ripples {
+                        margin: 0 10px;
+                        background-color: seagreen;
+                        padding: 10px;
+                        border-radius: 4px;
+                        cursor: pointer;
+
+                    }
+
+                    .speed-control {
+                        background-color: #545454;
+                        font-family:  Helvetica, sans-serif;
+                        div {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 1em;
+                            width: 1em;
+                        }
+                    }
+
+                    .stop-btn {
+                        background-color: crimson;
+                    }
+
+                    .skip-zero-points-marker {
+                        background-color: crimson;
+
+                        &.active {
+                            background-color: seagreen;
+                        }
+                    }
+
+                    .fit-marker {
+                        background-color: crimson;
+
+                        &.active {
+                            background-color: seagreen;
+                        }
+                    }
                 }
 
-                .speed-control {
-                    background-color: #545454;
-
-                    // font-size: .45em;
-                    div {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 1em;
-                        width: 1em;
-                    }
+                .time-container {
+                    font-size: .8em;
+                    width: 100px;
+                    text-align: center;
                 }
 
                 .marker-interval {
-                    flex-grow: 1;
+                    direction: ltr;
+                    // flex-grow: 1;
+                    // min-width: 290px;
+                    padding-left: 20px;
+                    text-align: center;
+                    font-size: .65em;
+                    position: absolute;
+                    left: 0;
                 }
 
-                .stop-btn {
-                    background-color: crimson;
-                }
-
-                .fit-marker {
-                    background-color: crimson;
-
-                    &.active {
-                        background-color: seagreen;
-                    }
-                }
             }
 
             // padding: 0 20px;
