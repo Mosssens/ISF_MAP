@@ -17,7 +17,90 @@ import Loader from "../../Components/Loader/Loader";
 import { DatePicker } from "jalali-react-datepicker";
 // import FakeData from "./data";
 import { marker } from "leaflet";
+const Pins = React.memo((props) => {
+  var pins = null;
 
+  if (props.markers.length) {
+    // console.log(playbackBarRef.current.offsetWidth  )
+    var avrgPinsSpace =
+      props.playbackBarWidth / props.markers.length;
+    // if (avrgPinsSpace < 1) {
+    //   avrgPinsSpace = 1;
+    // }
+    var theDate = moment(props.markers[0].clientDate, "YYYYMMDDHHmmss");
+    var nowDate = moment(
+      props.markers[props.markers.length - 1].clientDate,
+      "YYYYMMDDHHmmss"
+    );
+    var duration = moment.duration(nowDate.diff(theDate));
+    var diffSeconds = duration.asSeconds();
+
+    pins = props.markers.map((pin, id) => {
+      var theDate = moment(props.markers[0].clientDate, "YYYYMMDDHHmmss");
+      var nowDate = moment(props.markers[id].clientDate, "YYYYMMDDHHmmss");
+      var duration = moment.duration(nowDate.diff(theDate));
+      var seconds = duration.asSeconds();
+      var growPercentage = (seconds / diffSeconds) * 100;
+      // console.log(MATH.abs( seconds), "/", diffSeconds ,"*", 100)
+      return (
+        <div
+          className="pin"
+          onClick={() => props.onMarkerClick(id)}
+          style={{
+            left: (props.playbackBarWidth / 100) * growPercentage,
+            width: avrgPinsSpace / 2,
+          }}
+          title={`${id + 1} : ${moment(
+            pin.clientDate,
+            "YYYYMMDDHHmmss"
+          ).format("jYYYY/jMM/jDD HH:mm:ss")}`}
+        ></div>
+      );
+    });
+    return pins;
+
+  }
+});
+const Records = React.memo((props) => {
+  return (
+    <div className="col col-1">
+      {props.markers.map((bus, rcdIndex) => {
+        return (
+          <div
+            onClick={() => props.onMarkerClick(rcdIndex)}
+            key={rcdIndex}
+            className="bus-detail"
+          >
+            <table>
+              <tbody>
+                <tr>
+                  <td className="index">{rcdIndex + 1}</td>
+                  <td className="speed">
+                    <td>سرعت لحظه ای :</td>
+                    <td className="value">{`${bus.groundSpeed}km`}</td>
+                  </td>
+                  <td className="date">
+                    <td>تاریخ :</td>
+                    <td
+                      className="value"
+                      style={{ direction: "ltr", textAlign: "right" }}
+                    >
+                      {moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                        "jYYYY/jM/jD HH:mm:ss"
+                      )}
+                    </td>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
+    </div>
+  )
+
+
+});
 // Hook
 function useEventListener(eventName, handler, element = window) {
   // Create a ref that stores handler
@@ -79,11 +162,10 @@ const BusSimulation = () => {
   const [isTimerActive, setIsTimerActive] = useState(false);
   const [fitMarkerIntervalBounds, setFitMarkerIntervalBounds] = useState(false);
   const [skipZeroPoints, setSkipZeroPoints] = useState(true);
-  const [markerIntervalSpeed, setMarkerIntervalSpeed] = useState(1000);
   const busDetailsContainerRef = useRef();
   const [diffsecond, setDiffSecond] = useState(0);
   const [timeLineInterval, setTimeLineInterval] = useState(0);
-
+  const [bufferMarkers,setBufferMarkers]=useState([])
   const [speedOptions, setSpeedOptions] = useState([
     {
       id: 0,
@@ -375,53 +457,7 @@ const BusSimulation = () => {
     }
     return theDate;
   };
-  const getPins = React.memo((props) => {
-    var pins = null;
 
-    if (markers[0].length) {
-      // console.log(playbackBarRef.current.offsetWidth  )
-      if (markerInterval == 0) {
-
-
-        var avrgPinsSpace =
-          playbackBarRef.current.offsetWidth / markers[0].length;
-        // if (avrgPinsSpace < 1) {
-        //   avrgPinsSpace = 1;
-        // }
-        var theDate = moment(markers[0][0].clientDate, "YYYYMMDDHHmmss");
-        var nowDate = moment(
-          markers[0][markers[0].length - 1].clientDate,
-          "YYYYMMDDHHmmss"
-        );
-        var duration = moment.duration(nowDate.diff(theDate));
-        var diffSeconds = duration.asSeconds();
-
-        pins = markers[0].map((pin, id) => {
-          var theDate = moment(markers[0][0].clientDate, "YYYYMMDDHHmmss");
-          var nowDate = moment(markers[0][id].clientDate, "YYYYMMDDHHmmss");
-          var duration = moment.duration(nowDate.diff(theDate));
-          var seconds = duration.asSeconds();
-          var growPercentage = (seconds / diffSeconds) * 100;
-          // console.log(MATH.abs( seconds), "/", diffSeconds ,"*", 100)
-          return (
-            <div
-              className="pin"
-              onClick={() => onMarkerClick(id)}
-              style={{
-                left: (playbackBarRef.current.offsetWidth / 100) * growPercentage,
-                width: avrgPinsSpace / 2,
-              }}
-              title={`${id + 1} : ${moment(
-                pin.clientDate,
-                "YYYYMMDDHHmmss"
-              ).format("jYYYY/jMM/jDD HH:mm:ss")}`}
-            ></div>
-          );
-        });
-        return pins;
-      }
-    }
-  });
   const onMarkerClick = (id) => {
     setMarkerInterval(id);
 
@@ -457,7 +493,6 @@ const BusSimulation = () => {
         };
       })
     );
-    console.log(speedOptions);
   };
   return (
     <section className="bus-simulation-container">
@@ -477,7 +512,7 @@ const BusSimulation = () => {
         <div className="media-controler-container">
           <div className="playback-bar-container">
             <div className="playback-bar">
-              {getPins()}
+              <Pins onMarkerClick={(id) => onMarkerClick(id)} playbackBarWidth={(playbackBarRef.current !== undefined) ? playbackBarRef.current.offsetWidth : 0} markers={markers[0]} />
               <progress
                 ref={playbackBarRef}
                 value={timeLineInterval}
@@ -628,42 +663,8 @@ const BusSimulation = () => {
             className="bus-detail-container single"
             ref={busDetailsContainerRef}
           >
-            <div className="col col-1">
-              {markers[0].map((bus, rcdIndex) => {
-                return (
-                  <div
-                    onClick={() => onMarkerClick(rcdIndex)}
-                    key={rcdIndex}
-                    className={`bus-detail ${
-                      markerInterval === rcdIndex ? "active" : ""
-                      }`}
-                  >
-                    <table>
-                      <tbody>
-                        <tr>
-                          <td className="index">{rcdIndex + 1}</td>
-                          <td className="speed">
-                            <td>سرعت لحظه ای :</td>
-                            <td className="value">{`${bus.groundSpeed}km`}</td>
-                          </td>
-                          <td className="date">
-                            <td>تاریخ :</td>
-                            <td
-                              className="value"
-                              style={{ direction: "ltr", textAlign: "right" }}
-                            >
-                              {moment(bus.clientDate, "YYYYMMDDhhmmss").format(
-                                "jYYYY/jM/jD HH:mm:ss"
-                              )}
-                            </td>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })}
-            </div>
+            
+            <Records markers={markers[0]} onMarkerClick={(id)=>onMarkerClick(id)} />
           </div>
         ) : (
             <div
@@ -697,7 +698,7 @@ const BusSimulation = () => {
                                 >
                                   {moment(
                                     bus.clientDate,
-                                    "YYYYMMDDhhmmss"
+                                    "YYYYMMDDHHmmss"
                                   ).format("jYYYY/jM/jD HH:mm:ss")}
                                 </td>
                               </td>
@@ -736,7 +737,7 @@ const BusSimulation = () => {
                                 >
                                   {moment(
                                     bus.clientDate,
-                                    "YYYYMMDDhhmmss"
+                                    "YYYYMMDDHHmmss"
                                   ).format("jYYYY/jM/jD HH:mm:ss")}
                                 </td>
                               </td>

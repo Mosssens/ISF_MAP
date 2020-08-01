@@ -56,13 +56,30 @@ var blueIcon = L.icon({
   // shadowAnchor: [4, 62],  // the same for the shadow
   // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 });
+const Circles = React.memo((props) => {
+  console.log('sda',props.markers)
+  return props.markers.map((marker, markerIndex) => {
+    return (
+      <Circle
+        key={markerIndex}
+        center={{
+          lat: marker.latitude,
+          lng: marker.longitude,
+        }}
+        fillColor={props.color}
+        color={props.color}
+        radius={10}
+      />
+    );
+  });
+});
 export default React.memo(function Map(props) {
   // const [markers, setMarkers] = useState()
   // const { markers } = props;
   const mapRef = useRef();
   const mapGroupRef = useRef();
   const [markers, setMarkers] = useState([[], []]);
- 
+
   // const renderMarkers = () => {
   //   return markers.map(
   //     (marker,index) => {
@@ -87,26 +104,11 @@ export default React.memo(function Map(props) {
     }
   }, [props.marker]);
   useEffect(() => {
-    setMarkers([props.firstBusPath ,props.secondBusPath]);
-    console.log('asdaad',[props.firstBusPath], [props.secondBusPath]);
+    setMarkers([props.firstBusPath, props.secondBusPath]);
+    console.log('asdaad', [props.firstBusPath], [props.secondBusPath]);
   }, [props.firstBusPath, props.secondBusPath]);
 
-  const renderCircles = (markers,color) => {
-    return markers.map((marker, markerIndex) => {
-      return (
-        <Circle
-          key={markerIndex}
-          center={{
-            lat: marker.latitude,
-            lng: marker.longitude,
-          }}
-          fillColor={color}
-          color={color}
-          radius={10}
-        />
-      );
-    });
-  };
+
   return (
     <LeafletMap
       ref={mapRef}
@@ -135,10 +137,10 @@ export default React.memo(function Map(props) {
                 {markers[0][props.marker].busCode}
               </Tooltip>
             </Marker>
-            {renderCircles(markers[0],'blue')}
+            <Circles markers={markers[0]} color="blue" />
           </React.Fragment>
         ) : null}
-        { markers[1].length !== 0 && markers[1].length > props.marker? (
+        {markers[1].length !== 0 && markers[1].length > props.marker ? (
           <React.Fragment>
             <Marker
               icon={redIcon}
@@ -152,7 +154,7 @@ export default React.memo(function Map(props) {
                 {markers[1][props.marker].busCode}
               </Tooltip>
             </Marker>
-            {renderCircles(markers[1],'red')}
+            {/* {renderCircles(markers[1], 'red')} */}
           </React.Fragment>
         ) : null}
       </FeatureGroup>
