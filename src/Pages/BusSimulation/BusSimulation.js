@@ -15,15 +15,14 @@ import {
 import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
 import { DatePicker } from "jalali-react-datepicker";
-// import FakeData from "./data";
+import FakeData from "./data";
 import { marker } from "leaflet";
 const Pins = React.memo((props) => {
   var pins = null;
 
   if (props.markers.length) {
     // console.log(playbackBarRef.current.offsetWidth  )
-    var avrgPinsSpace =
-      props.playbackBarWidth / props.markers.length;
+    var avrgPinsSpace = props.playbackBarWidth / props.markers.length;
     // if (avrgPinsSpace < 1) {
     //   avrgPinsSpace = 1;
     // }
@@ -50,16 +49,35 @@ const Pins = React.memo((props) => {
             left: (props.playbackBarWidth / 100) * growPercentage,
             width: avrgPinsSpace / 2,
           }}
-          title={`${id + 1} : ${moment(
-            pin.clientDate,
-            "YYYYMMDDHHmmss"
-          ).format("jYYYY/jMM/jDD HH:mm:ss")}`}
+          title={`${id + 1} : ${moment(pin.clientDate, "YYYYMMDDHHmmss").format(
+            "jYYYY/jMM/jDD HH:mm:ss"
+          )}`}
         ></div>
       );
     });
     return pins;
-
   }
+});
+const TimeSlices = React.memo((props) => {
+  return props.buffers.map((buffer, index) => {
+    return (
+      <div
+      onClick={()=>props.onBufferClick(index)}
+        className={`time-slice ${props.currentBuffer >= index ? "active" : ""}`}
+        key={index}
+      >
+        <div>
+          {moment(buffer[0].clientDate, "YYYYMMDDHHmmss").format("HH:mm:ss")}
+        </div>
+        <div>
+          {moment(
+            buffer[buffer.length - 1].clientDate,
+            "YYYYMMDDHHmmss"
+          ).format("HH:mm:ss")}
+        </div>
+      </div>
+    );
+  });
 });
 const Records = React.memo((props) => {
   return (
@@ -97,9 +115,7 @@ const Records = React.memo((props) => {
         );
       })}
     </div>
-  )
-
-
+  );
 });
 // Hook
 function useEventListener(eventName, handler, element = window) {
@@ -154,7 +170,6 @@ const BusSimulation = () => {
   const actionMenuHeaderRef = useRef();
   const nextMarkerRef = useRef();
   const playbackBarRef = useRef();
-
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(moment().format("YYYYMMDDHHmmss"));
   const [isBusDataIsLoading, setIsBusDataIsLoading] = useState(false);
@@ -165,7 +180,14 @@ const BusSimulation = () => {
   const busDetailsContainerRef = useRef();
   const [diffsecond, setDiffSecond] = useState(0);
   const [timeLineInterval, setTimeLineInterval] = useState(0);
-  const [bufferMarkers,setBufferMarkers]=useState([])
+  const [bufferMarkers, setBufferMarkers] = useState([]);
+  const [isSubmitButtonDisabled,setIsSubmitButtonDisabled]=useState(false)
+  const [bufferInfo, setBufferInfo] = useState({
+    currentBuffer: 0,
+    bufferCount: 0,
+    bufferSize: 500,
+    buffers: [],
+  });
   const [speedOptions, setSpeedOptions] = useState([
     {
       id: 0,
@@ -209,9 +231,9 @@ const BusSimulation = () => {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
         setMarkerInterval(markerInterval + 1);
-        var theDate = moment(markers[0][0].clientDate, "YYYYMMDDHHmmss");
+        var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
-          markers[0][markerInterval + 1].clientDate,
+          bufferMarkers[markerInterval + 1].clientDate,
           "YYYYMMDDHHmmss"
         );
         var duration = moment.duration(nowDate.diff(theDate));
@@ -222,9 +244,9 @@ const BusSimulation = () => {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
         setMarkerInterval(markerInterval - 1);
-        var theDate = moment(markers[0][0].clientDate, "YYYYMMDDHHmmss");
+        var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
-          markers[0][markerInterval - 1].clientDate,
+          bufferMarkers[markerInterval - 1].clientDate,
           "YYYYMMDDHHmmss"
         );
         var duration = moment.duration(nowDate.diff(theDate));
@@ -251,30 +273,56 @@ const BusSimulation = () => {
     const selectedSpeedOption = speedOptions.filter(
       (item) => item.selected === true
     )[0].speed;
-    if (markers[0].length > markers[1].length) {
-      if (markers[0].length === markerInterval + 1) {
+    // if (bufferMarkers.length > markers[1].length) {
+
+    // } else {
+    //   if (markers[1].length === markerInterval + 1) {
+    //     setIsTimerActive(false);
+    //     setMarkerInterval(0);
+    //     setTimeLineInterval(0)
+    //   }
+    // }
+    if (bufferMarkers.length === markerInterval + 1) {
+      if (bufferInfo.currentBuffer === bufferInfo.bufferCount - 2) {
         setIsTimerActive(false);
         setMarkerInterval(0);
-        setTimeLineInterval(0)
-      }
-    } else {
-      if (markers[1].length === markerInterval + 1) {
-        setIsTimerActive(false);
+        setTimeLineInterval(0);
+      } else {
         setMarkerInterval(0);
-        setTimeLineInterval(0)
+        setTimeLineInterval(0);
+        if (bufferInfo.currentBuffer !== bufferInfo.bufferCount) {
+        }
+        setBufferInfo({
+          ...bufferInfo,
+          currentBuffer: bufferInfo.currentBuffer + 1,
+        });
+        setBufferMarkers(bufferInfo.buffers[bufferInfo.currentBuffer + 1]);
+        setDiffSecond(
+          moment(
+            bufferInfo.buffers[bufferInfo.currentBuffer + 1][
+              bufferInfo.buffers[bufferInfo.currentBuffer + 1].length - 1
+            ].clientDate,
+            "YYYYMMDDHHmmss"
+          ).diff(
+            moment(
+              bufferInfo.buffers[bufferInfo.currentBuffer + 1][0].clientDate,
+              "YYYYMMDDHHmmss"
+            ),
+            "seconds"
+          )
+        );
       }
     }
-
     if (isTimerActive) {
       interval = setInterval(() => {
         // setTimeLineInterval((timeLineInterval) => timeLineInterval + 1);
         // setMarkerInterval((markerInterval) => markerInterval + 1);
         if (skipZeroPoints) {
           if (
-            markers[0][markerInterval].groundSpeed == "0" &&
-            markers[0][markerInterval + 1].groundSpeed == "0"
+            bufferMarkers[markerInterval].groundSpeed == "0" &&
+            bufferMarkers[markerInterval + 1].groundSpeed == "0"
           ) {
-            const slicedMarkers = markers[0].slice(markerInterval);
+            const slicedMarkers = bufferMarkers.slice(markerInterval);
             var nextNotZeroIndex;
             slicedMarkers.some((item, index) => {
               if (item.groundSpeed > 0) {
@@ -283,17 +331,10 @@ const BusSimulation = () => {
               }
             });
 
-            if ((!isNaN(nextNotZeroIndex))) {
-              setMarkerInterval(
-                markerInterval + nextNotZeroIndex
-              );
-
+            if (!isNaN(nextNotZeroIndex)) {
+              setMarkerInterval(markerInterval + nextNotZeroIndex);
             } else {
-
-              setMarkerInterval(
-                markers[0].length - 1
-              );
-
+              setMarkerInterval(bufferMarkers.length - 1);
             }
           } else {
             setMarkerInterval((markerInterval) => markerInterval + 1);
@@ -301,9 +342,9 @@ const BusSimulation = () => {
         } else {
           setMarkerInterval((markerInterval) => markerInterval + 1);
         }
-        var theDate = moment(markers[0][0].clientDate, "YYYYMMDDHHmmss");
+        var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
-          markers[0][markerInterval].clientDate,
+          bufferMarkers[markerInterval].clientDate,
           "YYYYMMDDHHmmss"
         );
         var duration = moment.duration(nowDate.diff(theDate));
@@ -313,8 +354,8 @@ const BusSimulation = () => {
         // console.log("ts", futureTime);
         // if (
         //   !(
-        //     markers[0][markerInterval].clientDate <= newDate &&
-        //     markers[0][markerInterval + 1].clientDate >= newDate
+        //     bufferMarkers[markerInterval].clientDate <= newDate &&
+        //     bufferMarkers[markerInterval + 1].clientDate >= newDate
         //   )
         // ) {
         // setMarkerInterval(markerInterval + 1);
@@ -323,11 +364,11 @@ const BusSimulation = () => {
           busDetailsContainerRef.current.scrollTo(
             0,
             busDetailsContainerRef.current.offsetHeight *
-            parseInt(
-              markerInterval /
-              (busDetailsContainerRef.current.offsetHeight / 45)
-            ) +
-            45,
+              parseInt(
+                markerInterval /
+                  (busDetailsContainerRef.current.offsetHeight / 45)
+              ) +
+              45,
             {
               behavior: "smooth",
             }
@@ -336,11 +377,11 @@ const BusSimulation = () => {
           busDetailsContainerRef.current.scrollTo(
             0,
             busDetailsContainerRef.current.offsetHeight *
-            parseInt(
-              markerInterval /
-              (busDetailsContainerRef.current.offsetHeight / 70.8)
-            ) +
-            82,
+              parseInt(
+                markerInterval /
+                  (busDetailsContainerRef.current.offsetHeight / 70.8)
+              ) +
+              82,
             {
               behavior: "smooth",
             }
@@ -348,7 +389,6 @@ const BusSimulation = () => {
         }
       }, selectedSpeedOption);
     } else if (!isTimerActive && markerInterval !== 0) {
-
       clearInterval(interval);
     }
     return () => clearInterval(interval);
@@ -390,6 +430,7 @@ const BusSimulation = () => {
     return data;
   }
   const onSubmitBtnClick = () => {
+    setIsSubmitButtonDisabled(true)
     setIsBusDataIsLoading(true);
     console.log(selectedBusOptions[0], selectedBusOptions[1]);
     const bus1 = selectedBusOptions.value;
@@ -412,16 +453,36 @@ const BusSimulation = () => {
       fromDate: fromDate,
       toDate: toDate,
     }).then((data) => {
-      // console.log(data, "sdsds");
       setMarkers([
         // data[0].busData[0],
         data[0].busData[0],
-        []
+        [],
       ]);
 
+      const bufferCount = Math.ceil(
+        data[0].busData[0].length / bufferInfo.bufferSize
+      );
+      var buffers = [];
+      for (var i = 0; i < bufferCount - 1; i++) {
+        var bufferI = data[0].busData[0].slice(
+          bufferInfo.bufferSize * (i + 1),
+          bufferInfo.bufferSize * (i + 2)
+        );
+        buffers.push(bufferI);
+      }
+      setBufferInfo({
+        ...bufferInfo,
+        buffers: buffers,
+        bufferCount: Math.ceil(
+          data[0].busData[0].length / bufferInfo.bufferSize
+        ),
+      });
+      setBufferMarkers(data[0].busData[0].slice(0, bufferInfo.bufferSize));
       setDiffSecond(
         moment(
-          data[0].busData[0][data[0].busData[0].length - 1].clientDate,
+          data[0].busData[0].slice(0, bufferInfo.bufferSize)[
+            data[0].busData[0].slice(0, bufferInfo.bufferSize).length - 1
+          ].clientDate,
           "YYYYMMDDHHmmss"
         ).diff(
           moment(data[0].busData[0][0].clientDate, "YYYYMMDDHHmmss"),
@@ -429,27 +490,64 @@ const BusSimulation = () => {
         )
       );
       setIsBusDataIsLoading(false);
+      setIsSubmitButtonDisabled(false)
     });
+    // console.log(data, "sdsds");
+    // var data = [];
+    console.log(FakeData);
+    // setMarkers([FakeData[0].busData[0], []]);
+
+    // const bufferCount = Math.ceil(
+    //   FakeData[0].busData[0].length / bufferInfo.bufferSize
+    // );
+    // var buffers = [];
+    // for (var i = 0; i < bufferCount - 1; i++) {
+    //   var bufferI = FakeData[0].busData[0].slice(
+    //     bufferInfo.bufferSize * (i + 1),
+    //     bufferInfo.bufferSize * (i + 2)
+    //   );
+    //   buffers.push(bufferI);
+    // }
+    // setBufferInfo({
+    //   ...bufferInfo,
+    //   buffers: buffers,
+    //   bufferCount: Math.ceil(
+    //     FakeData[0].busData[0].length / bufferInfo.bufferSize
+    //   ),
+    // });
+    // setBufferMarkers(FakeData[0].busData[0].slice(0, bufferInfo.bufferSize));
+    // setDiffSecond(
+    //   moment(
+    //     FakeData[0].busData[0].slice(0, bufferInfo.bufferSize)[
+    //       FakeData[0].busData[0].slice(0, bufferInfo.bufferSize).length - 1
+    //     ].clientDate,
+    //     "YYYYMMDDHHmmss"
+    //   ).diff(
+    //     moment(FakeData[0].busData[0][0].clientDate, "YYYYMMDDHHmmss"),
+    //     "seconds"
+    //   )
+    // );
+    // setIsBusDataIsLoading(false);
     // setMarkers([
     //   // data[0].busData[0],
-    //   FakeData.busData[2],
+    //   FakeData[0].busData[0],
     //   [],
     // ]);
 
     // setDiffSecond(
     //   moment(
-    //     FakeData.busData[2][FakeData.busData[2].length - 1].clientDate,
+    //     FakeData[0].busData[0][FakeData[0].busData[0].length - 1].clientDate,
     //     "YYYYMMDDHHmmss"
     //   ).diff(
-    //     moment(FakeData.busData[2][0].clientDate, "YYYYMMDDHHmmss"),
+    //     moment(FakeData[0].busData[0][0].clientDate, "YYYYMMDDHHmmss"),
     //     "seconds"
     //   )
     // );
   };
   const getTimeLineTime = () => {
-    if (markers[0].length) {
+    if (bufferMarkers.length) {
       var theDate = moment(
-        markers[0][markerInterval].clientDate,
+        bufferMarkers[markerInterval].clientDate,
         "YYYYMMDDHHmmss"
       ).format("HH:mm:ss");
     } else {
@@ -461,8 +559,8 @@ const BusSimulation = () => {
   const onMarkerClick = (id) => {
     setMarkerInterval(id);
 
-    var theDate = moment(markers[0][0].clientDate, "YYYYMMDDHHmmss");
-    var nowDate = moment(markers[0][id].clientDate, "YYYYMMDDHHmmss");
+    var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
+    var nowDate = moment(bufferMarkers[id].clientDate, "YYYYMMDDHHmmss");
     var duration = moment.duration(nowDate.diff(theDate));
     var seconds = duration.asSeconds();
     setTimeLineInterval(seconds);
@@ -500,19 +598,55 @@ const BusSimulation = () => {
         {isLoading ? (
           <Loader />
         ) : (
-            <Map
-              center={mapCenter}
-              firstBusPath={markers[0]}
-              secondBusPath={markers[1]}
-              zoom={mapZoom}
-              fitMarkerIntervalBounds={fitMarkerIntervalBounds}
-              marker={markerInterval}
-            />
-          )}
+          <Map
+            center={mapCenter}
+            firstBusPath={markers[0]}
+            secondBusPath={markers[1]}
+            zoom={mapZoom}
+            fitMarkerIntervalBounds={fitMarkerIntervalBounds}
+            marker={
+              markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
+            }
+          />
+        )}
         <div className="media-controler-container">
+          <div className="palyback-slice-container">
+            <TimeSlices
+              buffers={bufferInfo.buffers}
+              currentBuffer={bufferInfo.currentBuffer}
+              onBufferClick={(index)=>{
+                setBufferInfo({...bufferInfo,currentBuffer:index})
+                setBufferMarkers(bufferInfo.buffers[index]);
+                setDiffSecond(
+                  moment(
+                    bufferInfo.buffers[index][
+                      bufferInfo.buffers[index].length - 1
+                    ].clientDate,
+                    "YYYYMMDDHHmmss"
+                  ).diff(
+                    moment(
+                      bufferInfo.buffers[index][0].clientDate,
+                      "YYYYMMDDHHmmss"
+                    ),
+                    "seconds"
+                  )
+                );
+                setMarkerInterval(0)
+                setTimeLineInterval(0)
+              }}
+            />
+          </div>
           <div className="playback-bar-container">
             <div className="playback-bar">
-              <Pins onMarkerClick={(id) => onMarkerClick(id)} playbackBarWidth={(playbackBarRef.current !== undefined) ? playbackBarRef.current.offsetWidth : 0} markers={markers[0]} />
+              <Pins
+                onMarkerClick={(id) => onMarkerClick(id)}
+                playbackBarWidth={
+                  playbackBarRef.current !== undefined
+                    ? playbackBarRef.current.offsetWidth
+                    : 0
+                }
+                markers={bufferMarkers}
+              />
               <progress
                 ref={playbackBarRef}
                 value={timeLineInterval}
@@ -538,7 +672,7 @@ const BusSimulation = () => {
                 onClick={() => setSkipZeroPoints(!skipZeroPoints)}
                 className={`skip-zero-points-marker ${
                   skipZeroPoints ? "active" : ""
-                  }`}
+                }`}
                 title="پرش از نقاط با سرعت 0"
               >
                 <FaFastForward />
@@ -549,7 +683,7 @@ const BusSimulation = () => {
                 }
                 className={`fit-marker ${
                   fitMarkerIntervalBounds ? "active" : ""
-                  }`}
+                }`}
                 title="فوکوس روی موقعیت اتوبوس"
               >
                 <FaMapMarkerAlt />
@@ -567,7 +701,11 @@ const BusSimulation = () => {
               <Ripples onClick={toggleTimer} title="اجرا/توقف">
                 {!isTimerActive ? <FaPlay /> : <FaPause />}
               </Ripples>
-              <Ripples className="stop-btn" onClick={resetTimer} title="بازگشت به ابتدا">
+              <Ripples
+                className="stop-btn"
+                onClick={resetTimer}
+                title="بازگشت به ابتدا"
+              >
                 <FaStop />
               </Ripples>
               <Ripples
@@ -583,7 +721,7 @@ const BusSimulation = () => {
 
             <div className="marker-interval">{`${
               markerInterval + 1
-              } / ${getTimeLineTime()}`}</div>
+            } / ${getTimeLineTime()}`}</div>
           </div>
         </div>
       </div>
@@ -613,7 +751,6 @@ const BusSimulation = () => {
               //     });
               //   }
               // }
-              console.log(selectedBuses)
               setSelectedBusOptions(selectedBuses);
               setSelectedBusOptionsString(tempArr);
             }}
@@ -645,7 +782,7 @@ const BusSimulation = () => {
               />
             </div>
           </div>
-          <button className="submit-btn" onClick={onSubmitBtnClick}>
+          <button className="submit-btn" onClick={onSubmitBtnClick} disabled={isSubmitButtonDisabled}>
             نمایش اطلاعات
             {isBusDataIsLoading ? (
               <div className="loader">
@@ -654,8 +791,8 @@ const BusSimulation = () => {
                 <span>.</span>
               </div>
             ) : (
-                ""
-              )}
+              ""
+            )}
           </button>
         </div>
         {markers[1].length === 0 ? (
@@ -663,94 +800,96 @@ const BusSimulation = () => {
             className="bus-detail-container single"
             ref={busDetailsContainerRef}
           >
-            
-            <Records markers={markers[0]} onMarkerClick={(id)=>onMarkerClick(id)} />
+            <Records
+              markers={bufferMarkers}
+              onMarkerClick={(id) => onMarkerClick(id)}
+            />
           </div>
         ) : (
-            <div
-              className="bus-detail-container double"
-              ref={busDetailsContainerRef}
-            >
-              <div className="col col-1">
-                {markers[0].map((bus, rcdIndex) => {
-                  return (
-                    <div
-                      onClick={() => setMarkerInterval(rcdIndex)}
-                      key={rcdIndex}
-                      className={`bus-detail ${
-                        markerInterval === rcdIndex ? "active" : ""
-                        }`}
-                    >
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td className="index">{rcdIndex + 1}</td>
-                            <td className="info-container">
-                              <td className="speed">
-                                <td>سرعت لحظه ای :</td>
-                                <td className="value">{`${bus.groundSpeed}km`}</td>
-                              </td>
-                              <td className="date">
-                                <td>تاریخ :</td>
-                                <td
-                                  className="value"
-                                  style={{ direction: "ltr", textAlign: "right" }}
-                                >
-                                  {moment(
-                                    bus.clientDate,
-                                    "YYYYMMDDHHmmss"
-                                  ).format("jYYYY/jM/jD HH:mm:ss")}
-                                </td>
+          <div
+            className="bus-detail-container double"
+            ref={busDetailsContainerRef}
+          >
+            <div className="col col-1">
+              {bufferMarkers.map((bus, rcdIndex) => {
+                return (
+                  <div
+                    onClick={() => setMarkerInterval(rcdIndex)}
+                    key={rcdIndex}
+                    className={`bus-detail ${
+                      markerInterval === rcdIndex ? "active" : ""
+                    }`}
+                  >
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td className="index">{rcdIndex + 1}</td>
+                          <td className="info-container">
+                            <td className="speed">
+                              <td>سرعت لحظه ای :</td>
+                              <td className="value">{`${bus.groundSpeed}km`}</td>
+                            </td>
+                            <td className="date">
+                              <td>تاریخ :</td>
+                              <td
+                                className="value"
+                                style={{ direction: "ltr", textAlign: "right" }}
+                              >
+                                {moment(
+                                  bus.clientDate,
+                                  "YYYYMMDDHHmmss"
+                                ).format("jYYYY/jM/jD HH:mm:ss")}
                               </td>
                             </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="col col-2">
-                {markers[1].map((bus, rcdIndex) => {
-                  return (
-                    <div
-                      onClick={() => setMarkerInterval(rcdIndex)}
-                      key={rcdIndex}
-                      className={`bus-detail ${
-                        markerInterval === rcdIndex ? "active" : ""
-                        }`}
-                    >
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td className="index">{rcdIndex + 1}</td>
-                            <td className="info-container">
-                              <td className="speed">
-                                <td>سرعت لحظه ای :</td>
-                                <td className="value">{`${bus.groundSpeed}km`}</td>
-                              </td>
-                              <td className="date">
-                                <td>تاریخ :</td>
-                                <td
-                                  className="value"
-                                  style={{ direction: "ltr", textAlign: "right" }}
-                                >
-                                  {moment(
-                                    bus.clientDate,
-                                    "YYYYMMDDHHmmss"
-                                  ).format("jYYYY/jM/jD HH:mm:ss")}
-                                </td>
-                              </td>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  );
-                })}
-              </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
             </div>
-          )}
+            <div className="col col-2">
+              {markers[1].map((bus, rcdIndex) => {
+                return (
+                  <div
+                    onClick={() => setMarkerInterval(rcdIndex)}
+                    key={rcdIndex}
+                    className={`bus-detail ${
+                      markerInterval === rcdIndex ? "active" : ""
+                    }`}
+                  >
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td className="index">{rcdIndex + 1}</td>
+                          <td className="info-container">
+                            <td className="speed">
+                              <td>سرعت لحظه ای :</td>
+                              <td className="value">{`${bus.groundSpeed}km`}</td>
+                            </td>
+                            <td className="date">
+                              <td>تاریخ :</td>
+                              <td
+                                className="value"
+                                style={{ direction: "ltr", textAlign: "right" }}
+                              >
+                                {moment(
+                                  bus.clientDate,
+                                  "YYYYMMDDHHmmss"
+                                ).format("jYYYY/jM/jD HH:mm:ss")}
+                              </td>
+                            </td>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
