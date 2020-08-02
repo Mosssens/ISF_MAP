@@ -319,13 +319,13 @@ const BusSimulation = () => {
         // setMarkerInterval((markerInterval) => markerInterval + 1);
         if (skipZeroPoints) {
           if (
-            bufferMarkers[markerInterval].groundSpeed == "0" &&
-            bufferMarkers[markerInterval + 1].groundSpeed == "0"
+            bufferMarkers[markerInterval].groundSpeed < 4 &&
+            bufferMarkers[markerInterval + 1].groundSpeed < 4
           ) {
             const slicedMarkers = bufferMarkers.slice(markerInterval);
             var nextNotZeroIndex;
             slicedMarkers.some((item, index) => {
-              if (item.groundSpeed > 0) {
+              if (item.groundSpeed > 4) {
                 nextNotZeroIndex = index;
                 return true;
               }
@@ -678,9 +678,10 @@ const BusSimulation = () => {
                 <FaFastForward />
               </Ripples>
               <Ripples
-                onClick={() =>
+                onClick={() =>{
+                  setMapZoom(17)
                   setFitMarkerIntervalBounds(!fitMarkerIntervalBounds)
-                }
+                }}
                 className={`fit-marker ${
                   fitMarkerIntervalBounds ? "active" : ""
                 }`}

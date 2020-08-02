@@ -57,7 +57,7 @@ var blueIcon = L.icon({
   // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 });
 const Circles = React.memo((props) => {
-  console.log('sda',props.markers)
+  console.log("sda", props.markers);
   return props.markers.map((marker, markerIndex) => {
     return (
       <Circle
@@ -79,6 +79,7 @@ export default React.memo(function Map(props) {
   const mapRef = useRef();
   const mapGroupRef = useRef();
   const [markers, setMarkers] = useState([[], []]);
+  const [center, setCenter] = useState([32.654492278497646, 51.64067001473507]);
 
   // const renderMarkers = () => {
   //   return markers.map(
@@ -88,31 +89,25 @@ export default React.memo(function Map(props) {
   //     })
   // }
   const fitBounds = () => {
-    if (mapGroupRef.current !== undefined) {
-      //get native Map instance
-      const map = mapRef.current.leafletElement;
-      const group = mapGroupRef.current.leafletElement; //get native featureGroup instance
-      // map.fitBounds(group.getBounds());
-      if (group.getBounds()._northEast !== undefined) {
-        map.fitBounds(group.getBounds());
-      }
-    }
+    setCenter([
+      markers[0][props.marker].latitude,
+      markers[0][props.marker].longitude,
+    ]);
   };
   useEffect(() => {
     if (props.fitMarkerIntervalBounds) {
-      fitBounds();
+      fitBounds(props.marker);
     }
   }, [props.marker]);
   useEffect(() => {
     setMarkers([props.firstBusPath, props.secondBusPath]);
-    console.log('asdaad', [props.firstBusPath], [props.secondBusPath]);
+    console.log("asdaad", [props.firstBusPath], [props.secondBusPath]);
   }, [props.firstBusPath, props.secondBusPath]);
-
 
   return (
     <LeafletMap
       ref={mapRef}
-      center={props.center}
+      center={center}
       zoom={props.zoom}
       minZoom={7}
       maxZoom={19}
@@ -165,4 +160,4 @@ export default React.memo(function Map(props) {
       </Control>
     </LeafletMap>
   );
-})
+});
