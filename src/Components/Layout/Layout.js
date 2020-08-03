@@ -6,13 +6,15 @@ import {
     Link
 } from "react-router-dom";
 import 'leaflet/dist/leaflet.css'
-const Layout = (props) => {
 
+const Layout = (props) => {
+    
     const [lastUrlPath, setLastUrlPath] = useState(window.location.pathname.split("/").pop())
     const onItemClicked = () => {
         setLastUrlPath(window.location.pathname.split("/").pop())
     }
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(true);
+   
     return (
         <section className="main-container">
             <section className={`side-menu-right disable-select ${(isMenuCollapsed) ? "collapse" : ""}`}>

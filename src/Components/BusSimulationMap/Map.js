@@ -79,7 +79,6 @@ export default React.memo(function Map(props) {
   const mapRef = useRef();
   const mapGroupRef = useRef();
   const [markers, setMarkers] = useState([[], []]);
-  const [center, setCenter] = useState([32.654492278497646, 51.64067001473507]);
 
   // const renderMarkers = () => {
   //   return markers.map(
@@ -89,10 +88,10 @@ export default React.memo(function Map(props) {
   //     })
   // }
   const fitBounds = () => {
-    setCenter([
-      markers[0][props.marker].latitude,
-      markers[0][props.marker].longitude,
-    ]);
+    // setCenter([
+    //   markers[0][props.marker].latitude,
+    //   markers[0][props.marker].longitude,
+    // ]);
   };
   useEffect(() => {
     if (props.fitMarkerIntervalBounds) {
@@ -107,11 +106,10 @@ export default React.memo(function Map(props) {
   return (
     <LeafletMap
       ref={mapRef}
-      center={center}
+      center={props.center}
       zoom={props.zoom}
       minZoom={7}
       maxZoom={19}
-      preferCanvas={true}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -132,7 +130,7 @@ export default React.memo(function Map(props) {
                 {markers[0][props.marker].busCode}
               </Tooltip>
             </Marker>
-            <Circles markers={markers[0]} color="blue" />
+            <Circles markers={markers[0]} color="rgba(0,0,200,0.4)" />
           </React.Fragment>
         ) : null}
         {markers[1].length !== 0 && markers[1].length > props.marker ? (

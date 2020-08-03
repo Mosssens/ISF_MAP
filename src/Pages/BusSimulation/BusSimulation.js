@@ -17,6 +17,8 @@ import Loader from "../../Components/Loader/Loader";
 import { DatePicker } from "jalali-react-datepicker";
 import FakeData from "./data";
 import { marker } from "leaflet";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const Pins = React.memo((props) => {
   var pins = null;
 
@@ -49,10 +51,13 @@ const Pins = React.memo((props) => {
             left: (props.playbackBarWidth / 100) * growPercentage,
             width: avrgPinsSpace / 2,
           }}
-          title={`${id + 1} : ${moment(pin.clientDate, "YYYYMMDDHHmmss").format(
-            "jYYYY/jMM/jDD HH:mm:ss"
-          )}`}
-        ></div>
+        >
+          <div className="tooltip">
+            {`${id + 1} : ${moment(pin.clientDate, "YYYYMMDDHHmmss").format(
+              "HH:mm:ss"
+            )}`}
+          </div>
+        </div>
       );
     });
     return pins;
@@ -62,7 +67,7 @@ const TimeSlices = React.memo((props) => {
   return props.buffers.map((buffer, index) => {
     return (
       <div
-      onClick={()=>props.onBufferClick(index)}
+        onClick={() => props.onBufferClick(index)}
         className={`time-slice ${props.currentBuffer >= index ? "active" : ""}`}
         key={index}
       >
@@ -87,7 +92,9 @@ const Records = React.memo((props) => {
           <div
             onClick={() => props.onMarkerClick(rcdIndex)}
             key={rcdIndex}
-            className="bus-detail"
+            className={`bus-detail ${
+              props.activeMarker == rcdIndex ? "active" : ""
+            }`}
           >
             <table>
               <tbody>
@@ -150,7 +157,7 @@ function useEventListener(eventName, handler, element = window) {
     [eventName, element] // Re-run if eventName or element changes
   );
 }
-const BusSimulation = () => {
+const BusSimulation = (props) => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getBusSimulation')
   const [markers, setMarkers] = useState([[], []]);
   const [mapCenter, setMapCenter] = useState([
@@ -170,7 +177,7 @@ const BusSimulation = () => {
   const actionMenuHeaderRef = useRef();
   const nextMarkerRef = useRef();
   const playbackBarRef = useRef();
-  const [fromDate, setFromDate] = useState(null);
+  const [fromDate, setFromDate] = useState(moment().format("YYYYMMDDHHmmss"));
   const [toDate, setToDate] = useState(moment().format("YYYYMMDDHHmmss"));
   const [isBusDataIsLoading, setIsBusDataIsLoading] = useState(false);
   const [markerInterval, setMarkerInterval] = useState(0);
@@ -181,7 +188,7 @@ const BusSimulation = () => {
   const [diffsecond, setDiffSecond] = useState(0);
   const [timeLineInterval, setTimeLineInterval] = useState(0);
   const [bufferMarkers, setBufferMarkers] = useState([]);
-  const [isSubmitButtonDisabled,setIsSubmitButtonDisabled]=useState(false)
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
   const [bufferInfo, setBufferInfo] = useState({
     currentBuffer: 0,
     bufferCount: 0,
@@ -215,21 +222,42 @@ const BusSimulation = () => {
     },
   ]);
   function toggleTimer() {
+    if (bufferMarkers.length === 0) {
+      Notify({
+        type: "error",
+        msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+      });
+      return;
+    }
     setIsTimerActive(!isTimerActive);
   }
   function resetTimer() {
     setMarkerInterval(0);
     setIsTimerActive(false);
+    setTimeLineInterval(0);
     busDetailsContainerRef.current.scrollTo(0, 0, {
       behavior: "smooth",
     });
   }
+  const Notify = (notify) => {
+    switch (notify.type) {
+      case "error":
+        toast.error(notify.msg);
+        break;
+      case "message":
+        toast(notify.msg);
+        break;
+    }
+  };
   const handler = useCallback(
     (e) => {
       // Update coordinates
       if (e.key === "ArrowRight") {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
+        if (bufferMarkers.length === 0) {
+          return;
+        }
         setMarkerInterval(markerInterval + 1);
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
@@ -243,6 +271,9 @@ const BusSimulation = () => {
       if (e.key === "ArrowLeft") {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
+        if (markerInterval === 0) {
+          return;
+        }
         setMarkerInterval(markerInterval - 1);
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
@@ -282,8 +313,9 @@ const BusSimulation = () => {
     //     setTimeLineInterval(0)
     //   }
     // }
+
     if (bufferMarkers.length === markerInterval + 1) {
-      if (bufferInfo.currentBuffer === bufferInfo.bufferCount - 2) {
+      if (bufferInfo.currentBuffer + 1 >= bufferInfo.bufferCount) {
         setIsTimerActive(false);
         setMarkerInterval(0);
         setTimeLineInterval(0);
@@ -296,6 +328,7 @@ const BusSimulation = () => {
           ...bufferInfo,
           currentBuffer: bufferInfo.currentBuffer + 1,
         });
+
         setBufferMarkers(bufferInfo.buffers[bufferInfo.currentBuffer + 1]);
         setDiffSecond(
           moment(
@@ -341,6 +374,18 @@ const BusSimulation = () => {
           }
         } else {
           setMarkerInterval((markerInterval) => markerInterval + 1);
+        }
+        if (fitMarkerIntervalBounds) {
+          setMapCenter([
+            markers[0][
+              markerInterval +
+                bufferInfo.currentBuffer * bufferInfo.bufferSize
+            ].latitude,
+            markers[0][
+              markerInterval +
+                bufferInfo.currentBuffer * bufferInfo.bufferSize
+            ].longitude,
+          ]);
         }
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
@@ -430,8 +475,27 @@ const BusSimulation = () => {
     return data;
   }
   const onSubmitBtnClick = () => {
-    setIsSubmitButtonDisabled(true)
-    setIsBusDataIsLoading(true);
+    if (isSubmitButtonDisabled) {
+      Notify({
+        type: "message",
+        msg: "در حال دریافت اطلاعات... لطفا منتظر بمانید.",
+      });
+      return;
+    }
+    setMarkers([
+      // data[0].busData[0],
+      [],
+      [],
+    ]);
+    setBufferInfo({
+      currentBuffer: 0,
+      bufferCount: 0,
+      bufferSize: 500,
+      buffers: [],
+    });
+    setBufferMarkers([]);
+    setDiffSecond(0);
+    resetTimer();
     console.log(selectedBusOptions[0], selectedBusOptions[1]);
     const bus1 = selectedBusOptions.value;
     // const bus1 =
@@ -445,7 +509,24 @@ const BusSimulation = () => {
       fromDate: fromDate,
       toDate: toDate,
     });
-
+    if (!bus1) {
+      Notify({ type: "error", msg: "اتوبوس را انتخاب کنید." });
+      return;
+    }
+    if (!fromDate || !toDate) {
+      Notify({ type: "error", msg: "تاریخ شروع و پایان را وارد کنید!" });
+      return;
+    }
+    var theDate = moment(fromDate, "YYYYMMDDHHmmss");
+    var nowDate = moment(toDate, "YYYYMMDDHHmmss");
+    var duration = moment.duration(nowDate.diff(theDate));
+    var seconds = duration.asSeconds();
+    if (seconds < 0) {
+      Notify({ type: "error", msg: "تاریخ پایان قبل تر از تاریخ شروع است!" });
+      return;
+    }
+    setIsSubmitButtonDisabled(true);
+    setIsBusDataIsLoading(true);
     getSelectedBusesData({
       busCode1: bus1,
       busCode2: 0,
@@ -453,6 +534,16 @@ const BusSimulation = () => {
       fromDate: fromDate,
       toDate: toDate,
     }).then((data) => {
+      console.log(data);
+      if (data[0].busData[0].length === 0) {
+        Notify({
+          type: "message",
+          msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} ثبت نشده است .`,
+        });
+        setIsSubmitButtonDisabled(false);
+        setIsBusDataIsLoading(false);
+        return;
+      }
       setMarkers([
         // data[0].busData[0],
         data[0].busData[0],
@@ -473,10 +564,15 @@ const BusSimulation = () => {
       setBufferInfo({
         ...bufferInfo,
         buffers: buffers,
-        bufferCount: Math.ceil(
+        bufferCount: Math.floor(
           data[0].busData[0].length / bufferInfo.bufferSize
         ),
       });
+      console.log(
+        data[0].busData[0].length / bufferInfo.bufferSize,
+        Math.floor(data[0].busData[0].length / bufferInfo.bufferSize),
+        buffers
+      );
       setBufferMarkers(data[0].busData[0].slice(0, bufferInfo.bufferSize));
       setDiffSecond(
         moment(
@@ -490,11 +586,10 @@ const BusSimulation = () => {
         )
       );
       setIsBusDataIsLoading(false);
-      setIsSubmitButtonDisabled(false)
+      setIsSubmitButtonDisabled(false);
     });
     // console.log(data, "sdsds");
     // var data = [];
-    console.log(FakeData);
     // setMarkers([FakeData[0].busData[0], []]);
 
     // const bufferCount = Math.ceil(
@@ -603,7 +698,6 @@ const BusSimulation = () => {
             firstBusPath={markers[0]}
             secondBusPath={markers[1]}
             zoom={mapZoom}
-            fitMarkerIntervalBounds={fitMarkerIntervalBounds}
             marker={
               markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
             }
@@ -614,8 +708,8 @@ const BusSimulation = () => {
             <TimeSlices
               buffers={bufferInfo.buffers}
               currentBuffer={bufferInfo.currentBuffer}
-              onBufferClick={(index)=>{
-                setBufferInfo({...bufferInfo,currentBuffer:index})
+              onBufferClick={(index) => {
+                setBufferInfo({ ...bufferInfo, currentBuffer: index });
                 setBufferMarkers(bufferInfo.buffers[index]);
                 setDiffSecond(
                   moment(
@@ -631,8 +725,8 @@ const BusSimulation = () => {
                     "seconds"
                   )
                 );
-                setMarkerInterval(0)
-                setTimeLineInterval(0)
+                setMarkerInterval(0);
+                setTimeLineInterval(0);
               }}
             />
           </div>
@@ -678,9 +772,19 @@ const BusSimulation = () => {
                 <FaFastForward />
               </Ripples>
               <Ripples
-                onClick={() =>{
-                  setMapZoom(17)
-                  setFitMarkerIntervalBounds(!fitMarkerIntervalBounds)
+                onClick={() => {
+                  setMapZoom(17);
+                  setMapCenter([
+                    markers[0][
+                      markerInterval +
+                        bufferInfo.currentBuffer * bufferInfo.bufferSize
+                    ].latitude,
+                    markers[0][
+                      markerInterval +
+                        bufferInfo.currentBuffer * bufferInfo.bufferSize
+                    ].longitude,
+                  ]);
+                  setFitMarkerIntervalBounds(!fitMarkerIntervalBounds);
                 }}
                 className={`fit-marker ${
                   fitMarkerIntervalBounds ? "active" : ""
@@ -783,7 +887,7 @@ const BusSimulation = () => {
               />
             </div>
           </div>
-          <button className="submit-btn" onClick={onSubmitBtnClick} disabled={isSubmitButtonDisabled}>
+          <button className="submit-btn" onClick={onSubmitBtnClick}>
             نمایش اطلاعات
             {isBusDataIsLoading ? (
               <div className="loader">
@@ -803,6 +907,7 @@ const BusSimulation = () => {
           >
             <Records
               markers={bufferMarkers}
+              activeMarker={markerInterval}
               onMarkerClick={(id) => onMarkerClick(id)}
             />
           </div>
@@ -892,6 +997,18 @@ const BusSimulation = () => {
           </div>
         )}
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={true}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      {/* Same as */}
     </section>
   );
 };

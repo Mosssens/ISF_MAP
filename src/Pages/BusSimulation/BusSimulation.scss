@@ -1,7 +1,7 @@
 .bus-simulation-container {
   display: flex;
   height: 100vh;
-
+  overflow-x: hidden;
   .leaflet-container {
     width: 100%;
     height: 100%;
@@ -52,7 +52,7 @@
           display: flex;
           flex-direction: column;
           justify-content: center;
-            align-items: center;
+          align-items: center;
           cursor: pointer;
           &.active {
             background-color: unset;
@@ -88,6 +88,39 @@
             top: 0;
             left: 0;
             cursor: pointer;
+            .tooltip {
+              display: none;
+              position: absolute;
+              color: rgb(0, 0, 0);
+              text-align: center;
+              width: 120px;
+              top: 38px;
+              right: -60px;
+            
+              // left: 0px;
+              border-radius: 4px;
+              background-color: #ffffff;
+              font-size: 16px;
+              z-index: 5;
+              font-weight: bold;
+              box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+            }
+            .tooltip:before {
+              content: "";
+              position: absolute;
+              border-style: solid;
+              border-width: 8px 10px;
+              border-color: transparent transparent white transparent;
+              left: 50px;
+              /* TOP IS DOUBLE THE HEIGHT OF THE BORDER */
+              top: -14px;
+              
+            }
+            &:hover {
+              .tooltip {
+                display: block;
+              }
+            }
           }
 
           .pin:last-of-type {
@@ -336,6 +369,7 @@
       min-height: 47px;
       border: 0;
       border-radius: 4px;
+      cursor: pointer;
       box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
     }
 
@@ -440,11 +474,11 @@
               justify-content: center;
               align-items: center;
               height: 100%;
-              font-size: 1.25em;
+              font-size: 1em;
               font-weight: bold;
               // width: 30%;
               color: white;
-              background-color: rgb(96, 72, 233);
+              background-color: #345aca;
             }
 
             table tr .speed {
@@ -473,7 +507,7 @@
               padding-top: 12px;
               padding-bottom: 12px;
               text-align: left;
-              background-color: seagreen;
+              background-color: #345aca;
               color: white;
             }
 
@@ -510,10 +544,16 @@
             }
 
             &.active {
-              table tbody tr .index {
-                -webkit-animation: argh-my-eyes-blue 1s 30;
-                -moz-animation: argh-my-eyes-blue 1s 30;
-                animation: argh-my-eyes-blue 1s 30;
+              table tbody tr {
+                background-color: #345aca;
+                color: white;
+                .value {
+                  color: white;
+                }
+                .index {
+                  background-color: #345aca;
+                  color: white;
+                }
               }
             }
           }
