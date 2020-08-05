@@ -4,19 +4,19 @@
   height: 100%;
   @keyframes ldio-i3rs1wndzvh {
     0% {
-      transform: rotate(0)
+      transform: rotate(0);
     }
 
     100% {
-      transform: rotate(360deg)
+      transform: rotate(360deg);
     }
   }
 
   .ldio-i3rs1wndzvh div {
-    box-sizing: border-box !important
+    box-sizing: border-box !important;
   }
 
-  .ldio-i3rs1wndzvh>div {
+  .ldio-i3rs1wndzvh > div {
     position: absolute;
     width: 144px;
     height: 144px;
@@ -28,19 +28,19 @@
     animation: ldio-i3rs1wndzvh 1s linear infinite;
   }
 
-  .ldio-i3rs1wndzvh>div:nth-child(2) {
-    border-color: transparent
+  .ldio-i3rs1wndzvh > div:nth-child(2) {
+    border-color: transparent;
   }
 
-  .ldio-i3rs1wndzvh>div:nth-child(2) div {
+  .ldio-i3rs1wndzvh > div:nth-child(2) div {
     position: absolute;
     width: 100%;
     height: 100%;
     transform: rotate(45deg);
   }
 
-  .ldio-i3rs1wndzvh>div:nth-child(2) div:before,
-  .ldio-i3rs1wndzvh>div:nth-child(2) div:after {
+  .ldio-i3rs1wndzvh > div:nth-child(2) div:before,
+  .ldio-i3rs1wndzvh > div:nth-child(2) div:after {
     content: "";
     display: block;
     position: absolute;
@@ -53,7 +53,7 @@
     box-shadow: 0 128px 0 0 #5b8fff;
   }
 
-  .ldio-i3rs1wndzvh>div:nth-child(2) div:after {
+  .ldio-i3rs1wndzvh > div:nth-child(2) div:after {
     left: -16px;
     top: 48px;
     box-shadow: 128px 0 0 0 #5b8fff;
@@ -111,15 +111,14 @@
         cursor: pointer;
       }
 
-      table:hover {}
+      table:hover {
+      }
 
       table td,
       table th {
         // border: 1px solid #ddd;
         padding: 8px;
       }
-
-
 
       table tr:nth-child(even) {
         background-color: #d6d6d6;
@@ -191,13 +190,16 @@
     margin: 40px 20px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
     background-color: white;
-    height: 15em;
+    height: 9em;
     border-radius: 4px;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
     margin-bottom: 3.5em;
-
+    &:nth-of-type(2) {
+      margin-top: 110px;
+      margin-bottom: 100px;
+    }
     .header {
       height: 2em;
       display: flex;
@@ -218,66 +220,70 @@
 
       &.forward {
         $forwardsColor: #3ee06f;
-        background: linear-gradient(-75deg,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            #fff,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor,
-            $forwardsColor);
+        background: linear-gradient(
+          -75deg,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          #fff,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor,
+          $forwardsColor
+        );
         background-size: 300% 300%;
         animation: gradientForward 4s ease infinite;
       }
 
       &.backwards {
         $backwardsColor: #eb0d0d;
-        background: linear-gradient(-75deg,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            #fff,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor,
-            $backwardsColor);
+        background: linear-gradient(
+          -75deg,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          #fff,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor,
+          $backwardsColor
+        );
         background-size: 300% 300%;
         animation: gradientBackwards 4s ease infinite;
       }
@@ -323,7 +329,6 @@
             right: 20px;
             color: white;
             font-family: Arial, Helvetica, sans-serif;
-            
           }
         }
 
@@ -373,7 +378,8 @@
         .pin:hover {
           z-index: 100;
 
-          .pin-marker {}
+          .pin-marker {
+          }
         }
 
         .pulse {
@@ -493,7 +499,7 @@
         .bus-stop-name {
           width: 122px;
           background-color: #101010;
-          color:white;
+          color: white;
           position: absolute;
           left: -59px;
           padding-right: 20px;

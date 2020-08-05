@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import data from "./data.js";
+import { ToastContainer, toast } from "react-toastify";
+
 const SchematicTripState = () => {
   const forwardLineRef = useRef();
   const backwardLineRef = useRef();
@@ -12,7 +14,7 @@ const SchematicTripState = () => {
   const [outboundBusStops, setOutboundBusStops] = useState([]);
   const [outboundBuses, setOutboundBuses] = useState([]);
   const [lines, setLines] = useState([]);
-  const [selectedLine, setSelectedLine] = useState([]);
+  const [selectedLine, setSelectedLine] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [lineDetail, setLineDetail] = useState({
     activeBusCount: 0,
@@ -29,9 +31,6 @@ const SchematicTripState = () => {
     outboundTripDuration: 0,
     busCountInbound: 0,
   });
-  const makeRnd = () => {
-    return (Math.random() * (9.0 - 1.0 + 1.0) + 1.0).toFixed(2);
-  };
 
   const getRandomColor = () => {
     var letters = "0123456789ABCDEF".split("");
@@ -61,9 +60,9 @@ const SchematicTripState = () => {
     var isFirstMessageReceived = false;
     ws.onmessage = (e) => {
       if (isPaused) return;
-      if (isLoading) {
+     
         setIsLoading(false);
-      }
+      
       const message = JSON.parse(e.data);
       // this.setState({dataFromServer: message})
       const busStopsTemp = message.payload.inboundPoints.filter(
@@ -168,7 +167,22 @@ const SchematicTripState = () => {
       setOutboundBuses(outBusesTemp);
     };
   }, [isPaused, ws]);
+  const Notify = (notify) => {
+    switch (notify.type) {
+      case "error":
+        toast.error(notify.msg);
+        break;
+      case "message":
+        toast(notify.msg);
+        break;
+    }
+  };
+  
   const onSubmitBtnClick = () => {
+    if (selectedLine === 0) {
+      Notify({ type: "error", msg: "ابتدا خط را انتخاب کنید!" });
+      return ;
+    }
     setIsLoading(true);
     fetch(
       `http://193.176.241.150:8080/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
@@ -176,6 +190,7 @@ const SchematicTripState = () => {
     )
       .then((res) => res.json())
       .then((res) => {
+        
         setLineDetail(res);
         console.log("res", res);
       });
@@ -215,7 +230,7 @@ const SchematicTripState = () => {
             <option value="0">انتخاب کنید ...</option>
             {lines.map((line, index) => (
               <option key={index} value={line.code}>
-                {line.name}
+                {`${line.code}-${line.name}`}
               </option>
             ))}
           </select>
@@ -250,7 +265,7 @@ const SchematicTripState = () => {
               </tr>
               <tr>
                 <td>
-                  <td>تعداد اتوبوس های فعال خط npm:</td>
+                  <td>تعداد اتوبوس های فعال خط :</td>
                   <td>{lineDetail.activeBusCount}</td>
                 </td>
                 {/* <td>
@@ -271,7 +286,6 @@ const SchematicTripState = () => {
                   <td>تعداد اتوبوس های مسیر برگشت :</td>
                   <td>{lineDetail.busCountOutbound}</td>
                 </td>
-                
               </tr>
               <tr>
                 <td>
@@ -359,6 +373,17 @@ const SchematicTripState = () => {
         </div>
         <div className="gap"></div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={true}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </section>
   );
 };

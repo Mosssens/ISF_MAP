@@ -73,7 +73,7 @@ const Circles = React.memo((props) => {
     );
   });
 });
-export default React.memo(function Map(props) {
+export default (function Map(props) {
   // const [markers, setMarkers] = useState()
   // const { markers } = props;
   const mapRef = useRef();

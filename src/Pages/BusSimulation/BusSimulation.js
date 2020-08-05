@@ -63,12 +63,13 @@ const Pins = React.memo((props) => {
     return pins;
   }
 });
-const TimeSlices = React.memo((props) => {
+const TimeSlices = (props) => {
+  // alert(props.currentBuffer)
   return props.buffers.map((buffer, index) => {
     return (
       <div
         onClick={() => props.onBufferClick(index)}
-        className={`time-slice ${props.currentBuffer >= index ? "active" : ""}`}
+        className={`time-slice ${props.currentBuffer == index ? "active" : ""}`}
         key={index}
       >
         <div>
@@ -83,7 +84,7 @@ const TimeSlices = React.memo((props) => {
       </div>
     );
   });
-});
+};
 const Records = React.memo((props) => {
   return (
     <div className="col col-1">
@@ -239,6 +240,7 @@ const BusSimulation = (props) => {
       behavior: "smooth",
     });
   }
+  const moveMarker = (step) => {};
   const Notify = (notify) => {
     switch (notify.type) {
       case "error":
@@ -256,8 +258,13 @@ const BusSimulation = (props) => {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
         if (bufferMarkers.length === 0) {
+          Notify({
+            type: "error",
+            msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+          });
           return;
         }
+
         setMarkerInterval(markerInterval + 1);
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
@@ -267,13 +274,89 @@ const BusSimulation = (props) => {
         var duration = moment.duration(nowDate.diff(theDate));
         var seconds = duration.asSeconds();
         setTimeLineInterval(seconds);
+        if (markerInterval + 2 === bufferInfo.bufferSize) {
+          busDetailsContainerRef.current.scrollTo(0, 0, {
+            behavior: "smooth",
+          });
+        } else {
+          busDetailsContainerRef.current.scrollTo(
+            0,
+            busDetailsContainerRef.current.offsetHeight *
+              parseInt(
+                (markerInterval + 1) /
+                  (busDetailsContainerRef.current.offsetHeight / 45)
+              ) +
+              45,
+            {
+              behavior: "smooth",
+            }
+          );
+        }
       }
       if (e.key === "ArrowLeft") {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
-        if (markerInterval === 0) {
+        if (bufferMarkers.length === 0) {
+          Notify({
+            type: "error",
+            msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+          });
           return;
         }
+        if (markerInterval === 0) {
+          if (bufferInfo.currentBuffer > 0) {
+            setBufferInfo({
+              ...bufferInfo,
+              currentBuffer: bufferInfo.currentBuffer - 1,
+            });
+            setBufferMarkers(bufferInfo.buffers[bufferInfo.currentBuffer - 1]);
+            setDiffSecond(
+              moment(
+                bufferInfo.buffers[bufferInfo.currentBuffer - 1][
+                  bufferInfo.buffers[bufferInfo.currentBuffer - 1].length - 1
+                ].clientDate,
+                "YYYYMMDDHHmmss"
+              ).diff(
+                moment(
+                  bufferInfo.buffers[bufferInfo.currentBuffer - 1][0]
+                    .clientDate,
+                  "YYYYMMDDHHmmss"
+                ),
+                "seconds"
+              )
+            );
+            setMarkerInterval(bufferInfo.bufferSize - 2);
+            setTimeLineInterval(
+              moment(
+                bufferInfo.buffers[bufferInfo.currentBuffer - 1][
+                  bufferInfo.buffers[bufferInfo.currentBuffer - 1].length - 1
+                ].clientDate,
+                "YYYYMMDDHHmmss"
+              ).diff(
+                moment(
+                  bufferInfo.buffers[bufferInfo.currentBuffer - 1][0]
+                    .clientDate,
+                  "YYYYMMDDHHmmss"
+                ),
+                "seconds"
+              )
+            );
+            busDetailsContainerRef.current.scrollTo(
+              0,
+              busDetailsContainerRef.current.offsetHeight *
+                parseInt(
+                  bufferInfo.bufferSize /
+                    (busDetailsContainerRef.current.offsetHeight / 45)
+                ) +
+                45,
+              {
+                behavior: "smooth",
+              }
+            );
+          }
+          return;
+        }
+
         setMarkerInterval(markerInterval - 1);
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
@@ -283,9 +366,21 @@ const BusSimulation = (props) => {
         var duration = moment.duration(nowDate.diff(theDate));
         var seconds = duration.asSeconds();
         setTimeLineInterval(seconds);
+        busDetailsContainerRef.current.scrollTo(
+          0,
+          busDetailsContainerRef.current.offsetHeight *
+            parseInt(
+              (markerInterval - 1) /
+                (busDetailsContainerRef.current.offsetHeight / 45)
+            ) +
+            45,
+          {
+            behavior: "smooth",
+          }
+        );
       }
     },
-    [markerInterval]
+    [bufferMarkers, markerInterval]
   );
 
   // Add event listener using our hook
@@ -317,8 +412,7 @@ const BusSimulation = (props) => {
     if (bufferMarkers.length === markerInterval + 1) {
       if (bufferInfo.currentBuffer + 1 >= bufferInfo.bufferCount) {
         setIsTimerActive(false);
-        setMarkerInterval(0);
-        setTimeLineInterval(0);
+        setTimeLineInterval(diffsecond);
       } else {
         setMarkerInterval(0);
         setTimeLineInterval(0);
@@ -365,6 +459,18 @@ const BusSimulation = (props) => {
             });
 
             if (!isNaN(nextNotZeroIndex)) {
+              busDetailsContainerRef.current.scrollTo(
+                0,
+                busDetailsContainerRef.current.offsetHeight *
+                  parseInt(
+                    (markerInterval + nextNotZeroIndex) /
+                      (busDetailsContainerRef.current.offsetHeight / 45)
+                  ) +
+                  45,
+                {
+                  behavior: "smooth",
+                }
+              );
               setMarkerInterval(markerInterval + nextNotZeroIndex);
             } else {
               setMarkerInterval(bufferMarkers.length - 1);
@@ -378,12 +484,10 @@ const BusSimulation = (props) => {
         if (fitMarkerIntervalBounds) {
           setMapCenter([
             markers[0][
-              markerInterval +
-                bufferInfo.currentBuffer * bufferInfo.bufferSize
+              markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
             ].latitude,
             markers[0][
-              markerInterval +
-                bufferInfo.currentBuffer * bufferInfo.bufferSize
+              markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
             ].longitude,
           ]);
         }
@@ -474,6 +578,12 @@ const BusSimulation = (props) => {
     let data = await response.json();
     return data;
   }
+  function pickPropsFromObject(o, ...fields) {
+    return fields.reduce((a, x) => {
+      if (o.hasOwnProperty(x)) a[x] = o[x];
+      return a;
+    }, {});
+  }
   const onSubmitBtnClick = () => {
     if (isSubmitButtonDisabled) {
       Notify({
@@ -482,6 +592,8 @@ const BusSimulation = (props) => {
       });
       return;
     }
+    setFitMarkerIntervalBounds(false);
+
     setMarkers([
       // data[0].busData[0],
       [],
@@ -496,6 +608,8 @@ const BusSimulation = (props) => {
     setBufferMarkers([]);
     setDiffSecond(0);
     resetTimer();
+    setMapCenter([32.654492278497646, 51.64067001473507]);
+    setMapZoom(12);
     console.log(selectedBusOptions[0], selectedBusOptions[1]);
     const bus1 = selectedBusOptions.value;
     // const bus1 =
@@ -544,36 +658,54 @@ const BusSimulation = (props) => {
         setIsBusDataIsLoading(false);
         return;
       }
-      setMarkers([
+      var markers = [];
+      data[0].busData[0].map((item) => {
+        markers.push(
+          pickPropsFromObject(
+            item,
+            "clientDate",
+            "busCode",
+            "latitude",
+            "longitude",
+            "groundSpeed"
+          )
+        );
+      });
+      var markers = setMarkers([
         // data[0].busData[0],
-        data[0].busData[0],
+        markers,
         [],
       ]);
 
-      const bufferCount = Math.ceil(
+      var bufferCount = Math.ceil(
         data[0].busData[0].length / bufferInfo.bufferSize
       );
+
       var buffers = [];
-      for (var i = 0; i < bufferCount - 1; i++) {
+      for (var i = 0; i < bufferCount; i++) {
         var bufferI = data[0].busData[0].slice(
-          bufferInfo.bufferSize * (i + 1),
-          bufferInfo.bufferSize * (i + 2)
+          bufferInfo.bufferSize * i,
+          bufferInfo.bufferSize * (i + 1)
         );
         buffers.push(bufferI);
       }
+      console.log("buffers :", buffers);
       setBufferInfo({
         ...bufferInfo,
         buffers: buffers,
-        bufferCount: Math.floor(
+        bufferCount: Math.ceil(
           data[0].busData[0].length / bufferInfo.bufferSize
         ),
+        currentBuffer: 0,
       });
       console.log(
         data[0].busData[0].length / bufferInfo.bufferSize,
         Math.floor(data[0].busData[0].length / bufferInfo.bufferSize),
+        "buffers:",
         buffers
       );
       setBufferMarkers(data[0].busData[0].slice(0, bufferInfo.bufferSize));
+      console.log("sss", data[0].busData[0].slice(0, bufferInfo.bufferSize));
       setDiffSecond(
         moment(
           data[0].busData[0].slice(0, bufferInfo.bufferSize)[
@@ -659,6 +791,16 @@ const BusSimulation = (props) => {
     var duration = moment.duration(nowDate.diff(theDate));
     var seconds = duration.asSeconds();
     setTimeLineInterval(seconds);
+    busDetailsContainerRef.current.scrollTo(
+      0,
+      busDetailsContainerRef.current.offsetHeight *
+        parseInt(id / (busDetailsContainerRef.current.offsetHeight / 45)) +
+        45,
+      {
+        behavior: "smooth",
+      }
+    );
+    // setMapZoom()
   };
   const handleSpeedChange = () => {
     var selected = speedOptions.filter((item) => item.selected)[0].id;
@@ -711,6 +853,7 @@ const BusSimulation = (props) => {
               onBufferClick={(index) => {
                 setBufferInfo({ ...bufferInfo, currentBuffer: index });
                 setBufferMarkers(bufferInfo.buffers[index]);
+
                 setDiffSecond(
                   moment(
                     bufferInfo.buffers[index][
@@ -727,6 +870,13 @@ const BusSimulation = (props) => {
                 );
                 setMarkerInterval(0);
                 setTimeLineInterval(0);
+                busDetailsContainerRef.current.scrollTo(
+                  0,
+                  busDetailsContainerRef.current.offsetHeight * 0,
+                  {
+                    behavior: "smooth",
+                  }
+                );
               }}
             />
           </div>
@@ -773,6 +923,13 @@ const BusSimulation = (props) => {
               </Ripples>
               <Ripples
                 onClick={() => {
+                  if (bufferMarkers.length === 0) {
+                    Notify({
+                      type: "error",
+                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                    });
+                    return;
+                  }
                   setMapZoom(17);
                   setMapCenter([
                     markers[0][
@@ -796,8 +953,44 @@ const BusSimulation = (props) => {
 
               <Ripples
                 onClick={() => {
-                  setIsTimerActive(false);
+                  if (bufferMarkers.length === 0) {
+                    Notify({
+                      type: "error",
+                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                    });
+                    return;
+                  }
+
                   setMarkerInterval(markerInterval + 1);
+                  var theDate = moment(
+                    bufferMarkers[0].clientDate,
+                    "YYYYMMDDHHmmss"
+                  );
+                  var nowDate = moment(
+                    bufferMarkers[markerInterval + 1].clientDate,
+                    "YYYYMMDDHHmmss"
+                  );
+                  var duration = moment.duration(nowDate.diff(theDate));
+                  var seconds = duration.asSeconds();
+                  setTimeLineInterval(seconds);
+                  if (markerInterval + 2 === bufferInfo.bufferSize) {
+                    busDetailsContainerRef.current.scrollTo(0, 0, {
+                      behavior: "smooth",
+                    });
+                  } else {
+                    busDetailsContainerRef.current.scrollTo(
+                      0,
+                      busDetailsContainerRef.current.offsetHeight *
+                        parseInt(
+                          (markerInterval + 1) /
+                            (busDetailsContainerRef.current.offsetHeight / 45)
+                        ) +
+                        45,
+                      {
+                        behavior: "smooth",
+                      }
+                    );
+                  }
                 }}
                 title="موقعیت بعدی"
               >
@@ -815,8 +1008,95 @@ const BusSimulation = (props) => {
               </Ripples>
               <Ripples
                 onClick={() => {
-                  setIsTimerActive(false);
+                  if (bufferMarkers.length === 0) {
+                    Notify({
+                      type: "error",
+                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                    });
+                    return;
+                  }
+                  if (markerInterval === 0) {
+                    if (bufferInfo.currentBuffer > 0) {
+                      setBufferInfo({
+                        ...bufferInfo,
+                        currentBuffer: bufferInfo.currentBuffer - 1,
+                      });
+                      setBufferMarkers(
+                        bufferInfo.buffers[bufferInfo.currentBuffer - 1]
+                      );
+                      setDiffSecond(
+                        moment(
+                          bufferInfo.buffers[bufferInfo.currentBuffer - 1][
+                            bufferInfo.buffers[bufferInfo.currentBuffer - 1]
+                              .length - 1
+                          ].clientDate,
+                          "YYYYMMDDHHmmss"
+                        ).diff(
+                          moment(
+                            bufferInfo.buffers[bufferInfo.currentBuffer - 1][0]
+                              .clientDate,
+                            "YYYYMMDDHHmmss"
+                          ),
+                          "seconds"
+                        )
+                      );
+                      setMarkerInterval(bufferInfo.bufferSize - 2);
+                      setTimeLineInterval(
+                        moment(
+                          bufferInfo.buffers[bufferInfo.currentBuffer - 1][
+                            bufferInfo.buffers[bufferInfo.currentBuffer - 1]
+                              .length - 1
+                          ].clientDate,
+                          "YYYYMMDDHHmmss"
+                        ).diff(
+                          moment(
+                            bufferInfo.buffers[bufferInfo.currentBuffer - 1][0]
+                              .clientDate,
+                            "YYYYMMDDHHmmss"
+                          ),
+                          "seconds"
+                        )
+                      );
+                      busDetailsContainerRef.current.scrollTo(
+                        0,
+                        busDetailsContainerRef.current.offsetHeight *
+                          parseInt(
+                            bufferInfo.bufferSize /
+                              (busDetailsContainerRef.current.offsetHeight / 45)
+                          ) +
+                          45,
+                        {
+                          behavior: "smooth",
+                        }
+                      );
+                    }
+                    return;
+                  }
+
                   setMarkerInterval(markerInterval - 1);
+                  var theDate = moment(
+                    bufferMarkers[0].clientDate,
+                    "YYYYMMDDHHmmss"
+                  );
+                  var nowDate = moment(
+                    bufferMarkers[markerInterval - 1].clientDate,
+                    "YYYYMMDDHHmmss"
+                  );
+                  var duration = moment.duration(nowDate.diff(theDate));
+                  var seconds = duration.asSeconds();
+                  setTimeLineInterval(seconds);
+                  busDetailsContainerRef.current.scrollTo(
+                    0,
+                    busDetailsContainerRef.current.offsetHeight *
+                      parseInt(
+                        (markerInterval - 1) /
+                          (busDetailsContainerRef.current.offsetHeight / 45)
+                      ) +
+                      45,
+                    {
+                      behavior: "smooth",
+                    }
+                  );
                 }}
                 title="موقعیت قبلی"
               >
