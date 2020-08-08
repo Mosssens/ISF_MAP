@@ -67,6 +67,7 @@
       table th {
         // border: 1px solid #ddd;
         padding: 4px;
+       
       }
 
       table {
@@ -163,6 +164,7 @@
         table th {
           // border: 1px solid #ddd;
           // padding: 8px;
+          height: 37px;
         }
 
         table {
@@ -190,8 +192,8 @@
         }
 
         table tr:hover {
-          background-color: #ffffff;
-          color: black;
+          background-color: #343434;
+          color: white;
         }
        table .value{
         color: seagreen;
@@ -284,3 +286,31 @@
     background-color: #202020;
   }
 }
+@media screen and (max-width: 1170px) { 
+ 
+  .all-bus-locations-container .action-menu .bus-detail-container .react-ripples{
+    .bus-code{
+      font-size: 1em;
+    }
+    table{
+      font-size: .75em;
+      .value{
+        font-size: 1em;
+      }
+    }
+  }
+ }
+ @media screen and (max-width: 930px) { 
+ 
+  .all-bus-locations-container .action-menu .bus-detail-container .react-ripples{
+    .bus-code{
+      font-size: .9em;
+    }
+    table{
+      font-size: .65em;
+      .value{
+        font-size: .8em;
+      }
+    }
+  }
+ }

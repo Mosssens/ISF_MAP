@@ -49,6 +49,7 @@ a {
 }
 
 .main-container {
+  
   display: flex;
   height: 100%;
   direction: rtl;
@@ -171,4 +172,11 @@ a {
   .child-container {
     flex-grow: 1;
   }
+}
+.jalaali.calendarContainer .selectToday{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px !important;
+  font-size: 1em;
 }

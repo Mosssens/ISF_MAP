@@ -12,13 +12,21 @@ import {
   FaChevronRight,
   FaChevronLeft,
 } from "react-icons/fa";
-import moment from "jalali-moment";
+// import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
-import { DatePicker } from "jalali-react-datepicker";
+import moment from "moment-jalaali";
+import DatePicker from "react-datepicker2";
+
 import FakeData from "./data";
 import { marker } from "leaflet";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./time-picker.css";
+import TimePicker from "rc-time-picker";
+
+import { esfApp as appInfo } from "../../Constants/config";
+import { from } from "jalali-moment";
+
 const Pins = React.memo((props) => {
   var pins = null;
 
@@ -161,10 +169,7 @@ function useEventListener(eventName, handler, element = window) {
 const BusSimulation = (props) => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getBusSimulation')
   const [markers, setMarkers] = useState([[], []]);
-  const [mapCenter, setMapCenter] = useState([
-    32.654492278497646,
-    51.64067001473507,
-  ]);
+  const [mapCenter, setMapCenter] = useState(appInfo.mapCenter);
   const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
@@ -178,8 +183,9 @@ const BusSimulation = (props) => {
   const actionMenuHeaderRef = useRef();
   const nextMarkerRef = useRef();
   const playbackBarRef = useRef();
-  const [fromDate, setFromDate] = useState(moment().format("YYYYMMDDHHmmss"));
-  const [toDate, setToDate] = useState(moment().format("YYYYMMDDHHmmss"));
+  const [fromDate, setFromDate] = useState(moment().format("YYYYMMDD"));
+  const [fromTime, setFromTime] = useState(moment().format("HHmmss"));
+  const [toTime, setToTime] = useState(moment().format("HHmmss"));
   const [isBusDataIsLoading, setIsBusDataIsLoading] = useState(false);
   const [markerInterval, setMarkerInterval] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(false);
@@ -560,7 +566,7 @@ const BusSimulation = (props) => {
   }, []);
   async function getBuses() {
     let response = await fetch(
-      `http://193.176.241.150:8080/tms/api/reactService/bus/all`
+      `${appInfo.apiBaseAddress}/tms/api/reactService/bus/all`
     );
     console.log(response);
     let data = await response.json();
@@ -568,7 +574,7 @@ const BusSimulation = (props) => {
   }
   async function getSelectedBusesData(inputJson) {
     let response = await fetch(
-      `http://193.176.241.150:8080/tms/api/reactService/bus/track`,
+      `${appInfo.apiBaseAddress}/tms/api/reactService/bus/track`,
       {
         headers: { "content-type": "application/json" },
         method: "POST",
@@ -608,10 +614,12 @@ const BusSimulation = (props) => {
     setBufferMarkers([]);
     setDiffSecond(0);
     resetTimer();
-    setMapCenter([32.654492278497646, 51.64067001473507]);
+    setMapCenter(appInfo.mapCenter);
     setMapZoom(12);
     console.log(selectedBusOptions[0], selectedBusOptions[1]);
     const bus1 = selectedBusOptions.value;
+    var fromDateTime= `${fromDate}${fromTime}` 
+    var toDateTime= `${fromDate}${toTime}` 
     // const bus1 =
     //   selectedBusOptions[0] !== undefined ? selectedBusOptions[0].value : "0";
     const bus2 =
@@ -620,19 +628,19 @@ const BusSimulation = (props) => {
       busCode1: bus1,
       busCode2: bus2,
       tripCode: 0,
-      fromDate: fromDate,
-      toDate: toDate,
+      fromDate: fromDateTime,
+      toDate: toDateTime,
     });
     if (!bus1) {
       Notify({ type: "error", msg: "اتوبوس را انتخاب کنید." });
       return;
     }
-    if (!fromDate || !toDate) {
+    if (!fromDateTime || !toDateTime) {
       Notify({ type: "error", msg: "تاریخ شروع و پایان را وارد کنید!" });
       return;
     }
-    var theDate = moment(fromDate, "YYYYMMDDHHmmss");
-    var nowDate = moment(toDate, "YYYYMMDDHHmmss");
+    var theDate = moment(fromDateTime, "YYYYMMDDHHmmss");
+    var nowDate = moment(toDateTime, "YYYYMMDDHHmmss");
     var duration = moment.duration(nowDate.diff(theDate));
     var seconds = duration.asSeconds();
     if (seconds < 0) {
@@ -645,8 +653,8 @@ const BusSimulation = (props) => {
       busCode1: bus1,
       busCode2: 0,
       tripCode: 0,
-      fromDate: fromDate,
-      toDate: toDate,
+      fromDate: fromDateTime,
+      toDate: toDateTime,
     }).then((data) => {
       console.log(data);
       if (data[0].busData[0].length === 0) {
@@ -689,7 +697,7 @@ const BusSimulation = (props) => {
         );
         buffers.push(bufferI);
       }
-      console.log("buffers :", buffers);
+      // console.log("buffers :", buffers);
       setBufferInfo({
         ...bufferInfo,
         buffers: buffers,
@@ -698,12 +706,12 @@ const BusSimulation = (props) => {
         ),
         currentBuffer: 0,
       });
-      console.log(
-        data[0].busData[0].length / bufferInfo.bufferSize,
-        Math.floor(data[0].busData[0].length / bufferInfo.bufferSize),
-        "buffers:",
-        buffers
-      );
+      // console.log(
+      //   data[0].busData[0].length / bufferInfo.bufferSize,
+      //   Math.floor(data[0].busData[0].length / bufferInfo.bufferSize),
+      //   "buffers:",
+      //   buffers
+      // );
       setBufferMarkers(data[0].busData[0].slice(0, bufferInfo.bufferSize));
       console.log("sss", data[0].busData[0].slice(0, bufferInfo.bufferSize));
       setDiffSecond(
@@ -719,6 +727,12 @@ const BusSimulation = (props) => {
       );
       setIsBusDataIsLoading(false);
       setIsSubmitButtonDisabled(false);
+      setFitMarkerIntervalBounds(true);
+      setMapZoom(17);
+      setMapCenter([
+        data[0].busData[0][0].latitude,
+        data[0].busData[0][0].longitude,
+      ]);
     });
     // console.log(data, "sdsds");
     // var data = [];
@@ -800,6 +814,7 @@ const BusSimulation = (props) => {
         behavior: "smooth",
       }
     );
+    setMapCenter([bufferMarkers[id].latitude, bufferMarkers[id].longitude]);
     // setMapZoom()
   };
   const handleSpeedChange = () => {
@@ -1147,23 +1162,38 @@ const BusSimulation = (props) => {
           />
           <div className="dates-container">
             <div className="date-input-container">
-              <label>از تاریخ :</label>
+              <label>تاریخ :</label>
               <DatePicker
+                onChange={(value) =>
+                  setFromDate(moment(value).format("YYYYMMDD"))
+                }
+                isGregorian={false}
+                timePicker={false}
+                value={moment(fromDate)}
+              />
+              {/* <DatePicker
+                timePicker={false}
                 onClickSubmitButton={(momentObjFrom) => {
                   setFromDate(
                     moment(momentObjFrom.value._d).format("YYYYMMDDHHmmss")
                   );
                 }}
-              />
+              /> */}
             </div>
             <div className="date-input-container">
-              <label>تا تاریخ :</label>
-              <DatePicker
-                onClickSubmitButton={(momentObjTo) => {
-                  setToDate(
-                    moment(momentObjTo.value._d).format("YYYYMMDDHHmmss")
-                  );
-                }}
+              <label>از ساعت:</label>
+              <TimePicker
+                showSecond={false}
+                defaultValue={moment()}
+                className="xxx"
+                onChange={(value) => {setFromTime(moment(value).format("HHmmss"))}}
+              />
+              <label style={{ marginRight: "10px" }}>تا ساعت:</label>
+              <TimePicker
+                showSecond={false}
+                defaultValue={moment()}
+                className="xxx"
+                onChange={(value) => {setToTime(moment(value).format("HHmmss"))}}
               />
             </div>
           </div>

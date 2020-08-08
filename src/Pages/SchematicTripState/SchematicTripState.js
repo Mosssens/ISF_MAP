@@ -3,7 +3,8 @@ import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import data from "./data.js";
 import { ToastContainer, toast } from "react-toastify";
-
+import {esfApp as appInfo} from "../../Constants/config"
+import { from } from "jalali-moment";
 const SchematicTripState = () => {
   const forwardLineRef = useRef();
   const backwardLineRef = useRef();
@@ -42,8 +43,9 @@ const SchematicTripState = () => {
     return color;
   };
   useEffect(() => {
+
     const wsClient = new WebSocket(
-      "ws://193.176.241.150:8080/tms/websocket/getSchematicTripState"
+   `${appInfo.socketBaseAddress}/tms/websocket/getSchematicTripState`
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -179,13 +181,14 @@ const SchematicTripState = () => {
   };
   
   const onSubmitBtnClick = () => {
+  
     if (selectedLine === 0) {
       Notify({ type: "error", msg: "ابتدا خط را انتخاب کنید!" });
       return ;
     }
     setIsLoading(true);
     fetch(
-      `http://193.176.241.150:8080/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
+      `${appInfo.apiBaseAddress}/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
       { method: "post" }
     )
       .then((res) => res.json())
@@ -204,7 +207,7 @@ const SchematicTripState = () => {
   };
   async function getLines(name) {
     let response = await fetch(
-      `http://193.176.241.150:8080/tms/api/reactService/trip/all`
+      `${appInfo.apiBaseAddress}/tms/api/reactService/trip/all`
     );
     let data = await response.json();
     return data;

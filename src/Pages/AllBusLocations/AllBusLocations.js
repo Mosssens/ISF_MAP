@@ -6,13 +6,12 @@ import Select from "react-select";
 import { IoMdPin } from "react-icons/io";
 import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
+import { esfApp as appInfo} from "../../Constants/config"
+
 const AllBusLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
   const [markers, setMarkers] = useState([]);
-  const [mapCenter, setMapCenter] = useState([
-    32.654492278497646,
-    51.64067001473507,
-  ])
+  const [mapCenter, setMapCenter] = useState(appInfo.mapCenter)
   const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
@@ -28,7 +27,7 @@ const AllBusLocations = () => {
   const actionMenuHeaderRef = useRef();
   useEffect(() => {
     const wsClient = new WebSocket(
-      "ws://193.176.241.150:8080/tms/websocket/getAllBusLocationsNewDate"
+      `${appInfo.socketBaseAddress}/tms/websocket/getAllBusLocationsNewDate`
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -107,7 +106,7 @@ const AllBusLocations = () => {
     // console.log("sss", actionMenuHeaderRef.current.offsetHeight);
     actionMenuRef.current.scrollTo(
       0,
-      241 * index + actionMenuHeaderRef.current.offsetHeight - 10,
+      261 * index + actionMenuHeaderRef.current.offsetHeight - 10,
       { behavior: "smooth" }
     );
   };
@@ -407,7 +406,7 @@ const AllBusLocations = () => {
                       <td>
                       <td>تاریخ :</td>
                       <td  className="value" style={{ direction: "ltr", textAlign: "right" }}>
-                        {moment(bus.clientDate, "YYYYMMDDhhmmss").format(
+                        {moment(bus.clientDate, "YYYYMMDDHHmmss").format(
                           "jYYYY/jM/jD HH:mm:ss"
                         )}
                       </td>
