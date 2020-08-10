@@ -24,9 +24,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "./time-picker.css";
 import TimePicker from "rc-time-picker";
 
-import { esfApp as appInfo } from "../../Constants/config";
+import { qomApp as appInfo } from "../../Constants/config";
 import { from } from "jalali-moment";
-
+// import {baseURL} from '../../Constants/config'
 const Pins = React.memo((props) => {
   var pins = null;
 
@@ -552,9 +552,8 @@ const BusSimulation = (props) => {
   useEffect(() => {
     // window.addEventListener('keyup', upHandler);
     // Remove event listeners on cleanup
-
+    
     getBuses().then((data) => {
-      console.log(data, "buses");
       var busTempOptions = data.map((item, index) => {
         return {
           value: item.code,

@@ -3,7 +3,7 @@ import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import data from "./data.js";
 import { ToastContainer, toast } from "react-toastify";
-import {esfApp as appInfo} from "../../Constants/config"
+import {qomApp as appInfo} from "../../Constants/config"
 import { from } from "jalali-moment";
 const SchematicTripState = () => {
   const forwardLineRef = useRef();

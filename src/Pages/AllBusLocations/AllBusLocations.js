@@ -6,7 +6,7 @@ import Select from "react-select";
 import { IoMdPin } from "react-icons/io";
 import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
-import { esfApp as appInfo} from "../../Constants/config"
+import { qomApp as appInfo} from "../../Constants/config"
 
 const AllBusLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
