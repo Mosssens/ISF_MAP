@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Map from "../../Components/BusSimulationMap/Map";
-import "./BusSimulation.scss";
+import Map from "../../Components/MultiBusSimulationMap/Map";
+import "./MultiBusSimulation.scss";
 import Ripples from "react-ripples";
 import Select from "react-select";
 import {
@@ -16,7 +16,6 @@ import {
 import Loader from "../../Components/Loader/Loader";
 import moment from "moment-jalaali";
 import DatePicker from "react-datepicker2";
-
 import { marker } from "leaflet";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -25,6 +24,7 @@ import TimePicker from "rc-time-picker";
 
 import { appConfig } from "../../Constants/config";
 import { from } from "jalali-moment";
+
 // import {baseURL} from '../../Constants/config'
 const Pins = React.memo((props) => {
   var pins = null;
@@ -50,9 +50,10 @@ const Pins = React.memo((props) => {
       var seconds = duration.asSeconds();
       var growPercentage = (seconds / diffSeconds) * 100;
       // console.log(MATH.abs( seconds), "/", diffSeconds ,"*", 100)
+
       return (
         <div
-          className="pin"
+          className={`pin`}
           onClick={() => props.onMarkerClick(id)}
           style={{
             left: (props.playbackBarWidth / 100) * growPercentage,
@@ -60,9 +61,10 @@ const Pins = React.memo((props) => {
           }}
         >
           <div className="tooltip">
-            {`${id + 1} : ${moment(pin.clientDate, "YYYYMMDDHHmmss").format(
-              "HH:mm:ss"
-            )}`}
+            {`${id + 1} / ${pin.busCode} : ${moment(
+              pin.clientDate,
+              "YYYYMMDDHHmmss"
+            ).format("HH:mm:ss")}`}
           </div>
         </div>
       );
@@ -96,11 +98,27 @@ const Records = React.memo((props) => {
   return (
     <div className="col col-1">
       {props.markers.map((bus, rcdIndex) => {
+        var filteredBusIndex = props.buses.findIndex(
+          (tmpBus) => tmpBus.busCode === bus.busCode
+        );
+        // console.log('a',filteredBusIndex)
+        var color = "";
+        switch (filteredBusIndex) {
+          case 0:
+            color = "blue";
+            break;
+          case 1:
+            color = "red";
+            break;
+          case 2:
+            color = "green";
+            break;
+        }
         return (
           <div
             onClick={() => props.onMarkerClick(rcdIndex)}
             key={rcdIndex}
-            className={`bus-detail ${
+            className={`bus-detail  ${color}  ${
               props.activeMarker == rcdIndex ? "active" : ""
             }`}
           >
@@ -165,7 +183,7 @@ function useEventListener(eventName, handler, element = window) {
     [eventName, element] // Re-run if eventName or element changes
   );
 }
-const BusSimulation = (props) => {
+const MultiBusSimulation = (props) => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getBusSimulation')
   const [markers, setMarkers] = useState([[], []]);
   const [mapCenter, setMapCenter] = useState(appConfig.mapCenter);
@@ -182,6 +200,8 @@ const BusSimulation = (props) => {
   const actionMenuHeaderRef = useRef();
   const nextMarkerRef = useRef();
   const playbackBarRef = useRef();
+  const TimeSlicesRef = useRef();
+
   const [fromDate, setFromDate] = useState(moment().format("YYYYMMDD"));
   const [fromTime, setFromTime] = useState(moment().format("HHmmss"));
   const [toTime, setToTime] = useState(moment().format("HHmmss"));
@@ -201,6 +221,7 @@ const BusSimulation = (props) => {
     bufferSize: 500,
     buffers: [],
   });
+  const [buses, setBuses] = useState([]);
   const [speedOptions, setSpeedOptions] = useState([
     {
       id: 0,
@@ -256,6 +277,23 @@ const BusSimulation = (props) => {
         break;
     }
   };
+  const changeBusPosition = (markerInterval) => {
+    // console.log(markerInterval);
+    var filteredBusIndex = buses.findIndex(
+      (bus) => bus.busCode === bufferMarkers[markerInterval].busCode
+    );
+
+    var TmpBuses = buses;
+    TmpBuses[filteredBusIndex].busPosition = [
+      bufferMarkers[markerInterval].latitude,
+      bufferMarkers[markerInterval].longitude,
+    ];
+    TmpBuses[filteredBusIndex].time = moment(
+      bufferMarkers[markerInterval].clientDate,
+      "YYYYMMDDHHmmss"
+    ).format("HH:mm:ss");
+    setBuses(buses);
+  };
   const handler = useCallback(
     (e) => {
       // Update coordinates
@@ -271,6 +309,7 @@ const BusSimulation = (props) => {
         }
 
         setMarkerInterval(markerInterval + 1);
+        changeBusPosition(markerInterval + 1);
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
           bufferMarkers[markerInterval + 1].clientDate,
@@ -331,6 +370,7 @@ const BusSimulation = (props) => {
               )
             );
             setMarkerInterval(bufferInfo.bufferSize - 2);
+            changeBusPosition(bufferInfo.bufferSize - 2);
             setTimeLineInterval(
               moment(
                 bufferInfo.buffers[bufferInfo.currentBuffer - 1][
@@ -363,6 +403,7 @@ const BusSimulation = (props) => {
         }
 
         setMarkerInterval(markerInterval - 1);
+        changeBusPosition(markerInterval - 1);
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
           bufferMarkers[markerInterval - 1].clientDate,
@@ -420,6 +461,7 @@ const BusSimulation = (props) => {
         setTimeLineInterval(diffsecond);
       } else {
         setMarkerInterval(0);
+
         setTimeLineInterval(0);
         if (bufferInfo.currentBuffer !== bufferInfo.bufferCount) {
         }
@@ -428,6 +470,12 @@ const BusSimulation = (props) => {
           currentBuffer: bufferInfo.currentBuffer + 1,
         });
 
+        TimeSlicesRef.current.scrollLeft =
+          TimeSlicesRef.current.offsetWidth *
+          parseInt(
+            (bufferInfo.currentBuffer + 1) /
+              (TimeSlicesRef.current.offsetWidth / 70)
+          );
         setBufferMarkers(bufferInfo.buffers[bufferInfo.currentBuffer + 1]);
         setDiffSecond(
           moment(
@@ -477,14 +525,18 @@ const BusSimulation = (props) => {
                 }
               );
               setMarkerInterval(markerInterval + nextNotZeroIndex);
+              changeBusPosition(markerInterval + nextNotZeroIndex);
             } else {
               setMarkerInterval(bufferMarkers.length - 1);
+              changeBusPosition(bufferMarkers.length - 1);
             }
           } else {
-            setMarkerInterval((markerInterval) => markerInterval + 1);
+            setMarkerInterval(markerInterval + 1);
+            changeBusPosition(markerInterval + 1);
           }
         } else {
-          setMarkerInterval((markerInterval) => markerInterval + 1);
+          setMarkerInterval(markerInterval + 1);
+          changeBusPosition(markerInterval + 1);
         }
         if (fitMarkerIntervalBounds) {
           setMapCenter([
@@ -615,22 +667,18 @@ const BusSimulation = (props) => {
     setMapCenter(appConfig.mapCenter);
     setMapZoom(12);
     console.log(selectedBusOptions[0], selectedBusOptions[1]);
-    const bus1 = selectedBusOptions.value;
+    // if (selectedBusOptions.length < 2) {
+    //   Notify({ type: "error", msg: "دو اتوبوس را انتخاب کنید!" });
+    //   return;
+    // }
     var fromDateTime = `${fromDate}${fromTime}`;
     var toDateTime = `${fromDate}${toTime}`;
-    // const bus1 =
-    //   selectedBusOptions[0] !== undefined ? selectedBusOptions[0].value : "0";
+    const bus1 =
+      selectedBusOptions[0] !== undefined ? selectedBusOptions[0].value : "0";
     const bus2 =
       selectedBusOptions[1] !== undefined ? selectedBusOptions[1].value : "0";
-    console.log({
-      busCode1: bus1,
-      busCode2: bus2,
-      tripCode: 0,
-      fromDate: fromDateTime,
-      toDate: toDateTime,
-    });
-    if (!bus1) {
-      Notify({ type: "error", msg: "اتوبوس را انتخاب کنید." });
+    if(selectedBusOptions.length==0){
+      Notify({ type: "error", msg: "اتوبوس را انتخاب کنید !" });
       return;
     }
     if (!fromDateTime || !toDateTime) {
@@ -642,54 +690,107 @@ const BusSimulation = (props) => {
     var duration = moment.duration(nowDate.diff(theDate));
     var seconds = duration.asSeconds();
     if (seconds < 0) {
-      Notify({ type: "error", msg: "تاریخ پایان قبل تر از تاریخ شروع است!" });
+      Notify({ type: "error", msg: "ساعت پایان زودتر تر از ساعت شروع است!" });
       return;
     }
     setIsSubmitButtonDisabled(true);
     setIsBusDataIsLoading(true);
     getSelectedBusesData({
       busCode1: bus1,
-      busCode2: 0,
+      busCode2: bus2,
       tripCode: 0,
       fromDate: fromDateTime,
       toDate: toDateTime,
     }).then((data) => {
-      console.log(data);
-      if (data[0].busData[0].length === 0) {
-        Notify({
-          type: "message",
-          msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} ثبت نشده است .`,
-        });
-        setIsSubmitButtonDisabled(false);
-        setIsBusDataIsLoading(false);
-        return;
+      if (bus2 == 0) {
+        if (data[0].busData[0].length === 0) {
+          Notify({
+            type: "message",
+            msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} ثبت نشده است .`,
+          });
+          setIsSubmitButtonDisabled(false);
+          setIsBusDataIsLoading(false);
+          return
+        }
+      } else {
+        if (
+          data[0].busData[0].length === 0 ||
+          data[1].busData[0].length === 0
+        ) {
+          if (
+            data[0].busData[0].length === 0 &&
+            data[1].busData[0].length === 0
+          ) {
+            Notify({
+              type: "message",
+              msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} و ${bus2} ثبت نشده است .`,
+            });
+            return;
+          } else if (data[0].busData[0].length === 0) {
+            Notify({
+              type: "message",
+              msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} ثبت نشده است .`,
+            });
+          } else if (data[1].busData[0].length === 0) {
+            Notify({
+              type: "message",
+              msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus2} ثبت نشده است .`,
+            });
+          }
+          setIsSubmitButtonDisabled(false);
+          setIsBusDataIsLoading(false);
+        }
       }
-      var markers = [];
-      data[0].busData[0].map((item) => {
-        markers.push(
-          pickPropsFromObject(
-            item,
-            "clientDate",
-            "busCode",
-            "latitude",
-            "longitude",
-            "groundSpeed"
-          )
-        );
-      });
-      var markers = setMarkers([
-        // data[0].busData[0],
-        markers,
-        [],
-      ]);
 
-      var bufferCount = Math.ceil(
-        data[0].busData[0].length / bufferInfo.bufferSize
-      );
+      var markers = [];
+      data.map((dataItem, dataIndex) => {
+        dataItem.busData[0].map((item) => {
+          markers.push(
+            pickPropsFromObject(
+              item,
+              "clientDate",
+              "busCode",
+              "latitude",
+              "longitude",
+              "groundSpeed"
+            )
+          );
+        });
+      });
+      var buses = [];
+      data.map((bus) => {
+        if (bus.busData[0].length > 0) {
+          buses.push({
+            busCode: bus.busData[0][0].busCode,
+            busMarkerInterval: 0,
+            busPosition: [
+              bus.busData[0][0].latitude,
+              bus.busData[0][0].longitude,
+            ],
+            time: moment(bus.busData[0][0].clientDate, "YYYYMMDDHHmmss").format(
+              "HH:mm:ss"
+            ),
+          });
+        }
+      });
+      console.log("buses :", buses);
+      setBuses(buses);
+      markers = markers.sort((a, b) => {
+        if (a.clientDate < b.clientDate) {
+          return -1;
+        }
+        if (a.clientDate > b.clientDate) {
+          return 1;
+        }
+        return 0;
+      });
+      console.log("markers :", markers);
+
+      var bufferCount = Math.ceil(markers.length / bufferInfo.bufferSize);
 
       var buffers = [];
       for (var i = 0; i < bufferCount; i++) {
-        var bufferI = data[0].busData[0].slice(
+        var bufferI = markers.slice(
           bufferInfo.bufferSize * i,
           bufferInfo.bufferSize * (i + 1)
         );
@@ -699,9 +800,7 @@ const BusSimulation = (props) => {
       setBufferInfo({
         ...bufferInfo,
         buffers: buffers,
-        bufferCount: Math.ceil(
-          data[0].busData[0].length / bufferInfo.bufferSize
-        ),
+        bufferCount: Math.ceil(markers.length / bufferInfo.bufferSize),
         currentBuffer: 0,
       });
       // console.log(
@@ -710,78 +809,26 @@ const BusSimulation = (props) => {
       //   "buffers:",
       //   buffers
       // );
-      setBufferMarkers(data[0].busData[0].slice(0, bufferInfo.bufferSize));
-      console.log("sss", data[0].busData[0].slice(0, bufferInfo.bufferSize));
+      setBufferMarkers(markers.slice(0, bufferInfo.bufferSize));
       setDiffSecond(
         moment(
-          data[0].busData[0].slice(0, bufferInfo.bufferSize)[
-            data[0].busData[0].slice(0, bufferInfo.bufferSize).length - 1
+          markers.slice(0, bufferInfo.bufferSize)[
+            markers.slice(0, bufferInfo.bufferSize).length - 1
           ].clientDate,
           "YYYYMMDDHHmmss"
-        ).diff(
-          moment(data[0].busData[0][0].clientDate, "YYYYMMDDHHmmss"),
-          "seconds"
-        )
+        ).diff(moment(markers[0].clientDate, "YYYYMMDDHHmmss"), "seconds")
       );
       setIsBusDataIsLoading(false);
       setIsSubmitButtonDisabled(false);
-      setFitMarkerIntervalBounds(true);
-      setMapZoom(17);
-      setMapCenter([
-        data[0].busData[0][0].latitude,
-        data[0].busData[0][0].longitude,
+      // setFitMarkerIntervalBounds(true);
+      // setMapZoom(17);
+      // setMapCenter([markers[0].latitude, markers[0].longitude]);
+      var markers = setMarkers([
+        // data[0].busData[0],
+        markers,
+        [],
       ]);
     });
-    // console.log(data, "sdsds");
-    // var data = [];
-    // setMarkers([FakeData[0].busData[0], []]);
-
-    // const bufferCount = Math.ceil(
-    //   FakeData[0].busData[0].length / bufferInfo.bufferSize
-    // );
-    // var buffers = [];
-    // for (var i = 0; i < bufferCount - 1; i++) {
-    //   var bufferI = FakeData[0].busData[0].slice(
-    //     bufferInfo.bufferSize * (i + 1),
-    //     bufferInfo.bufferSize * (i + 2)
-    //   );
-    //   buffers.push(bufferI);
-    // }
-    // setBufferInfo({
-    //   ...bufferInfo,
-    //   buffers: buffers,
-    //   bufferCount: Math.ceil(
-    //     FakeData[0].busData[0].length / bufferInfo.bufferSize
-    //   ),
-    // });
-    // setBufferMarkers(FakeData[0].busData[0].slice(0, bufferInfo.bufferSize));
-    // setDiffSecond(
-    //   moment(
-    //     FakeData[0].busData[0].slice(0, bufferInfo.bufferSize)[
-    //       FakeData[0].busData[0].slice(0, bufferInfo.bufferSize).length - 1
-    //     ].clientDate,
-    //     "YYYYMMDDHHmmss"
-    //   ).diff(
-    //     moment(FakeData[0].busData[0][0].clientDate, "YYYYMMDDHHmmss"),
-    //     "seconds"
-    //   )
-    // );
-    // setIsBusDataIsLoading(false);
-    // setMarkers([
-    //   // data[0].busData[0],
-    //   FakeData[0].busData[0],
-    //   [],
-    // ]);
-
-    // setDiffSecond(
-    //   moment(
-    //     FakeData[0].busData[0][FakeData[0].busData[0].length - 1].clientDate,
-    //     "YYYYMMDDHHmmss"
-    //   ).diff(
-    //     moment(FakeData[0].busData[0][0].clientDate, "YYYYMMDDHHmmss"),
-    //     "seconds"
-    //   )
-    // );
   };
   const getTimeLineTime = () => {
     if (bufferMarkers.length) {
@@ -813,6 +860,19 @@ const BusSimulation = (props) => {
       }
     );
     setMapCenter([bufferMarkers[id].latitude, bufferMarkers[id].longitude]);
+    var filteredBusIndex = buses.findIndex(
+      (bus) => bus.busCode === bufferMarkers[id].busCode
+    );
+    var TmpBuses = buses;
+    TmpBuses[filteredBusIndex].busPosition = [
+      bufferMarkers[id].latitude,
+      bufferMarkers[id].longitude,
+    ];
+    TmpBuses[filteredBusIndex].time = moment(
+      bufferMarkers[id].clientDate,
+      "YYYYMMDDHHmmss"
+    ).format("HH:mm:ss");
+    setBuses(buses);
     // setMapZoom()
   };
   const handleSpeedChange = () => {
@@ -843,7 +903,7 @@ const BusSimulation = (props) => {
     );
   };
   return (
-    <section className="bus-simulation-container">
+    <section className="multi-bus-simulation-container">
       <div className="map-contianer">
         {isLoading ? (
           <Loader />
@@ -851,7 +911,7 @@ const BusSimulation = (props) => {
           <Map
             center={mapCenter}
             firstBusPath={markers[0]}
-            secondBusPath={markers[1]}
+            buses={buses}
             zoom={mapZoom}
             marker={
               markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
@@ -860,38 +920,40 @@ const BusSimulation = (props) => {
         )}
         <div className="media-controler-container">
           <div className="palyback-slice-container">
-            <TimeSlices
-              buffers={bufferInfo.buffers}
-              currentBuffer={bufferInfo.currentBuffer}
-              onBufferClick={(index) => {
-                setBufferInfo({ ...bufferInfo, currentBuffer: index });
-                setBufferMarkers(bufferInfo.buffers[index]);
+            <div className="time-slices-container" ref={TimeSlicesRef}>
+              <TimeSlices
+                buffers={bufferInfo.buffers}
+                currentBuffer={bufferInfo.currentBuffer}
+                onBufferClick={(index) => {
+                  setBufferInfo({ ...bufferInfo, currentBuffer: index });
+                  setBufferMarkers(bufferInfo.buffers[index]);
 
-                setDiffSecond(
-                  moment(
-                    bufferInfo.buffers[index][
-                      bufferInfo.buffers[index].length - 1
-                    ].clientDate,
-                    "YYYYMMDDHHmmss"
-                  ).diff(
+                  setDiffSecond(
                     moment(
-                      bufferInfo.buffers[index][0].clientDate,
+                      bufferInfo.buffers[index][
+                        bufferInfo.buffers[index].length - 1
+                      ].clientDate,
                       "YYYYMMDDHHmmss"
-                    ),
-                    "seconds"
-                  )
-                );
-                setMarkerInterval(0);
-                setTimeLineInterval(0);
-                busDetailsContainerRef.current.scrollTo(
-                  0,
-                  busDetailsContainerRef.current.offsetHeight * 0,
-                  {
-                    behavior: "smooth",
-                  }
-                );
-              }}
-            />
+                    ).diff(
+                      moment(
+                        bufferInfo.buffers[index][0].clientDate,
+                        "YYYYMMDDHHmmss"
+                      ),
+                      "seconds"
+                    )
+                  );
+                  setMarkerInterval(0);
+                  setTimeLineInterval(0);
+                  busDetailsContainerRef.current.scrollTo(
+                    0,
+                    busDetailsContainerRef.current.offsetHeight * 0,
+                    {
+                      behavior: "smooth",
+                    }
+                  );
+                }}
+              />
+            </div>
           </div>
           <div className="playback-bar-container">
             <div className="playback-bar">
@@ -902,6 +964,7 @@ const BusSimulation = (props) => {
                     ? playbackBarRef.current.offsetWidth
                     : 0
                 }
+                buses={buses}
                 markers={bufferMarkers}
               />
               <progress
@@ -1128,35 +1191,31 @@ const BusSimulation = (props) => {
           <Select
             isLoading={busOptions.length === 0}
             // defaultValue="adsda"
+            closeMenuOnSelect={true}
             withAll={true}
             ref={searchBoxRef}
             value={selectedBusOptions}
             placeholder="اتوبوس را انتخاب کنید ..."
             isRtl={true}
+            className="bus-select-input"
+            isMulti={true}
+            options={busOptions}
+            isRtl={true}
             onChange={(selectedBuses) => {
               var tempArr = [];
-              // console.log('fff',selectedBuses,'sdadd',(selectedBuses.filter(item=>item.value==="All")) )
-              // if (selectedBuses !== null) {
-              //   if (
-              //     selectedBuses.filter((item) => item.value === "All").length >
-              //     0
-              //   ) {
-              //     selectedBuses = [{ value: "All", label: "همه اتوبوس ها" }];
-              //     tempArr = ["All"];
-              //   } else {
-              //     selectedBuses.map((item) => {
-              //       tempArr.push(item.value);
-              //     });
-              //   }
-              // }
+              if (selectedBuses !== null) {
+                if (selectedBuses.length > 2) {
+                  Notify({
+                    type: "message",
+                    msg: "حداکثر 2 اتوبوس میتوانید انتخاب کنید.",
+                  });
+                  return;
+                }
+              }
               setSelectedBusOptions(selectedBuses);
               setSelectedBusOptionsString(tempArr);
             }}
-            className="bus-select-input"
-            closeMenuOnSelect={true}
-            isMulti={false}
-            options={busOptions}
-            isRtl={true}
+   
           />
           <div className="dates-container">
             <div className="date-input-container">
@@ -1169,20 +1228,13 @@ const BusSimulation = (props) => {
                 timePicker={false}
                 value={moment(fromDate)}
               />
-              {/* <DatePicker
-                timePicker={false}
-                onClickSubmitButton={(momentObjFrom) => {
-                  setFromDate(
-                    moment(momentObjFrom.value._d).format("YYYYMMDDHHmmss")
-                  );
-                }}
-              /> */}
             </div>
             <div className="date-input-container">
               <label>از ساعت:</label>
               <TimePicker
                 showSecond={false}
                 defaultValue={moment()}
+                className="xxx"
                 onChange={(value) => {
                   setFromTime(moment(value).format("HHmmss"));
                 }}
@@ -1191,6 +1243,7 @@ const BusSimulation = (props) => {
               <TimePicker
                 showSecond={false}
                 defaultValue={moment()}
+                className="xxx"
                 onChange={(value) => {
                   setToTime(moment(value).format("HHmmss"));
                 }}
@@ -1210,102 +1263,18 @@ const BusSimulation = (props) => {
             )}
           </button>
         </div>
-        {markers[1].length === 0 ? (
-          <div
-            className="bus-detail-container single"
-            ref={busDetailsContainerRef}
-          >
-            <Records
-              markers={bufferMarkers}
-              activeMarker={markerInterval}
-              onMarkerClick={(id) => onMarkerClick(id)}
-            />
-          </div>
-        ) : (
-          <div
-            className="bus-detail-container double"
-            ref={busDetailsContainerRef}
-          >
-            <div className="col col-1">
-              {bufferMarkers.map((bus, rcdIndex) => {
-                return (
-                  <div
-                    onClick={() => setMarkerInterval(rcdIndex)}
-                    key={rcdIndex}
-                    className={`bus-detail ${
-                      markerInterval === rcdIndex ? "active" : ""
-                    }`}
-                  >
-                    <table>
-                      <tbody>
-                        <tr>
-                          <td className="index">{rcdIndex + 1}</td>
-                          <td className="info-container">
-                            <td className="speed">
-                              <td>سرعت لحظه ای :</td>
-                              <td className="value">{`${bus.groundSpeed}km`}</td>
-                            </td>
-                            <td className="date">
-                              <td>تاریخ :</td>
-                              <td
-                                className="value"
-                                style={{ direction: "ltr", textAlign: "right" }}
-                              >
-                                {moment(
-                                  bus.clientDate,
-                                  "YYYYMMDDHHmmss"
-                                ).format("jYYYY/jM/jD HH:mm:ss")}
-                              </td>
-                            </td>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="col col-2">
-              {markers[1].map((bus, rcdIndex) => {
-                return (
-                  <div
-                    onClick={() => setMarkerInterval(rcdIndex)}
-                    key={rcdIndex}
-                    className={`bus-detail ${
-                      markerInterval === rcdIndex ? "active" : ""
-                    }`}
-                  >
-                    <table>
-                      <tbody>
-                        <tr>
-                          <td className="index">{rcdIndex + 1}</td>
-                          <td className="info-container">
-                            <td className="speed">
-                              <td>سرعت لحظه ای :</td>
-                              <td className="value">{`${bus.groundSpeed}km`}</td>
-                            </td>
-                            <td className="date">
-                              <td>تاریخ :</td>
-                              <td
-                                className="value"
-                                style={{ direction: "ltr", textAlign: "right" }}
-                              >
-                                {moment(
-                                  bus.clientDate,
-                                  "YYYYMMDDHHmmss"
-                                ).format("jYYYY/jM/jD HH:mm:ss")}
-                              </td>
-                            </td>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
+        <div
+          className="bus-detail-container single"
+          ref={busDetailsContainerRef}
+        >
+          <Records
+            buses={buses}
+            markers={bufferMarkers}
+            activeMarker={markerInterval}
+            onMarkerClick={(id) => onMarkerClick(id)}
+          />
+        </div>
       </div>
       <ToastContainer
         position="top-right"
@@ -1318,9 +1287,8 @@ const BusSimulation = (props) => {
         draggable
         pauseOnHover
       />
-      {/* Same as */}
     </section>
   );
 };
 
-export default BusSimulation;
+export default MultiBusSimulation;

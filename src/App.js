@@ -3,6 +3,8 @@ import Layout from './Components/Layout/Layout'
 import SchematicTripState from './Pages/SchematicTripState/SchematicTripState'
 import AllBusLocations from './Pages/AllBusLocations/AllBusLocations'
 import BusSimulation from './Pages/BusSimulation/BusSimulation'
+import MultiBusSimulation from './Pages/MultiBusSimulation/MultiBusSimulation'
+
 import Loader from './Components/Loader/Loader'
 // var ws = new WebSocket('ws://77.237.74.40:4546/tms/websocket/getAllBusLocations')
 import {
@@ -19,7 +21,8 @@ function App() {
         <Switch>
           <Route path="/SchematicTripState" component={SchematicTripState} />
           <Route path="/AllBusLocations" component={AllBusLocations} />
-          <Route path="/BusSimulation" component={BusSimulation} />
+          {/* <Route path="/BusSimulation" component={BusSimulation} /> */}
+          <Route path="/BusSimulation" component={MultiBusSimulation} />
           <Route path="/" >
             <Loader />
           </Route>

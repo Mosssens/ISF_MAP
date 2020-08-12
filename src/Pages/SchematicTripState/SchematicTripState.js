@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
-import data from "./data.js";
 import { ToastContainer, toast } from "react-toastify";
-import {qomApp as appInfo} from "../../Constants/config"
+import {appConfig} from "../../Constants/config"
 import { from } from "jalali-moment";
 const SchematicTripState = () => {
   const forwardLineRef = useRef();
@@ -45,7 +44,7 @@ const SchematicTripState = () => {
   useEffect(() => {
 
     const wsClient = new WebSocket(
-   `${appInfo.socketBaseAddress}/tms/websocket/getSchematicTripState`
+   `${appConfig.socketBaseAddress}websocket/getSchematicTripState`
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -188,7 +187,7 @@ const SchematicTripState = () => {
     }
     setIsLoading(true);
     fetch(
-      `${appInfo.apiBaseAddress}/tms/api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
+      `${appConfig.apiBaseAddress}api/reactService/trip/tripDetails?tripCode=${selectedLine}`,
       { method: "post" }
     )
       .then((res) => res.json())
@@ -207,7 +206,7 @@ const SchematicTripState = () => {
   };
   async function getLines(name) {
     let response = await fetch(
-      `${appInfo.apiBaseAddress}/tms/api/reactService/trip/all`
+      `${appConfig.apiBaseAddress}api/reactService/trip/all`
     );
     let data = await response.json();
     return data;
