@@ -16,16 +16,28 @@ const baseWSURL = "ws://" + getUrl.host;
 const $globalLat = window.parent.globalLat;
 const $globalLong = window.parent.globalLong;
 const $contextPath = window.parent.contextPath;
-console.log(
-  " baseUrl :",
-  $contextPath + "/",
-  "baseWSURL :",
-  baseWSURL + $contextPath + "/",
-  "$contextPath :",
-  $contextPath
-);
+const mapOnline = window.parent.mapOnline;
+console.log({
+  mapCenter: [$globalLat, $globalLong],
+  mapURL:
+    mapOnline == "0"
+      ? baseUrl + "/tiles/{z}/{x}/{y}.png"
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  apiBaseAddress:
+    baseUrl === "http://localhost:3000"
+      ? "http://193.176.241.150:8080/tms/"
+      : $contextPath + "/",
+  socketBaseAddress:
+    baseWSURL === "ws://localhost:3000"
+      ? "ws://193.176.241.150:8080/tms/"
+      : baseWSURL + $contextPath + "/",
+});
 export const appConfig = {
   mapCenter: [$globalLat, $globalLong],
+  mapURL:
+    mapOnline == "0"
+      ? baseUrl + "/tiles/{z}/{x}/{y}.png"
+      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   apiBaseAddress:
     baseUrl === "http://localhost:3000"
       ? "http://193.176.241.150:8080/tms/"

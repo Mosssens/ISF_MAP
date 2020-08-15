@@ -310,6 +310,12 @@ const MultiBusSimulation = (props) => {
 
         setMarkerInterval(markerInterval + 1);
         changeBusPosition(markerInterval + 1);
+        if (fitMarkerIntervalBounds) {
+          setMapCenter([
+            bufferMarkers[markerInterval + 1].latitude,
+            bufferMarkers[markerInterval + 1].longitude,
+          ]);
+        }
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
           bufferMarkers[markerInterval + 1].clientDate,
@@ -337,6 +343,9 @@ const MultiBusSimulation = (props) => {
           );
         }
       }
+      if (e.keyCode == 0 || e.keyCode == 32) {
+        toggleTimer();
+      }
       if (e.key === "ArrowLeft") {
         // console.log(nextMarkerRef)
         // setIsTimerActive(false);
@@ -353,6 +362,7 @@ const MultiBusSimulation = (props) => {
               ...bufferInfo,
               currentBuffer: bufferInfo.currentBuffer - 1,
             });
+
             setBufferMarkers(bufferInfo.buffers[bufferInfo.currentBuffer - 1]);
             setDiffSecond(
               moment(
@@ -426,7 +436,7 @@ const MultiBusSimulation = (props) => {
         );
       }
     },
-    [bufferMarkers, markerInterval]
+    [fitMarkerIntervalBounds, isTimerActive, bufferMarkers, markerInterval]
   );
 
   // Add event listener using our hook
@@ -677,7 +687,7 @@ const MultiBusSimulation = (props) => {
       selectedBusOptions[0] !== undefined ? selectedBusOptions[0].value : "0";
     const bus2 =
       selectedBusOptions[1] !== undefined ? selectedBusOptions[1].value : "0";
-    if(selectedBusOptions.length==0){
+    if (selectedBusOptions.length == 0) {
       Notify({ type: "error", msg: "اتوبوس را انتخاب کنید !" });
       return;
     }
@@ -710,7 +720,7 @@ const MultiBusSimulation = (props) => {
           });
           setIsSubmitButtonDisabled(false);
           setIsBusDataIsLoading(false);
-          return
+          return;
         }
       } else {
         if (
@@ -770,6 +780,7 @@ const MultiBusSimulation = (props) => {
             time: moment(bus.busData[0][0].clientDate, "YYYYMMDDHHmmss").format(
               "HH:mm:ss"
             ),
+            isTooltipActive: false,
           });
         }
       });
@@ -864,15 +875,16 @@ const MultiBusSimulation = (props) => {
       (bus) => bus.busCode === bufferMarkers[id].busCode
     );
     var TmpBuses = buses;
-    TmpBuses[filteredBusIndex].busPosition = [
-      bufferMarkers[id].latitude,
-      bufferMarkers[id].longitude,
-    ];
-    TmpBuses[filteredBusIndex].time = moment(
-      bufferMarkers[id].clientDate,
-      "YYYYMMDDHHmmss"
-    ).format("HH:mm:ss");
-    setBuses(buses);
+
+    TmpBuses[filteredBusIndex] = {
+      ...TmpBuses[filteredBusIndex],
+      time: moment(bufferMarkers[id].clientDate, "YYYYMMDDHHmmss").format(
+        "HH:mm:ss"
+      ),
+      busPosition: [bufferMarkers[id].latitude, bufferMarkers[id].longitude],
+    };
+    setBuses(TmpBuses);
+    console.log("ajab", buses);
     // setMapZoom()
   };
   const handleSpeedChange = () => {
@@ -916,6 +928,17 @@ const MultiBusSimulation = (props) => {
             marker={
               markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
             }
+            onMapMarkerCkick={(busIndex) => {
+              // alert(busIndex);
+              var TmpBuses = buses;
+              TmpBuses[busIndex] = {
+                ...TmpBuses[busIndex],
+                isTooltipActive: !TmpBuses[busIndex].isTooltipActive,
+              };
+
+              setBuses(TmpBuses);
+              console.log("tmpbusss", TmpBuses);
+            }}
           />
         )}
         <div className="media-controler-container">
@@ -1215,7 +1238,6 @@ const MultiBusSimulation = (props) => {
               setSelectedBusOptions(selectedBuses);
               setSelectedBusOptionsString(tempArr);
             }}
-   
           />
           <div className="dates-container">
             <div className="date-input-container">

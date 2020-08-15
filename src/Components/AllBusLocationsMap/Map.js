@@ -6,6 +6,7 @@ import Control from "react-leaflet-control";
 import {FaArrowsAlt} from 'react-icons/fa';
 import './Map.scss'
 delete L.Icon.Default.prototype._getIconUrl;
+import { appConfig } from "../../Constants/config";
 
 // L.Icon.Default.mergeOptions({
 //   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -80,7 +81,7 @@ export default function Map(props) {
   return (
     <LeafletMap ref={mapRef} center={props.center} zoom={props.zoom} minZoom={7} maxZoom={19} >
       <TileLayer
-        url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        url={appConfig.mapURL}
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       <FeatureGroup ref={mapGroupRef}>

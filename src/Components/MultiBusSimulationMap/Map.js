@@ -13,6 +13,8 @@ import {
 import Control from "react-leaflet-control";
 import { FaArrowsAlt } from "react-icons/fa";
 import "./Map.scss";
+import { appConfig } from "../../Constants/config";
+
 delete L.Icon.Default.prototype._getIconUrl;
 // L.Icon.Default.mergeOptions({
 //   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -74,7 +76,6 @@ var blueIcon = L.icon({
 // });
 
 const Circles = React.memo((props) => {
-  console.log("Circles is render these buses", props.buses);
   return props.buses.map((bus, busIndex) => {
     var color = switchColors(busIndex);
     return props.markers
@@ -113,16 +114,18 @@ const Markers = (props) => {
         icon={color.icon}
         key={`${bus.busCode}`}
         position={bus.busPosition}
+        onclick={()=>props.onMapMarkerCkick(busIndex)}
       >
-        <Tooltip permanent direction="bottom" offset={L.point(63, 1)}>
+        <Tooltip key={4} permanent direction="bottom" offset={L.point(63, 1)}>
           <div>{bus.busCode}</div>
           <div>{bus.time}</div>
+          {bus.isTooltipActive ? <div>active</div> : null}
         </Tooltip>
       </Marker>
     );
   });
 };
-export default (function Map(props) {
+ const Map=(props)=> {
   // const [markers, setMarkers] = useState()
   // const { markers } = props;
   const mapRef = useRef();
@@ -144,9 +147,9 @@ export default (function Map(props) {
   };
   useEffect(() => {
     if (props.fitMarkerIntervalBounds) {
-      fitBounds(props.marker);
+      // fitBounds(props.marker);
     }
-  }, [props.marker]);
+  }, [props.marker,props.buses]);
   useEffect(() => {
     setMarkers(props.firstBusPath);
   }, [props.firstBusPath, props.secondBusPath]);
@@ -160,23 +163,24 @@ export default (function Map(props) {
       maxZoom={19}
     >
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url={appConfig.mapURL}
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
       />
       <FeatureGroup ref={mapGroupRef}>
         {markers.length !== 0 && markers.length > props.marker ? (
           <React.Fragment>
-            <Markers buses={props.buses} />
+            <Markers onMapMarkerCkick={(busIndex) =>props.onMapMarkerCkick(busIndex)} buses={props.buses} />
 
             <Circles markers={markers} buses={props.buses} />
           </React.Fragment>
         ) : null}
       </FeatureGroup>
-      <Control position="topright">
+      {/* <Control position="topright">
         <button className="fit-bounds-btn" onClick={() => fitBounds()}>
           <FaArrowsAlt />
         </button>
-      </Control>
+      </Control> */}
     </LeafletMap>
   );
-});
+};
+export default Map
