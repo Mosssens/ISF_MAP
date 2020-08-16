@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import Layout from './Components/Layout/Layout'
-import SchematicTripState from './Pages/SchematicTripState/SchematicTripState'
-import AllBusLocations from './Pages/AllBusLocations/AllBusLocations'
-import BusSimulation from './Pages/BusSimulation/BusSimulation'
-import MultiBusSimulation from './Pages/MultiBusSimulation/MultiBusSimulation'
+import React, { useState, useEffect } from "react";
+import Layout from "./Components/Layout/Layout";
+import SchematicTripState from "./Pages/SchematicTripState/SchematicTripState";
+import AllBusLocations from "./Pages/AllBusLocations/AllBusLocations";
+import BusSimulation from "./Pages/BusSimulation/BusSimulation";
+import MultiBusSimulation from "./Pages/MultiBusSimulation/MultiBusSimulation";
+import LineSimulation from "./Pages/LineSimulation/LineSimulation";
 
-import Loader from './Components/Loader/Loader'
+import Loader from "./Components/Loader/Loader";
 // var ws = new WebSocket('ws://77.237.74.40:4546/tms/websocket/getAllBusLocations')
 import {
   BrowserRouter as Router,
   HashRouter,
   Switch,
   Route,
-  Link
+  Link,
 } from "react-router-dom";
 function App() {
   return (
@@ -23,7 +24,8 @@ function App() {
           <Route path="/AllBusLocations" component={AllBusLocations} />
           {/* <Route path="/BusSimulation" component={BusSimulation} /> */}
           <Route path="/BusSimulation" component={MultiBusSimulation} />
-          <Route path="/" >
+          <Route path="/LineSimulation" component={LineSimulation} />
+          <Route path="/">
             <Loader />
           </Route>
         </Switch>

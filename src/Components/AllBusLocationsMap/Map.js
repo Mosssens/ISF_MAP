@@ -4,9 +4,10 @@ import 'leaflet/dist/leaflet.css';
 import { Map as LeafletMap, TileLayer, Popup, Marker, FeatureGroup,Tooltip } from 'react-leaflet';
 import Control from "react-leaflet-control";
 import {FaArrowsAlt} from 'react-icons/fa';
+import { appConfig } from "../../Constants/config";
+
 import './Map.scss'
 delete L.Icon.Default.prototype._getIconUrl;
-import { appConfig } from "../../Constants/config";
 
 // L.Icon.Default.mergeOptions({
 //   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -79,7 +80,7 @@ export default function Map(props) {
     fitBounds()
   },[mapGroupRef.current]);
   return (
-    <LeafletMap ref={mapRef} center={props.center} zoom={props.zoom} minZoom={7} maxZoom={19} >
+    <LeafletMap ref={mapRef} center={props.center} zoom={props.zoom} minZoom={7} maxZoom={18} >
       <TileLayer
         url={appConfig.mapURL}
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'

@@ -11,6 +11,7 @@
     "leaflet": "^1.6.0",
     "moment": "^2.27.0",
     "node-sass": "^4.14.1",
+    "randomcolor": "^0.6.2",
     "rc-time-picker": "^3.7.3",
     "react": "^16.13.1",
     "react-clock": "^2.4.0",

@@ -109,7 +109,7 @@ export default (function Map(props) {
       center={props.center}
       zoom={props.zoom}
       minZoom={7}
-      maxZoom={19}
+      maxZoom={18}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
