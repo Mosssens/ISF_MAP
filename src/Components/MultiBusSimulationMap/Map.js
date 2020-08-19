@@ -116,8 +116,8 @@ const Markers = (props) => {
         position={bus.busPosition}
         onclick={()=>props.onMapMarkerCkick(busIndex)}
       >
-        <Tooltip key={4} permanent direction="bottom" offset={L.point(63, 1)}>
-          <div>{bus.busCode}</div>
+        <Tooltip className="bus-tooltip" key={4} permanent direction="bottom" offset={L.point(63, 1)}>
+          <div className="bus-code">{bus.busCode}</div>
           <div>{bus.time}</div>
           {bus.isTooltipActive ? <div>active</div> : null}
         </Tooltip>

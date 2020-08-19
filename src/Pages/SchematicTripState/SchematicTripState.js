@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
-import {appConfig} from "../../Constants/config"
+import { appConfig } from "../../Constants/config";
 import { from } from "jalali-moment";
 const SchematicTripState = () => {
   const forwardLineRef = useRef();
@@ -42,9 +42,8 @@ const SchematicTripState = () => {
     return color;
   };
   useEffect(() => {
-
     const wsClient = new WebSocket(
-   `${appConfig.socketBaseAddress}websocket/getSchematicTripState`
+      `${appConfig.socketBaseAddress}websocket/getSchematicTripState`
     );
     wsClient.onopen = () => {
       console.log("ws opened");
@@ -61,9 +60,9 @@ const SchematicTripState = () => {
     var isFirstMessageReceived = false;
     ws.onmessage = (e) => {
       if (isPaused) return;
-     
-        setIsLoading(false);
-      
+
+      setIsLoading(false);
+
       const message = JSON.parse(e.data);
       // this.setState({dataFromServer: message})
       const busStopsTemp = message.payload.inboundPoints.filter(
@@ -178,12 +177,11 @@ const SchematicTripState = () => {
         break;
     }
   };
-  
+
   const onSubmitBtnClick = () => {
-  
     if (selectedLine === 0) {
       Notify({ type: "error", msg: "ابتدا خط را انتخاب کنید!" });
-      return ;
+      return;
     }
     setIsLoading(true);
     fetch(
@@ -192,7 +190,6 @@ const SchematicTripState = () => {
     )
       .then((res) => res.json())
       .then((res) => {
-        
         setLineDetail(res);
         console.log("res", res);
       });

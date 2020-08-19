@@ -59,7 +59,22 @@ var blueIcon = L.icon({
   // shadowAnchor: [4, 62],  // the same for the shadow
   // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 });
-
+var inboundStartIcon = L.icon({
+  iconUrl: require("./img/bluestopmarkerfirst.png"),
+  iconAnchor: [13, 65],
+});
+var inboundEndIcon = L.icon({
+  iconUrl: require("./img/bluestopmarkerend.png"),
+  iconAnchor: [13, 65],
+});
+var outboundStartIcon = L.icon({
+  iconUrl: require("./img/redstopmarkerfirst.png"),
+  iconAnchor: [13, 65],
+});
+var outboundEndIcon = L.icon({
+  iconUrl: require("./img/redstopmarkerend.png"),
+  iconAnchor: [13, 65],
+});
 const Circles = React.memo((props) => {
   return props.buses.map((bus, busIndex) => {
     return props.markers
@@ -86,21 +101,51 @@ const Polylines = React.memo((props) => {
   props.inBoundPoints.map((inBoundPoint) => {
     positions.push([inBoundPoint.latitude, inBoundPoint.longitude]);
   });
-  return <Polyline positions={positions} />;
+  return <Polyline positions={positions} color={props.color} />;
 });
 const BusStops = React.memo((props) => {
-  return props.inBoundPoints.map((inBoundPoint,inBoundPointIndex) => {
+  return props.inBoundPoints.map((inBoundPoint, inBoundPointIndex) => {
     return (
       <Circle
-        center={{ lat: inBoundPoint.latitude, lng: inBoundPoint.longitude } }
+        center={{ lat: inBoundPoint.latitude, lng: inBoundPoint.longitude }}
         fillColor={props.color}
         color={props.color}
         radius={100}
         key={inBoundPointIndex}
         offset={L.point(63, 1)}
       >
-        <Tooltip className="black-tooltip" offset={L.point(130,0)} direction="bottom" >
-          <div>{inBoundPoint.stopName}</div>
+        {props.color === "red" && inBoundPointIndex === 0 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={outboundStartIcon}
+          />
+        ) : null}
+        {props.color === "red" &&
+        inBoundPointIndex === props.inBoundPoints.length - 1 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={outboundEndIcon}
+          />
+        ) : null}
+        {props.color === "blue" && inBoundPointIndex === 0 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={inboundStartIcon}
+          />
+        ) : null}
+        {props.color === "blue" &&
+        inBoundPointIndex === props.inBoundPoints.length - 1 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={inboundEndIcon}
+          />
+        ) : null}
+        <Tooltip
+          className="black-tooltip"
+          offset={L.point(130, 0)}
+          direction="bottom"
+        >
+          <div>{`${inBoundPoint.stopCode}: ${inBoundPoint.stopName}`}</div>
         </Tooltip>
       </Circle>
     );
@@ -172,7 +217,9 @@ const Map = (props) => {
   };
   useEffect(() => {
     if (props.fitMarkerIntervalBounds) {
-      // fitBounds(props.marker);
+      const map = mapRef.current.leafletElement; //get native Map instance
+      const group = mapGroupRef.current.leafletElement; //get native featureGroup instance
+      map.fitBounds(group.getBounds());
     }
   }, [props.marker, props.buses]);
   useEffect(() => {
@@ -201,7 +248,8 @@ const Map = (props) => {
             <BusStops color="blue" inBoundPoints={props.inBoundPoints} />
             <BusStops color="red" inBoundPoints={props.outBoundPoints} />
 
-            <Polylines inBoundPoints={props.inBoundPoints} />
+            <Polylines color="blue" inBoundPoints={props.inBoundPoints} />
+            <Polylines color="red" inBoundPoints={props.outBoundPoints} />
           </React.Fragment>
         ) : null}
       </FeatureGroup>

@@ -126,7 +126,7 @@ export default (function Map(props) {
                 markers[0][props.marker].longitude,
               ]}
             >
-              <Tooltip permanent direction="bottom" offset={L.point(63, 1)}>
+              <Tooltip className="bus-tooltip" permanent direction="bottom" offset={L.point(63, 1)}>
                 {markers[0][props.marker].busCode}
               </Tooltip>
             </Marker>

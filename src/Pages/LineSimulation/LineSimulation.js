@@ -12,7 +12,7 @@ import {
   FaChevronRight,
   FaChevronLeft,
 } from "react-icons/fa";
-import randomColor from 'randomcolor'
+import randomColor from "randomcolor";
 // import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
 import moment from "moment-jalaali";
@@ -73,6 +73,40 @@ const Pins = React.memo((props) => {
     return pins;
   }
 });
+const averageGeolocation = (coords) => {
+  if (coords.length === 1) {
+    return coords[0];
+  }
+
+  let x = 0.0;
+  let y = 0.0;
+  let z = 0.0;
+
+  for (let coord of coords) {
+    let latitude = (coord.latitude * Math.PI) / 180;
+    let longitude = (coord.longitude * Math.PI) / 180;
+
+    x += Math.cos(latitude) * Math.cos(longitude);
+    y += Math.cos(latitude) * Math.sin(longitude);
+    z += Math.sin(latitude);
+  }
+
+  let total = coords.length;
+
+  x = x / total;
+  y = y / total;
+  z = z / total;
+
+  let centralLongitude = Math.atan2(y, x);
+  let centralSquareRoot = Math.sqrt(x * x + y * y);
+  let centralLatitude = Math.atan2(z, centralSquareRoot);
+
+  return {
+    latitude: (centralLatitude * 180) / Math.PI,
+    longitude: (centralLongitude * 180) / Math.PI,
+  };
+};
+
 const TimeSlices = (props) => {
   // alert(props.currentBuffer)
   return props.buffers.map((buffer, index) => {
@@ -104,7 +138,7 @@ const Records = React.memo((props) => {
         );
         // console.log('a',filteredBusIndex)
         var color = props.buses[filteredBusIndex].color;
-       
+
         return (
           <div
             onClick={() => props.onMarkerClick(rcdIndex)}
@@ -115,8 +149,8 @@ const Records = React.memo((props) => {
           >
             <table>
               <tbody>
-                <tr  style={{backgroundColor:color}}>
-                  <td className="index" >{rcdIndex + 1}</td>
+                <tr style={{ backgroundColor: color }}>
+                  <td className="index">{rcdIndex + 1}</td>
                   <td className="speed">
                     <td>سرعت لحظه ای :</td>
                     <td className="value">{`${bus.groundSpeed}km`}</td>
@@ -241,8 +275,8 @@ const LineSimulation = (props) => {
       selected: false,
     },
   ]);
-  const [inBoundPoints,setInBoundPoints]= useState([])
-  const [outBoundPoints,setOutBoundPoints]= useState([])
+  const [inBoundPoints, setInBoundPoints] = useState([]);
+  const [outBoundPoints, setOutBoundPoints] = useState([]);
 
   function toggleTimer() {
     if (bufferMarkers.length === 0) {
@@ -306,12 +340,18 @@ const LineSimulation = (props) => {
 
         setMarkerInterval(markerInterval + 1);
         changeBusPosition(markerInterval + 1);
-        if (fitMarkerIntervalBounds) {
-          setMapCenter([
-            bufferMarkers[markerInterval + 1].latitude,
-            bufferMarkers[markerInterval + 1].longitude,
-          ]);
-        }
+        // if (fitMarkerIntervalBounds) {
+        //   setMapZoom(13);
+        //   var busLocations = [];
+        //   buses.map((bus) => {
+        //     busLocations.push({
+        //       latitude: bus.busPosition[0],
+        //       longitude: bus.busPosition[1],
+        //     });
+        //   });
+        //   const center = averageGeolocation(busLocations);
+        //   setMapCenter([center.latitude, center.longitude]);
+        // }
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
           bufferMarkers[markerInterval + 1].clientDate,
@@ -544,16 +584,18 @@ const LineSimulation = (props) => {
           setMarkerInterval(markerInterval + 1);
           changeBusPosition(markerInterval + 1);
         }
-        if (fitMarkerIntervalBounds) {
-          setMapCenter([
-            markers[0][
-              markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
-            ].latitude,
-            markers[0][
-              markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
-            ].longitude,
-          ]);
-        }
+        // if (fitMarkerIntervalBounds) {
+        //   setMapZoom(13);
+        //   var busLocations = [];
+        //   buses.map((bus) => {
+        //     busLocations.push({
+        //       latitude: bus.busPosition[0],
+        //       longitude: bus.busPosition[1],
+        //     });
+        //   });
+        //   const center = averageGeolocation(busLocations);
+        //   setMapCenter([center.latitude, center.longitude]);
+        // }
         var theDate = moment(bufferMarkers[0].clientDate, "YYYYMMDDHHmmss");
         var nowDate = moment(
           bufferMarkers[markerInterval].clientDate,
@@ -607,11 +649,9 @@ const LineSimulation = (props) => {
   }, [isTimerActive, markerInterval]);
 
   useEffect(() => {
-    // window.addEventListener('keyup', upHandler);
-    // Remove event listeners on cleanup
-
     getLines().then((data) => {
       console.log("lines", data);
+      data = data.sort((a, b) => (a.code > b.code ? 1 : -1));
       var busTempOptions = data.map((item, index) => {
         return {
           value: item.code,
@@ -630,10 +670,10 @@ const LineSimulation = (props) => {
     return data;
   }
   const getRandomColor = () => {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
+    var letters = "0123456789ABCDEF".split("");
+    var color = "#";
     for (var i = 0; i < 6; i++) {
-        color += letters[Math.round(Math.random() * 10)];
+      color += letters[Math.round(Math.random() * 10)];
     }
     return color;
   };
@@ -731,8 +771,11 @@ const LineSimulation = (props) => {
         });
       });
       // console.log("ajaaab", markers);
-      if(!markers.length>0){
-        Notify({ type: "message", msg: `در این تاریخ هیچ رکوردی از خط "${selectedLineOptions.label}" ثبت نشده .` });
+      if (!markers.length > 0) {
+        Notify({
+          type: "message",
+          msg: `در این تاریخ هیچ رکوردی از خط "${selectedLineOptions.label}" ثبت نشده .`,
+        });
         setIsSubmitButtonDisabled(false);
         setIsBusDataIsLoading(false);
         return;
@@ -750,7 +793,7 @@ const LineSimulation = (props) => {
               "HH:mm:ss"
             ),
             isTooltipActive: false,
-            color: randomColor({   luminosity: 'dark'}),
+            color: randomColor({ luminosity: "dark" }),
           });
         }
       });
@@ -766,9 +809,13 @@ const LineSimulation = (props) => {
         return 0;
       });
       console.log("markers :", markers);
-      
-      setInBoundPoints( data[0].inboundPoints.filter(item=>item.stopCode!=null))
-      setOutBoundPoints( data[0].outboundPoints.filter(item=>item.stopCode!=null))
+
+      setInBoundPoints(
+        data[0].inboundPoints.filter((item) => item.stopCode != null)
+      );
+      setOutBoundPoints(
+        data[0].outboundPoints.filter((item) => item.stopCode != null)
+      );
 
       var bufferCount = Math.ceil(markers.length / bufferInfo.bufferSize);
 
@@ -910,6 +957,7 @@ const LineSimulation = (props) => {
             marker={
               markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
             }
+            fitMarkerIntervalBounds={fitMarkerIntervalBounds}
             onMapMarkerCkick={(busIndex) => {
               // alert(busIndex);
               var TmpBuses = buses;
@@ -932,7 +980,6 @@ const LineSimulation = (props) => {
                 onBufferClick={(index) => {
                   setBufferInfo({ ...bufferInfo, currentBuffer: index });
                   setBufferMarkers(bufferInfo.buffers[index]);
-
                   setDiffSecond(
                     moment(
                       bufferInfo.buffers[index][
@@ -1011,17 +1058,16 @@ const LineSimulation = (props) => {
                     });
                     return;
                   }
-                  setMapZoom(17);
-                  setMapCenter([
-                    markers[0][
-                      markerInterval +
-                        bufferInfo.currentBuffer * bufferInfo.bufferSize
-                    ].latitude,
-                    markers[0][
-                      markerInterval +
-                        bufferInfo.currentBuffer * bufferInfo.bufferSize
-                    ].longitude,
-                  ]);
+                  // setMapZoom(13);
+                  var busLocations = [];
+                  buses.map((bus) => {
+                    busLocations.push({
+                      latitude: bus.busPosition[0],
+                      longitude: bus.busPosition[1],
+                    });
+                  });
+                  const center = averageGeolocation(busLocations);
+                  setMapCenter([center.latitude, center.longitude]);
                   setFitMarkerIntervalBounds(!fitMarkerIntervalBounds);
                 }}
                 className={`fit-marker ${

@@ -1,37 +1,62 @@
 import React, { useState, useEffect, useRef } from "react";
-import Map from "../../Components/AllBusLocationsMap/Map";
-import "./AllBusLocations.scss";
+import Map from "../../Components/AllBusLineLocationsMap/Map";
+import "./AllBusLineLocations.scss";
 import Ripples from "react-ripples";
 import Select from "react-select";
 import { IoMdPin } from "react-icons/io";
 import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
 import { appConfig } from "../../Constants/config";
-
-const AllBusLocations = () => {
+import { ToastContainer, toast } from "react-toastify";
+const AllBusLineLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
   const [markers, setMarkers] = useState([]);
   const [mapCenter, setMapCenter] = useState(appConfig.mapCenter);
   const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
+  const [lineOptions, setLineOptions] = useState([]);
   const [selectedBusOptions, setSelectedBusOptions] = useState([]);
   const [selectedBusOptionsString, setSelectedBusOptionsString] = useState([]);
   const [pinnedMarkers, setPinnedMarkers] = useState([]);
   const [selectedMarker, setSelectedMarker] = useState([]);
-  const [isPaused, setPause] = useState(false);
   const [ws, setWs] = useState(null);
+  const [isPaused, setPause] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const actionMenuRef = useRef();
   const searchBoxRef = useRef();
   const overviewBoxRef = useRef();
   const actionMenuHeaderRef = useRef();
+  const [selectedLineOptions, setselectedLineOptions] = useState([]);
+  const [isBusDataIsLoading, setIsBusDataIsLoading] = useState(false);
+  const [selectedLineOptionsString, setselectedLineOptionsString] = useState(
+    []
+  );
+  const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
+  const [inBoundPoints, setInBoundPoints] = useState([]);
+  const [outBoundPoints, setOutBoundPoints] = useState([]);
+  async function getLines(name) {
+    let response = await fetch(
+      `${appConfig.apiBaseAddress}api/reactService/trip/all`
+    );
+    let data = await response.json();
+    return data;
+  }
   useEffect(() => {
+    getLines().then((data) => {
+      data = data.sort((a, b) => (a.code > b.code ? 1 : -1));
+      var linesTempOptions = data.map((item, index) => {
+        return {
+          value: item.code,
+          label: `${item.code}: ${item.name}`,
+        };
+      });
+      setLineOptions(linesTempOptions);
+    });
     const wsClient = new WebSocket(
-      `${appConfig.socketBaseAddress}/websocket/getAllBusLocationsNewDate`
+      `${appConfig.socketBaseAddress}websocket/getBusLocationsByTripNewDate`
     );
     wsClient.onopen = () => {
       console.log("ws opened");
-
       setWs(wsClient);
     };
     wsClient.onclose = () => console.log("ws closed");
@@ -40,48 +65,6 @@ const AllBusLocations = () => {
       wsClient.close();
     };
   }, []);
-
-  useEffect(() => {
-    if (!ws) return;
-    var isFirstMessageReceived = false;
-    ws.onmessage = (e) => {
-      if (isPaused) return;
-      const message = JSON.parse(e.data);
-      // console.log("e", message);
-      // listen to data sent from the websocket server
-      // this.setState({dataFromServer: message})
-      // console.log(message.payload);
-      var tmpBusData = [];
-      message.payload.map((item, index) => {
-        tmpBusData.push({
-          ...item,
-          busStatus: persianStatus(item.busStatus),
-          fuelType: persianFuelType(item.fuelType),
-        });
-      });
-      var busTempOptions = message.payload.map((item, index) => {
-        return {
-          value: item.busCode,
-          label: item.busCode,
-        };
-      });
-      setMarkers(tmpBusData);
-
-      busTempOptions.push({ value: "All", label: "همه اتوبوس ها" });
-      setBusOptions(busTempOptions);
-      // console.log("pinnd", pinnedMarkers);
-      if (isFirstMessageReceived === false) {
-        setSelectedBusOptions([{ value: "All", label: "همه اتوبوس ها" }]);
-        // var tempArr = [{value:'All',label:'همه اتوبوس ها'}]
-        // busTempOptions.map(item => {
-        //     tempArr.push(item.value)
-        // })
-        setSelectedBusOptionsString(["All"]);
-        isFirstMessageReceived = true;
-        setIsLoading(false);
-      }
-    };
-  }, [isPaused, ws]);
   const persianFuelType = (fuelType) => {
     switch (fuelType) {
       case "GAS_OIL":
@@ -110,6 +93,42 @@ const AllBusLocations = () => {
         return "نامشخص";
     }
   };
+  useEffect(() => {
+    if (!ws) return;
+
+    ws.onmessage = (e) => {
+      if (isPaused) return;
+      const message = JSON.parse(e.data);
+      var tmpBusData = [];
+      message.payload.busData.map((item, index) => {
+        tmpBusData.push({
+          ...item,
+          busStatus: persianStatus(item.busStatus),
+          fuelType: persianFuelType(item.fuelType),
+        });
+      });
+      console.log("tmpBusData", tmpBusData);
+      var busTempOptions = message.payload.busData.map((item, index) => {
+        return {
+          value: item.busCode,
+          label: item.busCode,
+        };
+      });
+      busTempOptions.push({ value: "All", label: "همه اتوبوس ها" });
+      setBusOptions(busTempOptions);
+      setMarkers(tmpBusData);
+      setInBoundPoints(
+        message.payload.inboundPoints.filter((item) => item.stopCode != null)
+      );
+      setOutBoundPoints(
+        message.payload.outboundPoints.filter((item) => item.stopCode != null)
+      );
+
+      setIsSubmitButtonDisabled(false);
+      setIsBusDataIsLoading(false);
+    };
+  }, [isPaused, ws]);
+
   const onBusDetailClick = (bus) => {
     setMapZoom(18);
     setMapCenter([bus.latitude, bus.longitude]);
@@ -146,42 +165,87 @@ const AllBusLocations = () => {
       { behavior: "smooth" }
     );
   };
-  const fitBoundsPinnedMarkers = (markers) => {
-    // var latXTotal = 0;
-    // var latYTotal = 0;
-    // var lonDegreesTotal = 0;
-    // var currentLatLong;
-    // for (var i = 0; (currentLatLong = markers[i]); i++) {
-    //   var latDegrees = currentLatLong.latitude;
-    //   var lonDegrees = currentLatLong.longitude;
-    //   var latRadians = (Math.PI * latDegrees) / 180;
-    //   latXTotal += Math.cos(latRadians);
-    //   latYTotal += Math.sin(latRadians);
-    //   lonDegreesTotal += lonDegrees;
-    // }
-    // var finalLatRadians = Math.atan2(latYTotal, latXTotal);
-    // var finalLatDegrees = (finalLatRadians * 180) / Math.PI;
-    // var finalLonDegrees = lonDegreesTotal / markers.length;
-    // setMapCenter([232,232])
+  const Notify = (notify) => {
+    switch (notify.type) {
+      case "error":
+        toast.error(notify.msg);
+        break;
+      case "message":
+        toast(notify.msg);
+        break;
+    }
+  };
+  const onSubmitBtnClick = () => {
+    if (isSubmitButtonDisabled) {
+      Notify({
+        type: "message",
+        msg: "در حال دریافت اطلاعات... لطفا منتظر بمانید.",
+      });
+      return;
+    }
+    setIsSubmitButtonDisabled(true);
+    setIsBusDataIsLoading(true);
+    ws.send(
+      JSON.stringify({
+        messageType: "getBusLocationsByTrip",
+        payloadType: "getBusLocationsByTrip",
+        payload: selectedLineOptions.value,
+      })
+    );
+
+    setSelectedBusOptions([{ value: "All", label: "همه اتوبوس ها" }]);
+    setSelectedBusOptionsString(["All"]);
   };
   return (
     <section className="all-bus-locations-container">
       <div className="map-contianer">
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <Map
-            onMarkerClick={(id, index) => onMarkerClick(id, index)}
-            markers={getMarkers()}
-            center={mapCenter}
-            zoom={mapZoom}
-          />
-        )}
+        <Map
+          onMarkerClick={(id, index) => onMarkerClick(id, index)}
+          inBoundPoints={inBoundPoints}
+          outBoundPoints={outBoundPoints}
+          markers={getMarkers()}
+          center={mapCenter}
+          zoom={mapZoom}
+        />
       </div>
       <div ref={actionMenuRef} className="action-menu">
         <div ref={actionMenuHeaderRef}>
+          <div className="filter-container">
+            <Select
+              isLoading={lineOptions.length === 0}
+              // defaultValue="adsda"
+              closeMenuOnSelect={true}
+              withAll={true}
+              ref={searchBoxRef}
+              value={selectedLineOptions}
+              placeholder="خط را انتخاب کنید ..."
+              isRtl={true}
+              className="bus-select-input"
+              isMulti={false}
+              options={lineOptions}
+              isRtl={true}
+              onChange={(selectedLine) => {
+                var tempArr = [];
+
+                setselectedLineOptions(selectedLine);
+
+                setselectedLineOptionsString(tempArr);
+              }}
+            />
+            <button className="submit-btn" onClick={onSubmitBtnClick}>
+              نمایش اطلاعات
+              {isBusDataIsLoading ? (
+                <div className="loader">
+                  <span>.</span>
+                  <span>.</span>
+                  <span>.</span>
+                </div>
+              ) : (
+                ""
+              )}
+            </button>
+          </div>
           <Select
-            defaultValue="adsda"
             withAll={true}
             ref={searchBoxRef}
             value={selectedBusOptions}
@@ -212,7 +276,6 @@ const AllBusLocations = () => {
             options={busOptions}
             isRtl={true}
           />
-
           {markers.length > 0 ? (
             <div ref={overviewBoxRef} className="overview-container">
               <table>
@@ -465,8 +528,19 @@ const AllBusLocations = () => {
           })}
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={true}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </section>
   );
 };
 
-export default AllBusLocations;
+export default AllBusLineLocations;

@@ -16,7 +16,16 @@
     text-align: center;
   
 }
-
+.bus-tooltip{
+    background-color: #232323 !important;
+    color: white;
+    // font-size: 1.25em;
+    border: 0;
+    .bus-code{
+        font-weight: bold;
+        font-size: 1.5em;
+    }
+}
 .busy-bus-tooltip {
     background-color: rgba(8, 212, 97, 0.9) !important;
     color: white;

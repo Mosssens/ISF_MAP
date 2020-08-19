@@ -1,0 +1,33 @@
+.fit-bounds-btn {
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30px;
+  width: 30px;
+  border: 0;
+  border-radius: 4px;
+  border-bottom: 1px solid #ccc;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+}
+
+.leaflet-tooltip {
+  min-width: 50px;
+  text-align: center;
+}
+.black-tooltip {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  font-family: Yekan;
+  color: white;
+  width: 60px;
+  white-space: normal;
+  font-size: 1em;
+  z-index: -1;
+}
+.leaflet-marker-pane {
+  z-index: 1000;
+}
+.busy-bus-tooltip {
+  background-color: rgba(8, 212, 97, 0.9) !important;
+  color: white;
+}

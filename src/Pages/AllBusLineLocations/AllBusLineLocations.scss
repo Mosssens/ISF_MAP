@@ -1,0 +1,338 @@
+.all-bus-locations-container {
+  display: flex;
+
+  .map-contianer {
+    flex-grow: 1;
+  }
+  .leaflet-container {
+    width: 100%;
+    height: 100vh;
+  }
+
+  .action-menu {
+    flex-basis: 30%;
+    background-color: #4b4b4b;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    z-index: 1000;
+    max-height: 100vh;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+    .filter-container {
+      display: flex;
+      .bus-select-input{
+        width: 70%;
+      }
+      .submit-btn{
+        width: 30%;
+        background-color: #345aca;
+        color: white;
+        font-family: "yekan";
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 8px;
+        border: 0;
+        border-radius: 4px;
+        cursor: pointer;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      }
+    }
+    .overview-container {
+      display: flex;
+      font-size: 1.05em;
+      font-weight: bold;
+      .active-buses {
+        background-color: rgb(255, 255, 255);
+        color: #2ecc71;
+      }
+
+      .deactive-buses {
+        background-color: crimson;
+      }
+
+      .unbusy-buses {
+        background-color: rgb(255, 255, 255);
+        color: crimson;
+      }
+
+      .btn {
+        position: relative;
+        display: block;
+        margin: 10px;
+        padding: 0;
+        overflow: hidden;
+        border-width: 0;
+        outline: none;
+        border-radius: 2px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+        background-color: #2ecc71;
+        color: #ffffff;
+        transition: background-color 0.3s;
+      }
+
+      table {
+        background-color: white;
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.85em;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+        margin: 10px 8px;
+        cursor: pointer;
+      }
+
+      table:hover {
+      }
+
+      table td,
+      table th {
+        // border: 1px solid #ddd;
+        padding: 4px;
+      }
+
+      table {
+        tr:first-of-type {
+          background-color: #2684ff;
+          color: white;
+        }
+      }
+
+      // table tr:hover {
+      //   background-color: #232323;
+      //   color: white;
+      // }
+
+      table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: seagreen;
+        color: white;
+      }
+    }
+
+    .bus-select-input {
+      margin: 5px 5px;
+    }
+
+    .bus-detail-container {
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+      display: flex;
+      flex-direction: column;
+      font-family: "Yekan";
+
+      .react-ripples {
+        cursor: pointer;
+        min-height: 170px;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+
+        .pin-btn {
+          position: absolute;
+          display: flex;
+          width: 30px;
+          height: 32px;
+          font-size: 22px;
+          color: #ffffff;
+          top: 3px;
+          align-items: center;
+          justify-content: center;
+          left: -29px;
+          background-color: #2e2e2e;
+          font-size: 1.65em;
+          border-radius: 4px 0 0 4px;
+          &.active {
+            background-color: #304ffe;
+            color: white;
+          }
+        }
+
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          font-size: 0.85em;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.23);
+          margin: 28px 8px;
+          position: relative;
+        }
+
+        .bus-code {
+          position: absolute;
+          height: 35px;
+          width: 185px;
+          background-color: #0277bd;
+          color: white;
+          font-size: 1.15em;
+          display: flex;
+          justify-content: center;
+          border-radius: 2px;
+          // padding-right: 12px;
+          align-items: center;
+          right: -2px;
+          box-shadow: 0 0px 12px rgba(191, 118, 118, 0.16),
+            0 1px 6px rgba(0, 0, 0, 0.23);
+          top: -31px;
+        }
+
+        table:hover {
+        }
+
+        table td,
+        table th {
+          // border: 1px solid #ddd;
+          // padding: 8px;
+          height: 37px;
+        }
+
+        table {
+          &.selected .bus-code {
+            // background-color: #2684ff ;
+            // color: black;
+            -webkit-animation: argh-my-eyes 1s 30;
+            -moz-animation: argh-my-eyes 1s 30;
+            animation: argh-my-eyes 1s 30;
+          }
+
+          tr:first-of-type {
+            background-color: #ffffff;
+            color: black;
+          }
+        }
+
+        table tr:nth-child(even) {
+          background-color: #cecece;
+        }
+
+        table tr:nth-child(odd) {
+          background-color: #ffffff;
+        }
+
+        table tr:hover {
+          background-color: #343434;
+          color: white;
+        }
+        table .value {
+          color: seagreen;
+          font-size: 1.2em;
+          font-weight: bold;
+        }
+        table th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: seagreen;
+          color: white;
+        }
+
+        .card {
+          width: 100%;
+          border-radius: 6px;
+          margin: 8px;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+            0 3px 6px rgba(0, 0, 0, 0.23);
+
+          .row {
+            display: flex;
+            flex-direction: column;
+
+            .col {
+              display: flex;
+              flex-grow: 1;
+              justify-content: center;
+              font-size: 0.95em;
+              justify-content: right;
+              flex-basis: 60%;
+              padding-right: 4px;
+              color: black;
+
+              &.value {
+                flex-basis: 40%;
+                color: steelblue;
+                font-weight: bold;
+                justify-content: right;
+                font-size: 1.05em;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .checkbox-lable {
+    position: relative;
+    padding: 4px;
+
+    input {
+      margin: 0;
+      height: 16px;
+      width: 16px;
+      // margin-top: 18px;
+    }
+  }
+}
+
+@-webkit-keyframes argh-my-eyes {
+  0% {
+    background-color: #0277bd;
+  }
+
+  100% {
+    background-color: #202020;
+  }
+}
+
+@-moz-keyframes argh-my-eyes {
+  0% {
+    background-color: #0277bd;
+  }
+
+  100% {
+    background-color: #202020;
+  }
+}
+
+@keyframes argh-my-eyes {
+  0% {
+    background-color: #0277bd;
+  }
+
+  100% {
+    background-color: #202020;
+  }
+}
+@media screen and (max-width: 1170px) {
+  .all-bus-locations-container
+    .action-menu
+    .bus-detail-container
+    .react-ripples {
+    .bus-code {
+      font-size: 1em;
+    }
+    table {
+      font-size: 0.75em;
+      .value {
+        font-size: 1em;
+      }
+    }
+  }
+}
+@media screen and (max-width: 930px) {
+  .all-bus-locations-container
+    .action-menu
+    .bus-detail-container
+    .react-ripples {
+    .bus-code {
+      font-size: 0.9em;
+    }
+    table {
+      font-size: 0.65em;
+      .value {
+        font-size: 0.8em;
+      }
+    }
+  }
+}
