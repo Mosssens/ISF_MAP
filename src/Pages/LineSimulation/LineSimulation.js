@@ -781,7 +781,7 @@ const LineSimulation = (props) => {
         return;
       }
       var buses = [];
-      data[0].busData.map((busData, busDataIndx) => {
+      data[0].busData.filter(busData=>busData.length>0).map((busData, busDataIndx) => {
         if (busData.length > 0) {
           // console.log(busDataIndx,busData.length,busData[0][0])
 
@@ -793,7 +793,7 @@ const LineSimulation = (props) => {
               "HH:mm:ss"
             ),
             isTooltipActive: false,
-            color: randomColor({ luminosity: "dark" }),
+            color: appConfig.colors[busDataIndx],
           });
         }
       });
