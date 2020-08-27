@@ -117,27 +117,27 @@ const BusStops = React.memo((props) => {
         {props.color === "red" && inBoundPointIndex === 0 ? (
           <Marker
             position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-            icon={outboundStartIcon}
+            icon={props.language === "persian" ? outboundStartIcon : greenIcon}
           />
         ) : null}
         {props.color === "red" &&
         inBoundPointIndex === props.inBoundPoints.length - 1 ? (
           <Marker
             position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-            icon={outboundEndIcon}
+            icon={props.language === "persian" ? outboundEndIcon : greenIcon}
           />
         ) : null}
         {props.color === "blue" && inBoundPointIndex === 0 ? (
           <Marker
             position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-            icon={inboundStartIcon}
+            icon={props.language === "persian" ? inboundStartIcon : redIcon}
           />
         ) : null}
         {props.color === "blue" &&
         inBoundPointIndex === props.inBoundPoints.length - 1 ? (
           <Marker
             position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-            icon={inboundEndIcon}
+            icon={props.language === "persian" ? inboundEndIcon : redIcon}
           />
         ) : null}
         <Tooltip
@@ -178,7 +178,7 @@ const Markers = (props) => {
       iconSize: [25, 41], // size of the icon
       // shadowSize:   [50, 64], // size of the shadow
       iconAnchor: [-23, 35], // point of the icon which will correspond to marker's location
-      html: `<span style="${markerHtmlStyles}" ><span style="transform: rotate(-45deg);color: white;font-size: 1.5em;font-family: Yekan;">${bus.busCode}</span></span>`,
+      html: `<span style="${markerHtmlStyles}" ><span style="transform: rotate(-45deg);color: white;font-size: 1.5em">${bus.busCode}</span></span>`,
     });
     return (
       <Marker

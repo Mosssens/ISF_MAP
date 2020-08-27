@@ -526,6 +526,26 @@
       }
     }
   }
+  &.ltr{
+    .bus-stop-counter{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    .line-info-container{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+   *{
+     direction: ltr;
+   }
+   .header{
+     padding-left: 8px;
+   }
+   .line-title{
+     margin-right: 8px;
+   }
+   .bus-stop-name{
+     direction: rtl;
+   }
+  }
 }
 
 @keyframes gradientForward {

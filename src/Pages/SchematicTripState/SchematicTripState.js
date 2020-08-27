@@ -3,7 +3,9 @@ import "./SchematicTripState.scss";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import { appConfig } from "../../Constants/config";
-import { from } from "jalali-moment";
+import { from, lang } from "jalali-moment";
+const language = appConfig.language.SchematicTripState;
+
 const SchematicTripState = () => {
   const forwardLineRef = useRef();
   const backwardLineRef = useRef();
@@ -180,7 +182,7 @@ const SchematicTripState = () => {
 
   const onSubmitBtnClick = () => {
     if (selectedLine === 0) {
-      Notify({ type: "error", msg: "ابتدا خط را انتخاب کنید!" });
+      Notify({ type: "error", msg: language.messages.selectLine });
       return;
     }
     setIsLoading(true);
@@ -216,17 +218,17 @@ const SchematicTripState = () => {
   }, []);
 
   return (
-    <section className="SchematicTripState">
+    <section className={`SchematicTripState ${appConfig.language.direction}`}>
       <section className="header-container">
         <div className="header-card line-select-container">
-          <div>خط:</div>
+          <div className="line-title">{language.line}:</div>
           <select
             onChange={(e) => {
               let { name, value } = e.target;
               setSelectedLine(value);
             }}
           >
-            <option value="0">انتخاب کنید ...</option>
+            <option value="0">{language.select.placeholder} ...</option>
             {lines.map((line, index) => (
               <option key={index} value={line.code}>
                 {`${line.code}-${line.name}`}
@@ -234,7 +236,7 @@ const SchematicTripState = () => {
             ))}
           </select>
           <button className="submit-btn" onClick={onSubmitBtnClick}>
-            نمایش
+            {language.submitTitle}
           </button>
           {isLoading ? (
             <div class="loadingio-spinner-dual-ring-wpkltzczrj">
@@ -254,17 +256,17 @@ const SchematicTripState = () => {
             <tbody>
               <tr>
                 <td>
-                  <td>تعداد ایستگاه های مسیر رفت :</td>
+                  <td>{language.inboundBusStops} :</td>
                   <td>{inboundBusStops.length}</td>
                 </td>
                 <td>
-                  <td>تعداد ایستگاه های مسیر برگشت :</td>
+                  <td>{language.outboundBusStops} :</td>
                   <td>{outboundBusStops.length}</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <td>تعداد اتوبوس های فعال خط :</td>
+                  <td>{language.activeBusCount} :</td>
                   <td>{lineDetail.activeBusCount}</td>
                 </td>
                 {/* <td>
@@ -272,38 +274,42 @@ const SchematicTripState = () => {
                   <td>{lineDetail.busCountInGarage}</td>
                 </td> */}
                 <td>
-                  <td>سرعت مجاز :</td>
+                  <td>{language.legalSpeed} :</td>
                   <td>{lineDetail.legalSpeed} Km</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <td>تعداد اتوبوس های مسیر رفت :</td>
+                  <td>{language.busCountInbound}:</td>
                   <td>{lineDetail.busCountInbound}</td>
                 </td>
                 <td>
-                  <td>تعداد اتوبوس های مسیر برگشت :</td>
+                  <td>{language.busCountOutbound} :</td>
                   <td>{lineDetail.busCountOutbound}</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <td>مسافت مسیر رفت :</td>
+                  <td>{language.inboundDistance} :</td>
                   <td>{lineDetail.inboundDistance} Km</td>
                 </td>
                 <td>
-                  <td>مسافت مسیر برگشت :</td>
+                  <td>{language.outboundDistance} :</td>
                   <td>{lineDetail.outboundDistance} Km</td>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <td>زمان مسیر رفت :</td>
-                  <td>{lineDetail.inboundTripDuration} دقیقه</td>
+                  <td>{language.inboundTripDuration} :</td>
+                  <td>
+                    {lineDetail.inboundTripDuration} {language.minute}
+                  </td>
                 </td>
                 <td>
-                  <td>زمان مسیر برگشت :</td>
-                  <td>{lineDetail.outboundTripDuration} دقیقه</td>
+                  <td>{language.outboundTripDuration} :</td>
+                  <td>
+                    {lineDetail.outboundTripDuration} {language.minute}
+                  </td>
                 </td>
               </tr>
             </tbody>
@@ -311,7 +317,7 @@ const SchematicTripState = () => {
         </div>
       </section>
       <div className="card">
-        <div className="header">مسیر رفت :</div>
+        <div className="header">{language.inbound} :</div>
         <div className="line forward" ref={forwardLineRef}>
           {inboundBuses.map((bus, index) => {
             return (
@@ -342,7 +348,7 @@ const SchematicTripState = () => {
         <div className="gap"></div>
       </div>
       <div className="card">
-        <div className="header">مسیر برگشت :</div>
+        <div className="header">{language.outbound} :</div>
         <div className="line backwards" ref={backwardLineRef}>
           {outboundBuses.map((bus, index) => {
             return (

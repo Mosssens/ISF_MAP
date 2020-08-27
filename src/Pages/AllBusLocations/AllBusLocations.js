@@ -7,6 +7,7 @@ import { IoMdPin } from "react-icons/io";
 import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
 import { appConfig } from "../../Constants/config";
+import { layerGroup } from "leaflet";
 
 const AllBusLocations = () => {
   // const ws = new WebSocket('ws://193.176.241.150:8080/tms/websocket/getAllBusLocations')
@@ -25,6 +26,8 @@ const AllBusLocations = () => {
   const searchBoxRef = useRef();
   const overviewBoxRef = useRef();
   const actionMenuHeaderRef = useRef();
+  const language = appConfig.language.AllBusLocations;
+
   useEffect(() => {
     const wsClient = new WebSocket(
       `${appConfig.socketBaseAddress}/websocket/getAllBusLocationsNewDate`
@@ -67,11 +70,13 @@ const AllBusLocations = () => {
       });
       setMarkers(tmpBusData);
 
-      busTempOptions.push({ value: "All", label: "همه اتوبوس ها" });
+      busTempOptions.push({ value: "All", label: language.select.allBus });
       setBusOptions(busTempOptions);
       // console.log("pinnd", pinnedMarkers);
       if (isFirstMessageReceived === false) {
-        setSelectedBusOptions([{ value: "All", label: "همه اتوبوس ها" }]);
+        setSelectedBusOptions([
+          { value: "All", label: language.select.allBus },
+        ]);
         // var tempArr = [{value:'All',label:'همه اتوبوس ها'}]
         // busTempOptions.map(item => {
         //     tempArr.push(item.value)
@@ -85,29 +90,29 @@ const AllBusLocations = () => {
   const persianFuelType = (fuelType) => {
     switch (fuelType) {
       case "GAS_OIL":
-        return "دوگانه سوز";
+        return language.gasStatuses.GAS_OIL;
       case "GAS":
-        return "بنزین";
+        return language.gasStatuses.GAS;
       case "ELECTRIC":
-        return "برق";
+        return language.gasStatuses.ELECTRIC;
       default:
-        return "نامشخص";
+        return language.gasStatuses.unknown;
     }
   };
   const persianStatus = (status) => {
     switch (status) {
       case "PA":
-        return "در پارکینگ";
+        return language.busStatuses.PA;
       case "LI":
-        return "در خط";
+        return language.busStatuses.LI;
       case "OF":
-        return "خارج از خط";
+        return language.busStatuses.OF;
       case "RS":
-        return "در محل سوختگیری";
+        return language.busStatuses.RS;
       case "GA":
-        return "در تعمیرگاه";
+        return language.busStatuses.GA;
       case "UN":
-        return "نامشخص";
+        return language.busStatuses.UN;
     }
   };
   const onBusDetailClick = (bus) => {
@@ -165,7 +170,9 @@ const AllBusLocations = () => {
     // setMapCenter([232,232])
   };
   return (
-    <section className="all-bus-locations-container">
+    <section
+      className={`all-bus-locations-container ${appConfig.language.direction}`}
+    >
       <div className="map-contianer">
         {isLoading ? (
           <Loader />
@@ -185,7 +192,7 @@ const AllBusLocations = () => {
             withAll={true}
             ref={searchBoxRef}
             value={selectedBusOptions}
-            placeholder="انتخاب کنید ..."
+            placeholder={`${language.select.placeholder} ...`}
             isRtl={true}
             onChange={(selectedBuses) => {
               var tempArr = [];
@@ -195,7 +202,9 @@ const AllBusLocations = () => {
                   selectedBuses.filter((item) => item.value === "All").length >
                   0
                 ) {
-                  selectedBuses = [{ value: "All", label: "همه اتوبوس ها" }];
+                  selectedBuses = [
+                    { value: "All", label: language.select.allBus },
+                  ];
                   tempArr = ["All"];
                 } else {
                   selectedBuses.map((item) => {
@@ -221,12 +230,15 @@ const AllBusLocations = () => {
                     <Ripples
                       onClick={() => {
                         setSelectedBusOptions([
-                          { value: "All", label: "همه اتوبوس ها" },
+                          { value: "All", label: language.select.allBus },
                         ]);
                         setSelectedBusOptionsString(["All"]);
                       }}
                     >
-                      <td>تعداد کل اتوبوس ها : {markers.length}</td>
+                      <td>
+                        <td>{language.allBusCount} :</td>
+                        <td>{markers.length}</td>
+                      </td>
                     </Ripples>
                   </tr>
                   <tr>
@@ -254,7 +266,7 @@ const AllBusLocations = () => {
                       }}
                     >
                       <td className="active-buses">
-                        <td>اتوبوس های فعال:</td>
+                        <td>{language.activeBuses}:</td>
                         <td>
                           {
                             markers.filter((item) => item.active === true)
@@ -287,7 +299,7 @@ const AllBusLocations = () => {
                       }}
                     >
                       <td className="deactive-buses">
-                        <td>اتوبوس های غیر فعال:</td>
+                        <td>{language.deactiveBuses}:</td>
                         <td>
                           {
                             markers.filter((item) => item.active === false)
@@ -322,7 +334,7 @@ const AllBusLocations = () => {
                       }}
                     >
                       <td>
-                        <td>اتوبوس های شاغل :</td>
+                        <td>{language.busyBuses} :</td>
                         <td>
                           {markers.filter((item) => item.busy === true).length}
                         </td>
@@ -352,7 +364,7 @@ const AllBusLocations = () => {
                       }}
                     >
                       <td className="unbusy-buses">
-                        <td>اتوبوس های غیر شاغل :</td>
+                        <td>{language.unbusyBuses} :</td>
                         <td>
                           {markers.filter((item) => item.busy === false).length}
                         </td>
@@ -380,7 +392,7 @@ const AllBusLocations = () => {
                   className={selectedMarker === bus.busCode ? "selected" : ""}
                 >
                   <div className="bus-code">
-                    کد اتوبوس : {bus.busCode}
+                    <div>{language.busCode} :</div> <div>{bus.busCode}</div>
                     <div
                       className={`pin-btn ${
                         pinnedMarkers.includes(bus.busCode) ? "active" : ""
@@ -393,42 +405,42 @@ const AllBusLocations = () => {
                   <tbody>
                     <tr>
                       <td>
-                        <td>سرعت لحظه ای :</td>
+                        <td>{language.speed} :</td>
                         <td className="value">{`${bus.groundSpeed}km`}</td>
                       </td>
                       <td></td>
                     </tr>
                     <tr>
                       <td>
-                        <td>شاغل/غیر شاغل:</td>
+                        <td>{language.busyStatus}:</td>
                         <td className="value">
-                          {bus.busy ? "شاغل" : "غیر شاغل"}
+                          {bus.busy ? language.busy : language.unbusy}
                         </td>
                       </td>
                       <td>
-                        <td>فعال/غیر فعال :</td>
+                        <td>{language.activeStatus} :</td>
                         <td className="value">
-                          {bus.active ? "فعال" : "غیر فعال"}
+                          {bus.active ? language.active : language.deactive}
                         </td>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <td>نوع سوخت:</td>
+                        <td>{language.gasStatus}:</td>
                         <td className="value">{bus.fuelType}</td>
                       </td>
                       <td>
-                        <td>وضعیت اتوبوس :</td>
+                        <td>{language.busStatus} :</td>
                         <td className="value">{bus.busStatus}</td>
                       </td>
                     </tr>
                     <tr>
                       <td>
-                        <td>کد خط :</td>
+                        <td>{language.lineCode} :</td>
                         <td className="value">{bus.tripCode}</td>
                       </td>
                       <td>
-                        <td>تعداد تراکنش ها :</td>
+                        <td>{language.transactionCount} :</td>
                         <td className="value">{bus.dcTransactionCount}</td>
                       </td>
                     </tr>
@@ -444,14 +456,18 @@ const AllBusLocations = () => {
                     </tr> */}
                     <tr>
                       <td>
-                        <td>تاریخ :</td>
+                        <td>{language.date} :</td>
                         <td
                           className="value"
                           style={{ direction: "ltr", textAlign: "right" }}
                         >
-                          {moment(bus.clientDate, "YYYYMMDDHHmmss").format(
-                            "jYYYY/jM/jD HH:mm:ss"
-                          )}
+                          {appConfig.language.language === "persian"
+                            ? moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                                "jYYYY/jM/jD HH:mm:ss"
+                              )
+                            : moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                                "YYYY/M/D HH:mm:ss"
+                              )}
                         </td>
                       </td>
                       <td></td>

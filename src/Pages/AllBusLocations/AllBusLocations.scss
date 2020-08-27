@@ -36,7 +36,6 @@
       }
 
       .btn {
-
         position: relative;
         display: block;
         margin: 10px;
@@ -45,10 +44,10 @@
         border-width: 0;
         outline: none;
         border-radius: 2px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         background-color: #2ecc71;
         color: #ffffff;
-        transition: background-color .3s;
+        transition: background-color 0.3s;
       }
 
       table {
@@ -61,13 +60,13 @@
         cursor: pointer;
       }
 
-      table:hover {}
+      table:hover {
+      }
 
       table td,
       table th {
         // border: 1px solid #ddd;
         padding: 4px;
-       
       }
 
       table {
@@ -76,8 +75,6 @@
           color: white;
         }
       }
-
-
 
       // table tr:hover {
       //   background-color: #232323;
@@ -102,7 +99,7 @@
       padding-bottom: 0.5em;
       display: flex;
       flex-direction: column;
-      font-family: 'Yekan';
+      font-family: "Yekan";
 
       .react-ripples {
         cursor: pointer;
@@ -137,7 +134,7 @@
           font-size: 0.85em;
           box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
             0 3px 6px rgba(0, 0, 0, 0.23);
-          margin:28px 8px;
+          margin: 28px 8px;
           position: relative;
         }
 
@@ -145,20 +142,22 @@
           position: absolute;
           height: 35px;
           width: 185px;
-          background-color: #0277bd ;
+          background-color: #0277bd;
           color: white;
           font-size: 1.15em;
           display: flex;
-          justify-content: center; 
+          justify-content: center;
           border-radius: 2px;
           // padding-right: 12px;
           align-items: center;
           right: -2px;
-          box-shadow: 0 0px 12px rgba(191, 118, 118, 0.16), 0 1px 6px rgba(0, 0, 0, 0.23);
+          box-shadow: 0 0px 12px rgba(191, 118, 118, 0.16),
+            0 1px 6px rgba(0, 0, 0, 0.23);
           top: -31px;
         }
 
-        table:hover {}
+        table:hover {
+        }
 
         table td,
         table th {
@@ -174,7 +173,6 @@
             -webkit-animation: argh-my-eyes 1s 30;
             -moz-animation: argh-my-eyes 1s 30;
             animation: argh-my-eyes 1s 30;
-
           }
 
           tr:first-of-type {
@@ -195,10 +193,10 @@
           background-color: #343434;
           color: white;
         }
-       table .value{
-        color: seagreen;
-        font-size: 1.2em;
-        font-weight: bold;
+        table .value {
+          color: seagreen;
+          font-size: 1.2em;
+          font-weight: bold;
         }
         table th {
           padding-top: 12px;
@@ -252,7 +250,22 @@
       height: 16px;
       width: 16px;
       // margin-top: 18px;
-
+    }
+  }
+  &.ltr {
+    .action-menu {
+      * {
+        direction: ltr;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      }
+      .bus-detail-container{
+        .react-ripples{
+          min-height: 261px;
+        }
+      }
+    }
+    .bus-code {
+      left: 25px;
     }
   }
 }
@@ -286,31 +299,35 @@
     background-color: #202020;
   }
 }
-@media screen and (max-width: 1170px) { 
- 
-  .all-bus-locations-container .action-menu .bus-detail-container .react-ripples{
-    .bus-code{
+@media screen and (max-width: 1170px) {
+  .all-bus-locations-container
+    .action-menu
+    .bus-detail-container
+    .react-ripples {
+    .bus-code {
       font-size: 1em;
     }
-    table{
-      font-size: .75em;
-      .value{
+    table {
+      font-size: 0.75em;
+      .value {
         font-size: 1em;
       }
     }
   }
- }
- @media screen and (max-width: 930px) { 
- 
-  .all-bus-locations-container .action-menu .bus-detail-container .react-ripples{
-    .bus-code{
-      font-size: .9em;
+}
+@media screen and (max-width: 930px) {
+  .all-bus-locations-container
+    .action-menu
+    .bus-detail-container
+    .react-ripples {
+    .bus-code {
+      font-size: 0.9em;
     }
-    table{
-      font-size: .65em;
-      .value{
-        font-size: .8em;
+    table {
+      font-size: 0.65em;
+      .value {
+        font-size: 0.8em;
       }
     }
   }
- }
+}

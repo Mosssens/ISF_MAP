@@ -1,15 +1,259 @@
-// export default {
-//   qomApp: {
-//     mapCenter: [34.6302026, 50.8656816],
-//     apiBaseAddress: "http://afc.qom.ir:9051",
-//     socketBaseAddress: "ws://afc.qom.ir:9051",
-//   },
-//   esfApp: {
-//     mapCenter: [32.654492278497646, 51.64067001473507],
-//     apiBaseAddress: "http://193.176.241.150:8080",
-//     socketBaseAddress: "ws://193.176.241.150:8080",
-//   },
-// };
+const languages = [
+  {
+    language: "persian",
+    direction: "rtl",
+    loader: "در حال دریافت اطلاعات",
+    AllBusLocations: {
+      allBusCount: "تعداد همه اتوبوس ها",
+      activeBuses: "اتوبوس های فعال",
+      deactiveBuses: "اتوبوس های غیر فعال",
+      busyBuses: "اتوبوس های شاغل",
+      unbusyBuses: "اتوبوس های غیر شاغل",
+      busCode: "کد اتوبوس",
+      speed: "سرعت لحظه ای",
+      busyStatus: "شاغل/غیرشاغل",
+      busy: "شاغل",
+      unbusy: "غیر شاغل",
+      activeStatus: "فعال/غیرفعال",
+      active: "فعال",
+      deactive: "غیر فعال",
+      gasStatus: "نوع سوخت",
+      gasStatuses: {
+        unknown: "نامشخص",
+        GAS_OIL: "دوگانه سوز",
+        GAS: "بنزین",
+        ELECTRIC: "برق",
+      },
+      busStatus: "وضعیت اتوبوس",
+      busStatuses: {
+        PA: "در پارکینگ",
+        LI: "در خط",
+        OF: "خارج از خط",
+        RS: "در محل سوختگیری",
+        GA: "در تعمیرگاه",
+        UN: "نامشخص",
+      },
+      lineCode: "کد خط",
+      transactionCount: "تعداد تراکنش ها",
+      date: "تاریخ",
+      select: {
+        allBus: "همه اتوبوس ها",
+        placeholder: "انتخاب کنید",
+      },
+    },
+    BusSimulation: {
+      select: {
+        allBus: "همه اتوبوس ها",
+        placeholder: "انتخاب کنید",
+      },
+      date: "تاریخ",
+      fromDate: "از ساعت",
+      toDate: "تا ساعت",
+      submitTitle: "نمایش اطلاعات",
+      speed: "سرعت لحظه ای",
+      previousStep: "موقعیت قبلی",
+      nextStep: "موقعیت بعدی",
+      stop: "بازگشت از ابتدا",
+      play: "اجرا/توقف",
+      focus: "فوکوس روی موقعیت اتوبوس",
+      jump: "پرش از موقعیت با سرعت < 4",
+      mediaSpeed: "تعیین سرعت حرکت",
+      messages: {
+        fillRequiredField: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+        gettingData: "در حال دریافت اطلاعات... لطفا منتظر بمانید.",
+        selectBus: "اتوبوس را انتخاب کنید.",
+        selectFromToDate: "تاریخ شروع و پایان را وارد کنید!",
+        inCorrectFromToDate: "تاریخ پایان قبل تر از تاریخ شروع است!",
+        noRecordForBus: (busId) => {
+          return `هیج رکوردی در این تاریخ برای اتوبوس ${busId} ثبت نشده است .`;
+        },
+        noRecordForBuses: (busId1, busId2) => {
+          return `هیج رکوردی در این تاریخ برای اتوبوس ${busId1} و ${busId2} ثبت نشده است .`;
+        },
+        maxBusCount: "حداکثر 2 اتوبوس میتوانید انتخاب کنید.",
+      },
+    },
+    LineSimulation: {
+      select: {
+        allBus: "همه اتوبوس ها",
+        placeholder: "انتخاب کنید",
+      },
+      date: "تاریخ",
+      fromDate: "از ساعت",
+      toDate: "تا ساعت",
+      submitTitle: "نمایش اطلاعات",
+      speed: "سرعت لحظه ای",
+      previousStep: "موقعیت قبلی",
+      nextStep: "موقعیت بعدی",
+      stop: "بازگشت از ابتدا",
+      play: "اجرا/توقف",
+      focus: "فوکوس روی موقعیت اتوبوس",
+      jump: "پرش از موقعیت با سرعت < 4",
+      mediaSpeed: "تعیین سرعت حرکت",
+      messages: {
+        fillRequiredField: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+        gettingData: "در حال دریافت اطلاعات... لطفا منتظر بمانید.",
+        selectBus: "اتوبوس را انتخاب کنید.",
+        selectFromToDate: "تاریخ شروع و پایان را وارد کنید!",
+        inCorrectFromToDate: "تاریخ پایان قبل تر از تاریخ شروع است!",
+        selectLine: "خطی را انتخاب کنید !",
+        noRecordForLine: (lineId) => {
+          return `در این تاریخ هیچ رکوردی از خط "${lineId}" ثبت نشده .`;
+        },
+      },
+    },
+    SchematicTripState: {
+      select: {
+        placeholder: "انتخاب کنید",
+      },
+      line: "خط",
+      submitTitle: "نمایش",
+      inbound: "مسیر رفت",
+      outbound: "مسیر برگشت",
+      activeBusCount: "تعداد اتوبوس های فعال خط",
+      inboundBusStops: "تعداد ایستگاه های مسیر رفت",
+      outboundBusStops: "تعداد ایستگاه های مسیر برگشت",
+      activeBusCount: "تعداد اتوبوس های فعال خط",
+      legalSpeed: "سرعت مجاز",
+      busCountInbound: "تعداد اتوبوس های مسیر رفت",
+      busCountOutbound: "تعداد اتوبوس های مسیر برگشت",
+      inboundDistance: "مسافت مسیر رفت",
+      outboundDistance: "مسافت مسیر برگشت",
+      inboundTripDuration: "زمان مسیر رفت",
+      outboundTripDuration: "زمان مسیر برگشت",
+      messages: {
+        selectLine: "خطی را انتخاب کنید !",
+      },
+      minute: "دقیقه",
+    },
+  },
+  {
+    language: "english",
+    direction: "ltr",
+    loader: "Loading",
+    AllBusLocations: {
+      allBusCount: "All Buses count",
+      activeBuses: "Active Buses",
+      deactiveBuses: "Deactive Buses",
+      busyBuses: "Busy Buses",
+      unbusyBuses: " unbusyBuses",
+      busCode: "Bus code",
+      speed: "Instantaneous speed",
+      busyStatus: "Busy/Unbusy",
+      busy: "Busy",
+      unbusy: "Unbusy",
+      activeStatus: "Active/Deactive",
+      active: "Active",
+      deactive: "Deactive",
+      gasStatus: "Gas Status",
+      gasStatuses: {
+        unknown: "Unknown",
+        GAS_OIL: "Gas oil",
+        GAS: "Gas",
+        ELECTRIC: "Electric",
+      },
+      busStatus: "Bus Status",
+      busStatuses: {
+        PA: "In parking",
+        LI: "In line",
+        OF: "Out of line",
+        RS: "In gas station",
+        GA: "In garage",
+        UN: "Unknown",
+      },
+      lineCode: "line Code",
+      transactionCount: " Transaction Count",
+      date: "Date",
+      select: {
+        allBus: "All Buses",
+        placeholder: "Choose",
+      },
+    },
+    BusSimulation: {
+      select: {
+        allBus: "All Buses",
+        placeholder: "Choose",
+      },
+      date: "Date",
+      fromDate: "From",
+      toDate: "To",
+      submitTitle: "Show information",
+      speed: "Instantaneous speed",
+      previousStep: "Previous position",
+      nextStep: "Next position",
+      stop: "Return from origin",
+      play: "Play/Stop",
+      focus: "Focus on position",
+      jump: "Jump from position with speed < 4",
+      mediaSpeed: "Define movement speed",
+      messages: {
+        fillRequiredField: "First fill all the input fields !",
+        gettingData: "Loading , Please wait !",
+        selectBus: "Choose the bus.",
+        selectFromToDate: "Input the start and end date !",
+        inCorrectFromToDate: "End date is before the start date !",
+        noRecordForBus: (busId) => {
+          return `No record found for the bus${busId}  .`;
+        },
+        noRecordForBuses: (busId1, busId2) => {
+          return `No record found in this date for bus${busId1} and ${busId2}  .`;
+        },
+        maxBusCount: "You can choose 2 buses at most",
+      },
+    },
+    LineSimulation: {
+      select: {
+        allBus: "All buses",
+        placeholder: "Choose",
+      },
+      date: "Date",
+      fromDate: "From",
+      toDate: "To",
+      submitTitle: "Show information",
+      speed: "Instantaneous speed",
+      previousStep: "Previous position",
+      nextStep: "Next position",
+      stop: "Return from origin",
+      play: "Play/Stop",
+      focus: "Focus on position",
+      jump: "Jump from position with speed < 4",
+      mediaSpeed: "Define movement speed",
+      messages: {
+        fillRequiredField: "First fill all the input fields !",
+        gettingData: "Loading , Please wait !",
+        selectBus: "Choose the bus.",
+        selectFromToDate: "Input the start and end date !",
+        inCorrectFromToDate: "End date is before the start date !",
+        selectLine: "Select a line",
+        noRecordForLine: (lineId) => {
+          return `No record found for the line${lineId} on this date .`;
+        },
+      },
+    },
+    SchematicTripState: {
+      line: "Line",
+      submitTitle: "Show",
+      inbound: "Way out",
+      outbound: "Way in",
+      activeBusCount: "Line active buses count",
+      inboundBusStops: "Way out active stations count",
+      outboundBusStops: "Way in active stations count",
+      legalSpeed: "Legal speed",
+      busCountInbound: "Way out buses count",
+      busCountOutbound: "Way in buses count",
+      inboundDistance: "Way out distance",
+      outboundDistance: "Way in distance",
+      inboundTripDuration: "Way out time",
+      outboundTripDuration: "Way in distance",
+      minute: "minute",
+      select: {
+        allBus: "All buses",
+        placeholder: "Choose",
+      },
+    },
+  },
+];
+
 const getUrl = window.location;
 const baseUrl = getUrl.protocol + "//" + getUrl.host;
 const baseWSURL = "ws://" + getUrl.host;
@@ -17,6 +261,7 @@ const $globalLat = window.parent.window.parent.globalLat;
 const $globalLong = window.parent.globalLong;
 const $contextPath = window.parent.contextPath;
 const mapOnline = window.parent.mapOnline;
+const language = window.parent.language;
 const colors = [
   "#1b6ca8",
   "#c70039",
@@ -45,7 +290,7 @@ const colors = [
   "#ff5722",
   "#c6ff00",
   "#7986cb",
-  "#3d5afe"
+  "#3d5afe",
 ];
 console.log({
   mapCenter: [$globalLat, $globalLong],
@@ -67,6 +312,7 @@ console.log({
     mapOnline: window.parent.mapOnline,
     contextPath: window.parent.contextPath,
   },
+  language: language,
 });
 export const appConfig = {
   mapCenter: [$globalLat, $globalLong],
@@ -83,4 +329,5 @@ export const appConfig = {
       ? "ws://193.176.241.150:8080/tms/"
       : baseWSURL + $contextPath + "/",
   colors,
+  language: language === "persian" ? languages[0] : languages[1],
 };

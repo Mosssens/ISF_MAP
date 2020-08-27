@@ -1,5 +1,7 @@
 import React from "react";
 import "./Loader.scss";
+import { appConfig } from "../../Constants/config";
+
 const Loader = () => {
   return (
     <section className="loader-container">
@@ -32,7 +34,7 @@ const Loader = () => {
           <li></li>
         </ul>
       </div>
-      <div className="title">در حال دریافت اطلاعات <span>.</span><span>.</span><span>.</span></div>
+      <div className="title">{appConfig.language.loader} <span>.</span><span>.</span><span>.</span></div>
     </section>
   );
 };

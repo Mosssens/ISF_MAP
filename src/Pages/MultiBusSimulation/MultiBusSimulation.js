@@ -11,6 +11,7 @@ import {
   FaFastForward,
   FaChevronRight,
   FaChevronLeft,
+  FaLaptopMedical,
 } from "react-icons/fa";
 // import moment from "jalali-moment";
 import Loader from "../../Components/Loader/Loader";
@@ -23,9 +24,11 @@ import "./time-picker.css";
 import TimePicker from "rc-time-picker";
 
 import { appConfig } from "../../Constants/config";
-import { from } from "jalali-moment";
+import { from, lang } from "jalali-moment";
 
 // import {baseURL} from '../../Constants/config'
+const language = appConfig.language.BusSimulation;
+
 const Pins = React.memo((props) => {
   var pins = null;
 
@@ -127,18 +130,22 @@ const Records = React.memo((props) => {
                 <tr>
                   <td className="index">{rcdIndex + 1}</td>
                   <td className="speed">
-                    <td>سرعت لحظه ای :</td>
+                    <td>{language.speed} :</td>
                     <td className="value">{`${bus.groundSpeed}km`}</td>
                   </td>
                   <td className="date">
-                    <td>تاریخ :</td>
+                    <td>{language.date} :</td>
                     <td
                       className="value"
                       style={{ direction: "ltr", textAlign: "right" }}
                     >
-                      {moment(bus.clientDate, "YYYYMMDDHHmmss").format(
-                        "jYYYY/jM/jD HH:mm:ss"
-                      )}
+                      {appConfig.language.language === "persian"
+                        ? moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                            "jYYYY/jM/jD HH:mm:ss"
+                          )
+                        : moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                            "YYYY/M/D HH:mm:ss"
+                          )}
                     </td>
                   </td>
                 </tr>
@@ -252,7 +259,7 @@ const MultiBusSimulation = (props) => {
     if (bufferMarkers.length === 0) {
       Notify({
         type: "error",
-        msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+        msg: language.messages.fillRequiredField,
       });
       return;
     }
@@ -303,7 +310,7 @@ const MultiBusSimulation = (props) => {
         if (bufferMarkers.length === 0) {
           Notify({
             type: "error",
-            msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+            msg: language.messages.fillRequiredField,
           });
           return;
         }
@@ -352,7 +359,7 @@ const MultiBusSimulation = (props) => {
         if (bufferMarkers.length === 0) {
           Notify({
             type: "error",
-            msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+            msg: language.messages.fillRequiredField,
           });
           return;
         }
@@ -654,7 +661,7 @@ const MultiBusSimulation = (props) => {
     if (isSubmitButtonDisabled) {
       Notify({
         type: "message",
-        msg: "در حال دریافت اطلاعات... لطفا منتظر بمانید.",
+        msg: language.messages.gettingData,
       });
       return;
     }
@@ -688,11 +695,11 @@ const MultiBusSimulation = (props) => {
     const bus2 =
       selectedBusOptions[1] !== undefined ? selectedBusOptions[1].value : "0";
     if (selectedBusOptions.length == 0) {
-      Notify({ type: "error", msg: "اتوبوس را انتخاب کنید !" });
+      Notify({ type: "error", msg: language.messages.selectBus });
       return;
     }
     if (!fromDateTime || !toDateTime) {
-      Notify({ type: "error", msg: "تاریخ شروع و پایان را وارد کنید!" });
+      Notify({ type: "error", msg: language.messages.selectFromToDate });
       return;
     }
     var theDate = moment(fromDateTime, "YYYYMMDDHHmmss");
@@ -700,7 +707,7 @@ const MultiBusSimulation = (props) => {
     var duration = moment.duration(nowDate.diff(theDate));
     var seconds = duration.asSeconds();
     if (seconds < 0) {
-      Notify({ type: "error", msg: "ساعت پایان زودتر تر از ساعت شروع است!" });
+      Notify({ type: "error", msg: language.messages.inCorrectFromToDate });
       return;
     }
     setIsSubmitButtonDisabled(true);
@@ -716,7 +723,7 @@ const MultiBusSimulation = (props) => {
         if (data[0].busData[0].length === 0) {
           Notify({
             type: "message",
-            msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} ثبت نشده است .`,
+            msg: language.messages.noRecordForBus(bus1),
           });
           setIsSubmitButtonDisabled(false);
           setIsBusDataIsLoading(false);
@@ -733,18 +740,20 @@ const MultiBusSimulation = (props) => {
           ) {
             Notify({
               type: "message",
-              msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} و ${bus2} ثبت نشده است .`,
+              msg: language.messages.noRecordForBuses(bus1, bus2),
             });
+            setIsSubmitButtonDisabled(false);
+            setIsBusDataIsLoading(false);
             return;
           } else if (data[0].busData[0].length === 0) {
             Notify({
               type: "message",
-              msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus1} ثبت نشده است .`,
+              msg: language.messages.noRecordForBus(bus1),
             });
           } else if (data[1].busData[0].length === 0) {
             Notify({
               type: "message",
-              msg: `هیج رکوردی در این تاریخ برای اتوبوس ${bus2} ثبت نشده است .`,
+              msg: language.messages.noRecordForBus(bus2),
             });
           }
           setIsSubmitButtonDisabled(false);
@@ -915,7 +924,9 @@ const MultiBusSimulation = (props) => {
     );
   };
   return (
-    <section className="multi-bus-simulation-container">
+    <section
+      className={`multi-bus-simulation-container ${appConfig.language.direction}`}
+    >
       <div className="map-contianer">
         {isLoading ? (
           <Loader />
@@ -1002,7 +1013,7 @@ const MultiBusSimulation = (props) => {
               <Ripples
                 onClick={() => handleSpeedChange()}
                 className="speed-control"
-                title="تعیین سرعت حرکت"
+                title={language.mediaSpeed}
               >
                 <div>
                   {
@@ -1016,7 +1027,7 @@ const MultiBusSimulation = (props) => {
                 className={`skip-zero-points-marker ${
                   skipZeroPoints ? "active" : ""
                 }`}
-                title="پرش از نقاط با سرعت 0"
+                title={language.jump}
               >
                 <FaFastForward />
               </Ripples>
@@ -1025,7 +1036,7 @@ const MultiBusSimulation = (props) => {
                   if (bufferMarkers.length === 0) {
                     Notify({
                       type: "error",
-                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                      msg: language.messages.fillRequiredField,
                     });
                     return;
                   }
@@ -1045,7 +1056,7 @@ const MultiBusSimulation = (props) => {
                 className={`fit-marker ${
                   fitMarkerIntervalBounds ? "active" : ""
                 }`}
-                title="فوکوس روی موقعیت اتوبوس"
+                title={language.focus}
               >
                 <FaMapMarkerAlt />
               </Ripples>
@@ -1055,7 +1066,7 @@ const MultiBusSimulation = (props) => {
                   if (bufferMarkers.length === 0) {
                     Notify({
                       type: "error",
-                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                      msg: language.messages.fillRequiredField,
                     });
                     return;
                   }
@@ -1091,17 +1102,17 @@ const MultiBusSimulation = (props) => {
                     );
                   }
                 }}
-                title="موقعیت بعدی"
+                title={language.nextStep}
               >
                 <FaChevronRight />
               </Ripples>
-              <Ripples onClick={toggleTimer} title="اجرا/توقف">
+              <Ripples onClick={toggleTimer} title={language.play}>
                 {!isTimerActive ? <FaPlay /> : <FaPause />}
               </Ripples>
               <Ripples
                 className="stop-btn"
                 onClick={resetTimer}
-                title="بازگشت به ابتدا"
+                title={language.stop}
               >
                 <FaStop />
               </Ripples>
@@ -1110,7 +1121,7 @@ const MultiBusSimulation = (props) => {
                   if (bufferMarkers.length === 0) {
                     Notify({
                       type: "error",
-                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                      msg: language.messages.fillRequiredField,
                     });
                     return;
                   }
@@ -1197,7 +1208,7 @@ const MultiBusSimulation = (props) => {
                     }
                   );
                 }}
-                title="موقعیت قبلی"
+                title={language.previousStep}
               >
                 <FaChevronLeft />
               </Ripples>
@@ -1218,19 +1229,18 @@ const MultiBusSimulation = (props) => {
             withAll={true}
             ref={searchBoxRef}
             value={selectedBusOptions}
-            placeholder="اتوبوس را انتخاب کنید ..."
+            placeholder={`${language.select.placeholder} ...`}
             isRtl={true}
             className="bus-select-input"
             isMulti={true}
             options={busOptions}
-            isRtl={true}
             onChange={(selectedBuses) => {
               var tempArr = [];
               if (selectedBuses !== null) {
                 if (selectedBuses.length > 2) {
                   Notify({
                     type: "message",
-                    msg: "حداکثر 2 اتوبوس میتوانید انتخاب کنید.",
+                    msg: language.messages.maxBusCount,
                   });
                   return;
                 }
@@ -1241,18 +1251,20 @@ const MultiBusSimulation = (props) => {
           />
           <div className="dates-container">
             <div className="date-input-container">
-              <label>تاریخ :</label>
+              <label>{language.date} :</label>
               <DatePicker
                 onChange={(value) =>
                   setFromDate(moment(value).format("YYYYMMDD"))
                 }
-                isGregorian={false}
+                isGregorian={
+                  appConfig.language.language === "persian" ? false : true
+                }
                 timePicker={false}
                 value={moment(fromDate)}
               />
             </div>
             <div className="date-input-container">
-              <label>از ساعت:</label>
+              <label>{language.fromDate}:</label>
               <TimePicker
                 showSecond={false}
                 defaultValue={moment()}
@@ -1261,7 +1273,15 @@ const MultiBusSimulation = (props) => {
                   setFromTime(moment(value).format("HHmmss"));
                 }}
               />
-              <label style={{ marginRight: "10px" }}>تا ساعت:</label>
+              <label
+                style={
+                  appConfig.language.direction === "ltr"
+                    ? { marginLeft: "10px" }
+                    : { marginRight: "10px" }
+                }
+              >
+                {language.toDate}:
+              </label>
               <TimePicker
                 showSecond={false}
                 defaultValue={moment()}
@@ -1273,7 +1293,7 @@ const MultiBusSimulation = (props) => {
             </div>
           </div>
           <button className="submit-btn" onClick={onSubmitBtnClick}>
-            نمایش اطلاعات
+            {language.submitTitle}
             {isBusDataIsLoading ? (
               <div className="loader">
                 <span>.</span>

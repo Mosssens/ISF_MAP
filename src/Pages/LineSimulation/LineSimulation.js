@@ -24,7 +24,8 @@ import "./time-picker.css";
 import TimePicker from "rc-time-picker";
 
 import { appConfig } from "../../Constants/config";
-import { from } from "jalali-moment";
+import { from, lang } from "jalali-moment";
+const language = appConfig.language.LineSimulation;
 
 // import {baseURL} from '../../Constants/config'
 const Pins = React.memo((props) => {
@@ -152,18 +153,22 @@ const Records = React.memo((props) => {
                 <tr style={{ backgroundColor: color }}>
                   <td className="index">{rcdIndex + 1}</td>
                   <td className="speed">
-                    <td>سرعت لحظه ای :</td>
+                    <td>{language.speed} :</td>
                     <td className="value">{`${bus.groundSpeed}km`}</td>
                   </td>
                   <td className="date">
-                    <td>تاریخ :</td>
+                    <td>{language.date} :</td>
                     <td
                       className="value"
                       style={{ direction: "ltr", textAlign: "right" }}
                     >
-                      {moment(bus.clientDate, "YYYYMMDDHHmmss").format(
-                        "jYYYY/jM/jD HH:mm:ss"
-                      )}
+                      {appConfig.language.language === "persian"
+                        ? moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                            "jYYYY/jM/jD HH:mm:ss"
+                          )
+                        : moment(bus.clientDate, "YYYYMMDDHHmmss").format(
+                            "YYYY/M/D HH:mm:ss"
+                          )}
                     </td>
                   </td>
                 </tr>
@@ -282,7 +287,7 @@ const LineSimulation = (props) => {
     if (bufferMarkers.length === 0) {
       Notify({
         type: "error",
-        msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+        msg: language.messages.fillRequiredField,
       });
       return;
     }
@@ -333,7 +338,7 @@ const LineSimulation = (props) => {
         if (bufferMarkers.length === 0) {
           Notify({
             type: "error",
-            msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+            msg: language.messages.fillRequiredField,
           });
           return;
         }
@@ -388,7 +393,7 @@ const LineSimulation = (props) => {
         if (bufferMarkers.length === 0) {
           Notify({
             type: "error",
-            msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+            msg: language.messages.fillRequiredField,
           });
           return;
         }
@@ -700,7 +705,7 @@ const LineSimulation = (props) => {
     if (isSubmitButtonDisabled) {
       Notify({
         type: "message",
-        msg: "در حال دریافت اطلاعات... لطفا منتظر بمانید.",
+        msg: language.messages.gettingData,
       });
       return;
     }
@@ -730,11 +735,11 @@ const LineSimulation = (props) => {
     var toDateTime = `${fromDate}${toTime}`;
 
     if (selectedLineOptions.length == 0) {
-      Notify({ type: "error", msg: "خطی را انتخاب کنید !" });
+      Notify({ type: "error", msg: language.messages.selectLine });
       return;
     }
     if (!fromDateTime || !toDateTime) {
-      Notify({ type: "error", msg: "تاریخ شروع و پایان را وارد کنید!" });
+      Notify({ type: "error", msg: language.messages.selectFromToDate });
       return;
     }
     var theDate = moment(fromDateTime, "YYYYMMDDHHmmss");
@@ -742,7 +747,7 @@ const LineSimulation = (props) => {
     var duration = moment.duration(nowDate.diff(theDate));
     var seconds = duration.asSeconds();
     if (seconds < 0) {
-      Notify({ type: "error", msg: "ساعت پایان زودتر تر از ساعت شروع است!" });
+      Notify({ type: "error", msg: language.messages.inCorrectFromToDate });
       return;
     }
     setIsSubmitButtonDisabled(true);
@@ -774,29 +779,31 @@ const LineSimulation = (props) => {
       if (!markers.length > 0) {
         Notify({
           type: "message",
-          msg: `در این تاریخ هیچ رکوردی از خط "${selectedLineOptions.label}" ثبت نشده .`,
+          msg: language.messages.noRecordForLine(selectedLineOptions.label),
         });
         setIsSubmitButtonDisabled(false);
         setIsBusDataIsLoading(false);
         return;
       }
       var buses = [];
-      data[0].busData.filter(busData=>busData.length>0).map((busData, busDataIndx) => {
-        if (busData.length > 0) {
-          // console.log(busDataIndx,busData.length,busData[0][0])
+      data[0].busData
+        .filter((busData) => busData.length > 0)
+        .map((busData, busDataIndx) => {
+          if (busData.length > 0) {
+            // console.log(busDataIndx,busData.length,busData[0][0])
 
-          buses.push({
-            busCode: busData[0].busCode,
-            busMarkerInterval: 0,
-            busPosition: [busData[0].latitude, busData[0].longitude],
-            time: moment(busData[0].clientDate, "YYYYMMDDHHmmss").format(
-              "HH:mm:ss"
-            ),
-            isTooltipActive: false,
-            color: appConfig.colors[busDataIndx],
-          });
-        }
-      });
+            buses.push({
+              busCode: busData[0].busCode,
+              busMarkerInterval: 0,
+              busPosition: [busData[0].latitude, busData[0].longitude],
+              time: moment(busData[0].clientDate, "YYYYMMDDHHmmss").format(
+                "HH:mm:ss"
+              ),
+              isTooltipActive: false,
+              color: appConfig.colors[busDataIndx],
+            });
+          }
+        });
       console.log("buses :", buses);
       setBuses(buses);
       markers = markers.sort((a, b) => {
@@ -942,7 +949,9 @@ const LineSimulation = (props) => {
     );
   };
   return (
-    <section className="line-simulation-container">
+    <section
+      className={`line-simulation-container ${appConfig.language.direction}`}
+    >
       <div className="map-contianer">
         {isLoading ? (
           <Loader />
@@ -957,6 +966,7 @@ const LineSimulation = (props) => {
             marker={
               markerInterval + bufferInfo.currentBuffer * bufferInfo.bufferSize
             }
+            language={appConfig.language.language}
             fitMarkerIntervalBounds={fitMarkerIntervalBounds}
             onMapMarkerCkick={(busIndex) => {
               // alert(busIndex);
@@ -1031,7 +1041,7 @@ const LineSimulation = (props) => {
               <Ripples
                 onClick={() => handleSpeedChange()}
                 className="speed-control"
-                title="تعیین سرعت حرکت"
+                title={language.mediaSpeed}
               >
                 <div>
                   {
@@ -1045,7 +1055,7 @@ const LineSimulation = (props) => {
                 className={`skip-zero-points-marker ${
                   skipZeroPoints ? "active" : ""
                 }`}
-                title="پرش از نقاط با سرعت 0"
+                title={language.jump}
               >
                 <FaFastForward />
               </Ripples>
@@ -1054,7 +1064,7 @@ const LineSimulation = (props) => {
                   if (bufferMarkers.length === 0) {
                     Notify({
                       type: "error",
-                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                      msg: language.messages.fillRequiredField,
                     });
                     return;
                   }
@@ -1073,7 +1083,7 @@ const LineSimulation = (props) => {
                 className={`fit-marker ${
                   fitMarkerIntervalBounds ? "active" : ""
                 }`}
-                title="فوکوس روی موقعیت اتوبوس"
+                title={language.focus}
               >
                 <FaMapMarkerAlt />
               </Ripples>
@@ -1083,7 +1093,7 @@ const LineSimulation = (props) => {
                   if (bufferMarkers.length === 0) {
                     Notify({
                       type: "error",
-                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                      msg: language.messages.fillRequiredField,
                     });
                     return;
                   }
@@ -1119,17 +1129,17 @@ const LineSimulation = (props) => {
                     );
                   }
                 }}
-                title="موقعیت بعدی"
+                title={language.nextStep}
               >
                 <FaChevronRight />
               </Ripples>
-              <Ripples onClick={toggleTimer} title="اجرا/توقف">
+              <Ripples onClick={toggleTimer} title={language.play}>
                 {!isTimerActive ? <FaPlay /> : <FaPause />}
               </Ripples>
               <Ripples
                 className="stop-btn"
                 onClick={resetTimer}
-                title="بازگشت به ابتدا"
+                title={language.stop}
               >
                 <FaStop />
               </Ripples>
@@ -1138,7 +1148,7 @@ const LineSimulation = (props) => {
                   if (bufferMarkers.length === 0) {
                     Notify({
                       type: "error",
-                      msg: "ابتدا تمامی فیلدهای ورودی را پر کنید!",
+                      msg: language.messages.fillRequiredField,
                     });
                     return;
                   }
@@ -1225,7 +1235,7 @@ const LineSimulation = (props) => {
                     }
                   );
                 }}
-                title="موقعیت قبلی"
+                title={language.previousStep}
               >
                 <FaChevronLeft />
               </Ripples>
@@ -1246,7 +1256,7 @@ const LineSimulation = (props) => {
             withAll={true}
             ref={searchBoxRef}
             value={selectedLineOptions}
-            placeholder="خط را انتخاب کنید ..."
+            placeholder={language.select.placeholder}
             isRtl={true}
             className="bus-select-input"
             isMulti={false}
@@ -1262,18 +1272,20 @@ const LineSimulation = (props) => {
           />
           <div className="dates-container">
             <div className="date-input-container">
-              <label>تاریخ :</label>
+              <label>{language.date} :</label>
               <DatePicker
                 onChange={(value) =>
                   setFromDate(moment(value).format("YYYYMMDD"))
                 }
-                isGregorian={false}
+                isGregorian={
+                  appConfig.language.language === "persian" ? false : true
+                }
                 timePicker={false}
                 value={moment(fromDate)}
               />
             </div>
             <div className="date-input-container">
-              <label>از ساعت:</label>
+              <label>{language.fromDate} :</label>
               <TimePicker
                 showSecond={false}
                 defaultValue={moment()}
@@ -1282,7 +1294,15 @@ const LineSimulation = (props) => {
                   setFromTime(moment(value).format("HHmmss"));
                 }}
               />
-              <label style={{ marginRight: "10px" }}>تا ساعت:</label>
+              <label
+                style={
+                  appConfig.language.direction === "ltr"
+                    ? { marginLeft: "10px" }
+                    : { marginRight: "10px" }
+                }
+              >
+                {language.toDate} :
+              </label>
               <TimePicker
                 showSecond={false}
                 defaultValue={moment()}
@@ -1294,7 +1314,7 @@ const LineSimulation = (props) => {
             </div>
           </div>
           <button className="submit-btn" onClick={onSubmitBtnClick}>
-            نمایش اطلاعات
+            {language.submitTitle}
             {isBusDataIsLoading ? (
               <div className="loader">
                 <span>.</span>

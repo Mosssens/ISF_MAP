@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Layout from "./Components/Layout/Layout";
 import SchematicTripState from "./Pages/SchematicTripState/SchematicTripState";
 import AllBusLocations from "./Pages/AllBusLocations/AllBusLocations";
-import BusSimulation from "./Pages/BusSimulation/BusSimulation";
 import MultiBusSimulation from "./Pages/MultiBusSimulation/MultiBusSimulation";
 import LineSimulation from "./Pages/LineSimulation/LineSimulation";
 import AllBusLineLocations from "./Pages/AllBusLineLocations/AllBusLineLocations";
