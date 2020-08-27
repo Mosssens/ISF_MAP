@@ -98,32 +98,32 @@ export default function Map(props) {
           key={inBoundPointIndex}
           offset={L.point(63, 1)}
         >
-          {props.color === "red" && inBoundPointIndex === 0 ? (
-            <Marker
-              position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-              icon={outboundStartIcon}
-            />
-          ) : null}
-          {props.color === "red" &&
-          inBoundPointIndex === props.inBoundPoints.length - 1 ? (
-            <Marker
-              position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-              icon={outboundEndIcon}
-            />
-          ) : null}
-          {props.color === "blue" && inBoundPointIndex === 0 ? (
-            <Marker
-              position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-              icon={inboundStartIcon}
-            />
-          ) : null}
-          {props.color === "blue" &&
-          inBoundPointIndex === props.inBoundPoints.length - 1 ? (
-            <Marker
-              position={[inBoundPoint.latitude, inBoundPoint.longitude]}
-              icon={inboundEndIcon}
-            />
-          ) : null}
+         {props.color === "red" && inBoundPointIndex === 0 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={props.language === "persian" ? outboundStartIcon : greenIcon}
+          />
+        ) : null}
+        {props.color === "red" &&
+        inBoundPointIndex === props.inBoundPoints.length - 1 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={props.language === "persian" ? outboundEndIcon : greenIcon}
+          />
+        ) : null}
+        {props.color === "blue" && inBoundPointIndex === 0 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={props.language === "persian" ? inboundStartIcon : redIcon}
+          />
+        ) : null}
+        {props.color === "blue" &&
+        inBoundPointIndex === props.inBoundPoints.length - 1 ? (
+          <Marker
+            position={[inBoundPoint.latitude, inBoundPoint.longitude]}
+            icon={props.language === "persian" ? inboundEndIcon : redIcon}
+          />
+        ) : null}
           <Tooltip
             className="black-tooltip"
             offset={L.point(70, 0)}
