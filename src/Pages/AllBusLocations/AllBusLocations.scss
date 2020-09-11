@@ -17,6 +17,9 @@
     max-height: 100vh;
     scroll-behavior: smooth;
     overflow-y: scroll;
+    .action-menu-header{
+      margin: 5px;
+    }
     .overview-container {
       display: flex;
       font-size: 1.05em;
@@ -56,7 +59,7 @@
         width: 100%;
         font-size: 0.85em;
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-        margin: 10px 8px;
+        // margin: 10px 8px;
         cursor: pointer;
       }
 
@@ -91,12 +94,14 @@
     }
 
     .bus-select-input {
-      margin: 5px 5px;
+      // margin: 5px 5px;
+      margin-bottom: 10px;
     }
 
     .bus-detail-container {
       padding-top: 0.5em;
       padding-bottom: 0.5em;
+      margin: 5px;
       display: flex;
       flex-direction: column;
       font-family: "Yekan";
@@ -134,7 +139,7 @@
           font-size: 0.85em;
           box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
             0 3px 6px rgba(0, 0, 0, 0.23);
-          margin: 28px 8px;
+          margin: 28px 0px;
           position: relative;
         }
 

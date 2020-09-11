@@ -22,6 +22,7 @@ function App() {
         <Switch>
           <Route path="/SchematicTripState" component={SchematicTripState} />
           <Route path="/AllBusLocations" component={AllBusLocations} />
+          <Route path="/PolygenBusLocations" component={AllBusLocations} />
           <Route path="/BusSimulation" component={MultiBusSimulation} />
           <Route path="/LineSimulation" component={LineSimulation} />
           <Route path="/AllBusLineLocations" component={AllBusLineLocations} />

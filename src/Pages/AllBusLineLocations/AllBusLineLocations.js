@@ -164,7 +164,7 @@ const AllBusLineLocations = () => {
     // console.log("sss", actionMenuHeaderRef.current.offsetHeight);
     actionMenuRef.current.scrollTo(
       0,
-      261 * index + actionMenuHeaderRef.current.offsetHeight - 10,
+      256 * index + actionMenuHeaderRef.current.offsetHeight - 10,
       { behavior: "smooth" }
     );
   };
@@ -213,7 +213,7 @@ const AllBusLineLocations = () => {
         />
       </div>
       <div ref={actionMenuRef} className="action-menu">
-        <div ref={actionMenuHeaderRef}>
+        <div ref={actionMenuHeaderRef} className="action-menu-header">
           <div className="filter-container">
             <Select
               isLoading={lineOptions.length === 0}
