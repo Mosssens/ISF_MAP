@@ -187,8 +187,8 @@ export default function Map(props) {
       />
       <FeatureGroup ref={mapGroupRef}>
         {renderMarkers()}
-        <BusStops color="blue" inBoundPoints={props.inBoundPoints} />
-        <BusStops color="red" inBoundPoints={props.outBoundPoints} />
+        <BusStops color="blue" inBoundPoints={props.inBoundBusStopPoints} />
+        <BusStops color="red" inBoundPoints={props.outBoundBusStopPoints} />
         <Polylines color="blue" inBoundPoints={props.inBoundPoints} />
         <Polylines color="red" inBoundPoints={props.outBoundPoints} />
       </FeatureGroup>

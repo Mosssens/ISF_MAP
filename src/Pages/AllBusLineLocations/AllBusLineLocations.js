@@ -35,8 +35,11 @@ const AllBusLineLocations = () => {
     []
   );
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
+  const [inBoundBusStopPoints, setInBoundBusStopPoints] = useState([]);
+  const [outBoundBusStopPoints, setOutBoundBusStopPoints] = useState([]);
   const [inBoundPoints, setInBoundPoints] = useState([]);
   const [outBoundPoints, setOutBoundPoints] = useState([]);
+
   async function getLines(name) {
     let response = await fetch(
       `${appConfig.apiBaseAddress}api/reactService/trip/all`
@@ -120,13 +123,18 @@ const AllBusLineLocations = () => {
       busTempOptions.push({ value: "All", label: language.select.allBus });
       setBusOptions(busTempOptions);
       setMarkers(tmpBusData);
-      setInBoundPoints(
+      setInBoundBusStopPoints(
         message.payload.inboundPoints.filter((item) => item.stopCode != null)
       );
-      setOutBoundPoints(
+      setOutBoundBusStopPoints(
         message.payload.outboundPoints.filter((item) => item.stopCode != null)
       );
-
+      setInBoundPoints(
+        message.payload.inboundPoints
+      )
+      setOutBoundPoints(
+        message.payload.outboundPoints
+      )
       setIsSubmitButtonDisabled(false);
       setIsBusDataIsLoading(false);
     };
@@ -206,6 +214,8 @@ const AllBusLineLocations = () => {
           onMarkerClick={(id, index) => onMarkerClick(id, index)}
           inBoundPoints={inBoundPoints}
           outBoundPoints={outBoundPoints}
+          inBoundBusStopPoints={inBoundBusStopPoints}
+          outBoundBusStopPoints={outBoundBusStopPoints}
           markers={getMarkers()}
           center={mapCenter}
           zoom={mapZoom}
