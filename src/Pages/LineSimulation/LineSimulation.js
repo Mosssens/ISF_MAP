@@ -220,6 +220,8 @@ const LineSimulation = (props) => {
   const [mapZoom, setMapZoom] = useState(12);
   const [busOptions, setBusOptions] = useState([]);
   const [selectedLineOptions, setselectedLineOptions] = useState([]);
+  const [inBoundBusStopPoints, setInBoundBusStopPoints] = useState([]);
+  const [outBoundBusStopPoints, setOutBoundBusStopPoints] = useState([]);
   const [selectedLineOptionsString, setselectedLineOptionsString] = useState(
     []
   );
@@ -818,12 +820,17 @@ const LineSimulation = (props) => {
       console.log("markers :", markers);
 
       setInBoundPoints(
-        data[0].inboundPoints.filter((item) => item.stopCode != null)
+        data[0].inboundPoints
       );
       setOutBoundPoints(
+        data[0].outboundPoints
+      );
+      setInBoundBusStopPoints(
+        data[0].inboundPoints.filter((item) => item.stopCode != null)
+      );
+      setOutBoundBusStopPoints(
         data[0].outboundPoints.filter((item) => item.stopCode != null)
       );
-
       var bufferCount = Math.ceil(markers.length / bufferInfo.bufferSize);
 
       var buffers = [];
@@ -961,6 +968,8 @@ const LineSimulation = (props) => {
             firstBusPath={markers[0]}
             inBoundPoints={inBoundPoints}
             outBoundPoints={outBoundPoints}
+            inBoundBusStopPoints={inBoundBusStopPoints}
+            outBoundBusStopPoints={outBoundBusStopPoints}
             buses={buses}
             zoom={mapZoom}
             marker={

@@ -245,8 +245,8 @@ const Map = (props) => {
               onMapMarkerCkick={(busIndex) => props.onMapMarkerCkick(busIndex)}
               buses={props.buses}
             />
-            <BusStops color="blue" inBoundPoints={props.inBoundPoints} />
-            <BusStops color="red" inBoundPoints={props.outBoundPoints} />
+            <BusStops color="blue" inBoundPoints={props.inBoundBusStopPoints} />
+            <BusStops color="red" inBoundPoints={props.outBoundBusStopPoints} />
 
             <Polylines color="blue" inBoundPoints={props.inBoundPoints} />
             <Polylines color="red" inBoundPoints={props.outBoundPoints} />
